@@ -13,29 +13,35 @@ brew install ocrmypdf  # for PDF text extraction
 
 ```bash
 # 1. Scrape filings metadata and PDFs
-uv run python scraper.py
+uv run python scripts/scraper.py
 
 # 2. Normalize data (fix formatting issues, expand multi-case entries)
-uv run python normalize_filings.py
+uv run python scripts/normalize_filings.py
 
 # 3. Validate data quality
-uv run python validate_filings.py
+uv run python scripts/validate_filings.py
 
 # 4. Aggregate into cases (group related documents)
-uv run python aggregate_cases.py
+uv run python scripts/aggregate_cases.py
 
 # 5. OCR PDFs to extract text
-uv run python ocr_pdfs.py
+uv run python scripts/ocr_pdfs.py
 ```
 
 ## Directory Structure
 
 ```
+scripts/
+├── scraper.py            # Fetch filings metadata and PDFs
+├── normalize_filings.py  # Clean and normalize data
+├── validate_filings.py   # Validate data quality
+├── aggregate_cases.py    # Group related documents
+├── ocr_pdfs.py           # OCR processing
 data/
 ├── filings.json              # Raw scraped metadata
 ├── filings_normalized.json   # Cleaned metadata (1,594 filings)
 ├── cases.json                # Grouped by case
-pdfs/{year}/                  # Original scanned PDFs
+pdfs/{year}/                  # Original scanned PDFs (local only)
 pdfs_ocr/{year}/              # Searchable PDFs (after OCR)
 text/{year}/                  # Extracted plain text
 ```
