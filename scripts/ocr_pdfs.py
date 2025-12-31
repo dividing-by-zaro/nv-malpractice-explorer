@@ -5,25 +5,29 @@ Creates:
 - pdfs_ocr/{year}/*.pdf - Searchable PDFs for downloading
 - text/{year}/*.txt - Extracted plain text for analysis
 
-Uses 10 parallel workers and logs failures to continue processing.
+Uses parallel workers and logs failures to continue processing.
 
 Usage:
-    uv run python ocr_pdfs.py
+    uv run python scripts/ocr_pdfs.py
 """
 
 import json
+import shutil
 import subprocess
+import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from dataclasses import dataclass, asdict
 
-PDF_DIR = Path("pdfs")
-OCR_PDF_DIR = Path("pdfs_ocr")
-TEXT_DIR = Path("text")
-DATA_DIR = Path("data")
+# Resolve paths relative to project root (parent of scripts/)
+PROJECT_ROOT = Path(__file__).parent.parent
+PDF_DIR = PROJECT_ROOT / "pdfs"
+OCR_PDF_DIR = PROJECT_ROOT / "pdfs_ocr"
+TEXT_DIR = PROJECT_ROOT / "text"
+DATA_DIR = PROJECT_ROOT / "data"
 
-NUM_WORKERS = 10
+NUM_WORKERS = 4  # Reduced from 10 to avoid CPU overload
 
 
 @dataclass
@@ -95,7 +99,6 @@ def ocr_single_pdf(input_path: Path) -> OCRResult:
             # Check for specific "already has text" case
             if "page already has text" in result.stderr.lower() or result.returncode == 6:
                 # Copy original and try to extract text anyway
-                import shutil
                 shutil.copy(input_path, output_pdf)
 
                 # Try pdftotext for extraction
@@ -177,7 +180,24 @@ def ocr_single_pdf(input_path: Path) -> OCRResult:
         )
 
 
+def check_dependencies():
+    """Check that required external tools are installed."""
+    missing = []
+    for cmd in ["ocrmypdf", "pdftotext", "pdfinfo"]:
+        result = subprocess.run(["which", cmd], capture_output=True)
+        if result.returncode != 0:
+            missing.append(cmd)
+
+    if missing:
+        print(f"Missing required tools: {', '.join(missing)}")
+        print("\nInstall with:")
+        print("  brew install ocrmypdf poppler")
+        sys.exit(1)
+
+
 def main():
+    check_dependencies()
+
     # Create output directories
     OCR_PDF_DIR.mkdir(exist_ok=True)
     TEXT_DIR.mkdir(exist_ok=True)

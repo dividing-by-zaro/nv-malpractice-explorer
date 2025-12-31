@@ -6,7 +6,7 @@ Tools to scrape, process, and analyze public medical malpractice filings from th
 
 ```bash
 uv sync
-brew install ocrmypdf  # for PDF text extraction
+brew install ocrmypdf poppler  # OCR and PDF text extraction
 ```
 
 ## Data Pipeline
