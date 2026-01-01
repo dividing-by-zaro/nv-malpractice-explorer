@@ -619,6 +619,19 @@ button.secondary:hover {
   letter-spacing: 0.3px;
 }
 
+/* Amended badge */
+.amended-badge {
+  background: var(--accent-amber);
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
 .case-card__tags {
   display: flex;
   gap: 8px;
@@ -1148,6 +1161,15 @@ button.secondary:hover {
   color: var(--black);
   font-size: 15px;
   line-height: 1.5;
+}
+
+/* Amendment summary - highlighted callout */
+.amendment-summary {
+  background: rgba(217, 151, 6, 0.1);
+  border-left: 3px solid var(--accent-amber);
+  padding: 12px 16px;
+  font-style: italic;
+  color: var(--charcoal);
 }
 
 .info-list {

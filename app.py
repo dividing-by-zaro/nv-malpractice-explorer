@@ -49,6 +49,13 @@ class Complainant(BaseModel):
     sex: Optional[str] = None
 
 
+class OriginalComplaint(BaseModel):
+    """Original complaint data for amended cases."""
+    type: str
+    date: str
+    pdf_url: Optional[str] = None
+
+
 class LLMExtractedComplaint(BaseModel):
     """LLM-extracted complaint fields."""
     summary: Optional[str] = None
@@ -70,6 +77,9 @@ class Complaint(BaseModel):
     type: str
     pdf_url: Optional[str] = None
     llm_extracted: Optional[LLMExtractedComplaint] = None
+    is_amended: Optional[bool] = False
+    original_complaint: Optional[OriginalComplaint] = None
+    amendment_summary: Optional[str] = None
 
     class Config:
         extra = "allow"  # Allow extra fields from MongoDB

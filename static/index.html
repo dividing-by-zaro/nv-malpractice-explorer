@@ -198,7 +198,8 @@
                 <div class="modal-info" id="modal-info"></div>
                 <div class="modal-pdf-container" style="flex: 1; display: flex; flex-direction: column;">
                     <div class="tabs" id="pdf-tabs">
-                        <button class="tab active" onclick="switchTab('complaint')">Complaint</button>
+                        <button class="tab active" onclick="switchTab('complaint')" id="complaint-tab"><span id="complaint-tab-label">Complaint</span></button>
+                        <button class="tab" onclick="switchTab('original')" id="original-tab" style="display:none;">Original Complaint</button>
                         <button class="tab" onclick="switchTab('settlement')" id="settlement-tab" style="display:none;">Settlement</button>
                     </div>
                     <div class="modal-pdf" id="modal-pdf" style="flex: 1;"></div>
@@ -503,6 +504,7 @@
         let currentSettlement = null;
         let currentComplaint = null;
         let complaintPdfPath = null;
+        let originalPdfPath = null;
         let settlementPdfPath = null;
 
         function formatDate(dateStr) {
@@ -548,6 +550,7 @@
                         <div class="case-card__topline">
                             <time class="case-card__date">${formatDate(c.date)}</time>
                             <span class="case-card__id">Case ${c.case_number}</span>
+                            ${c.is_amended ? '<span class="amended-badge">Amended</span>' : ''}
                         </div>
                         <div class="case-card__tags">
                             <span class="case-card__action-tag ${settlement.license_action && settlement.license_action !== 'none' ? getActionClass(settlement.license_action) : 'action-none'}">${settlement.license_action && settlement.license_action !== 'none' ? settlement.license_action : 'no settlement'}</span>
@@ -652,6 +655,16 @@
                 `;
             }
 
+            // Add amendment summary if this is an amended complaint
+            if (c.is_amended && c.amendment_summary) {
+                infoHtml += `
+                    <div class="info-section">
+                        <h3>Changes from Original</h3>
+                        <p class="amendment-summary">${c.amendment_summary}</p>
+                    </div>
+                `;
+            }
+
             // Fetch settlement data
             try {
                 const res = await fetch(`/api/settlement/${caseNumber}`);
@@ -675,6 +688,17 @@
 
             // Build PDF paths
             complaintPdfPath = c.pdf_path || buildPdfPath(c);
+
+            // Handle amended complaints - set tab label and show original tab
+            if (c.is_amended && c.original_complaint) {
+                document.getElementById('complaint-tab-label').textContent = 'Amended Complaint';
+                document.getElementById('original-tab').style.display = 'block';
+                originalPdfPath = buildOriginalPdfPath(c);
+            } else {
+                document.getElementById('complaint-tab-label').textContent = 'Complaint';
+                document.getElementById('original-tab').style.display = 'none';
+                originalPdfPath = null;
+            }
 
             // Reset to complaint tab
             switchTab('complaint');
@@ -757,7 +781,12 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
 
-            const pdfPath = tab === 'complaint' ? complaintPdfPath : settlementPdfPath;
+            const pdfPaths = {
+                'complaint': complaintPdfPath,
+                'original': originalPdfPath,
+                'settlement': settlementPdfPath
+            };
+            const pdfPath = pdfPaths[tab];
             if (pdfPath) {
                 document.getElementById('modal-pdf').innerHTML = `<iframe src="${pdfPath}"></iframe>`;
             } else {
@@ -771,6 +800,16 @@
             return `/pdfs/${c.year}/${c.case_number}_${typeSlug}.pdf`;
         }
 
+        function buildOriginalPdfPath(c) {
+            // Build PDF path for original complaint
+            if (!c.original_complaint) return null;
+            const orig = c.original_complaint;
+            const typeSlug = orig.type.replace(/[,]/g, '').replace(/\s+/g, '_').substring(0, 30);
+            // Extract year from original date
+            const origYear = new Date(orig.date).getFullYear();
+            return `/pdfs/${origYear}/${c.case_number}_${typeSlug}.pdf`;
+        }
+
         function closeModal(event) {
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('modal').classList.remove('active');
@@ -779,6 +818,7 @@
             currentSettlement = null;
             currentComplaint = null;
             complaintPdfPath = null;
+            originalPdfPath = null;
             settlementPdfPath = null;
         }
 

@@ -135,6 +135,7 @@ app.py → Web UI at http://localhost:8000
 
 ### MongoDB Collections
 - `complaints`: Extracted complaint data with `llm_extracted` field
+  - **Amended complaints**: If `is_amended: true`, includes `original_complaint` (type, date, pdf_url) and `amendment_summary` (LLM-generated description of changes)
 - `settlements`: Extracted settlement data with `llm_extracted` field, linked via `complaint_ids[]` array
   - **Important**: Settlements use `case_numbers[]` array (not singular `case_number`) because one settlement can resolve multiple complaints
   - Unique index is on `pdf_url`, not `case_number`
@@ -149,6 +150,8 @@ app.py → Web UI at http://localhost:8000
   - Body: Respondent, specialty, summary
   - Footer: Procedure, fine amount, investigation costs (each with icon)
 - **Modal View**: Click any case to see details + embedded PDF viewer with tabs for complaint/settlement
+  - Amended complaints show "Amended Complaint" tab label and "Original Complaint" tab for viewing both PDFs
+  - "Changes from Original" section displays LLM-generated amendment summary
 - **Statistics Tab**: Aggregate analytics with Chart.js
   - Stats cards: Total complaints, processed, settlements, categories, unique drugs
   - Totals cards: Fines collected, investigation costs, CME hours, probation time
@@ -159,10 +162,12 @@ app.py → Web UI at http://localhost:8000
 - `app.py`: FastAPI app (~580 lines) with Pydantic models and dependency injection
 - `static/index.html`: Frontend HTML + JavaScript
 - `static/css/styles.css`: Frontend styles with design system
-- `scripts/process_complaints.py`: LLM extraction for complaints (GPT-4o)
+- `scripts/process_complaints.py`: LLM extraction for complaints (GPT-4o), handles amended complaint pairs
 - `scripts/process_settlements.py`: LLM extraction for settlements (GPT-4o)
+- `scripts/reprocess_amended_complaints.py`: Migration script for adding amendment data to existing complaints
 - `scripts/prompts/complaint_extraction.md`: LLM prompt for complaints
 - `scripts/prompts/settlement_extraction.md`: LLM prompt for settlements
+- `scripts/prompts/amendment_comparison.md`: LLM prompt for comparing original vs amended complaints
 
 ### Frontend Design System
 
@@ -226,6 +231,9 @@ MONGODB_URI=mongodb://...
 
 ### Complaint Document (MongoDB)
 - `case_number`: Single case identifier (e.g., "19-28023-1")
+- `is_amended`: Boolean, true if this is an amended complaint
+- `original_complaint`: Object with original complaint metadata (type, date, pdf_url) - only present if amended
+- `amendment_summary`: LLM-generated one-sentence description of changes - only present if amended
 - `llm_extracted`: LLM-extracted fields:
   - `summary`: One-sentence description
   - `specialty`: ABMS-recognized specialty (e.g., "Internal Medicine")

@@ -38,6 +38,8 @@ uv run uvicorn app:app --reload --port 8000
     - Details: Procedure, fine amount, investigation costs
   - License action colors indicate severity (yellow reprimand → red revocation)
 - **Case Details**: Click any case to view extracted data + embedded PDF viewer (tabs for complaint/settlement)
+  - Amended complaints display both original and amended PDFs in separate tabs
+  - LLM-generated summary explains what changed between versions
 - **Statistics Tab**: Aggregate analytics dashboard
   - Stats cards: Total complaints, processed count, settlements, categories
   - Totals: Fines collected, investigation costs, CME hours, probation time
@@ -173,9 +175,11 @@ scripts/
 ├── process_settlements.py    # LLM extraction for settlements
 ├── build_cases_summary.py    # Update status tracking
 ├── migrate_settlements.py    # Migrate to deduplicated schema
+├── reprocess_amended_complaints.py  # Add amendment data to existing complaints
 └── prompts/
     ├── complaint_extraction.md   # GPT-4o prompt for complaints
-    └── settlement_extraction.md  # GPT-4o prompt for settlements
+    ├── settlement_extraction.md  # GPT-4o prompt for settlements
+    └── amendment_comparison.md   # GPT-4o prompt for comparing original vs amended
 data/
 ├── filings.json              # Raw scraped metadata
 ├── filings_normalized.json   # Cleaned metadata
@@ -203,6 +207,9 @@ text/{year}/                  # Extracted plain text
 - `procedure`: Medical procedure if applicable
 - `drugs[]`: Medications mentioned
 - `category`: Standard of Care, Controlled Substances, Sexual Misconduct, etc.
+- `is_amended`: Boolean indicating if this is an amended complaint
+- `original_complaint`: Original complaint metadata (type, date, pdf_url) - if amended
+- `amendment_summary`: LLM-generated description of changes - if amended
 
 ### Settlement Extraction (LLM)
 - `case_numbers[]`: Array of case IDs this settlement resolves (one-to-many)
