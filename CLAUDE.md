@@ -82,6 +82,20 @@ OpenAI has 30k TPM limit. If you hit rate limits:
 - Run complaints and settlements processing sequentially, not concurrently
 - Or add `--limit N` flag to process in batches
 
+### Migrating Settlements (if upgrading from old schema)
+
+If you have existing settlement data with `case_number` (singular) instead of `case_numbers[]` (array):
+
+```bash
+# Preview what will change (dry run)
+uv run python scripts/migrate_settlements.py
+
+# Apply the migration
+uv run python scripts/migrate_settlements.py --apply
+```
+
+This consolidates duplicate settlements (same PDF, multiple case numbers) into single documents.
+
 ## Quick Commands
 
 ```bash
@@ -121,7 +135,9 @@ app.py → Web UI at http://localhost:8000
 
 ### MongoDB Collections
 - `complaints`: Extracted complaint data with `llm_extracted` field
-- `settlements`: Extracted settlement data with `llm_extracted` field, linked via `complaint_id`
+- `settlements`: Extracted settlement data with `llm_extracted` field, linked via `complaint_ids[]` array
+  - **Important**: Settlements use `case_numbers[]` array (not singular `case_number`) because one settlement can resolve multiple complaints
+  - Unique index is on `pdf_url`, not `case_number`
 - `cases_summary`: Status tracking for each case (OCR status, extraction status)
 
 ### Web App Features (app.py)
@@ -147,22 +163,28 @@ MONGODB_URI=mongodb://...
 
 ## Data Schema
 
-### Complaint Extraction
-- `summary`: One-sentence description
-- `specialty`: ABMS-recognized specialty (e.g., "Internal Medicine")
-- `num_complainants`: Number of patients
-- `complainants[]`: Array of {age, sex}
-- `procedure`: Medical procedure involved
-- `drugs[]`: Medications mentioned
-- `category`: Standard of Care, Controlled Substances, Sexual Misconduct, etc.
+### Complaint Document (MongoDB)
+- `case_number`: Single case identifier (e.g., "19-28023-1")
+- `llm_extracted`: LLM-extracted fields:
+  - `summary`: One-sentence description
+  - `specialty`: ABMS-recognized specialty (e.g., "Internal Medicine")
+  - `num_complainants`: Number of patients
+  - `complainants[]`: Array of {age, sex}
+  - `procedure`: Medical procedure involved
+  - `drugs[]`: Medications mentioned
+  - `category`: Standard of Care, Controlled Substances, Sexual Misconduct, etc.
 
-### Settlement Extraction
-- `license_action`: revoked, suspended, surrendered, probation, reprimand, none
-- `probation_months`: Duration of probation
-- `fine_amount`: Dollar amount
-- `investigation_costs`: Costs recovered
-- `cme_hours`, `cme_topic`: Continuing education requirements
-- `violations_admitted[]`, `violations_dismissed[]`: NRS codes and descriptions
+### Settlement Document (MongoDB)
+- `case_numbers[]`: Array of case identifiers this settlement resolves (one-to-many relationship)
+- `complaint_ids[]`: Array of ObjectIds linking to complaints
+- `pdf_url`: Unique identifier for the settlement PDF
+- `llm_extracted`: LLM-extracted fields:
+  - `license_action`: revoked, suspended, surrendered, probation, reprimand, none
+  - `probation_months`: Duration of probation
+  - `fine_amount`: Dollar amount
+  - `investigation_costs`: Costs recovered
+  - `cme_hours`, `cme_topic`: Continuing education requirements
+  - `violations_admitted[]`, `violations_dismissed[]`: NRS codes and descriptions
 
 ## Current Stats
 

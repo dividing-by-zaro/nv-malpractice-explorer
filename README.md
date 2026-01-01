@@ -6,8 +6,7 @@ Tools to scrape, process, and analyze public medical malpractice filings from th
 
 - **1,593 filings** scraped (2008-2025)
 - **674 complaints** processed with LLM extraction (86.3%)
-- **463 settlements** processed with LLM extraction (59.3%)
-- **436 cases** with both complaint and settlement extracted
+- **442 unique settlements** processed (21 resolve multiple complaints)
 - **$1,049,700** in total fines collected
 - **$2,144,887** in investigation costs recovered
 - **2,501 hours** of continuing education ordered
@@ -151,6 +150,7 @@ scripts/
 ├── process_complaints.py     # LLM extraction for complaints
 ├── process_settlements.py    # LLM extraction for settlements
 ├── build_cases_summary.py    # Update status tracking
+├── migrate_settlements.py    # Migrate to deduplicated schema
 └── prompts/
     ├── complaint_extraction.md   # GPT-4o prompt for complaints
     └── settlement_extraction.md  # GPT-4o prompt for settlements
@@ -183,6 +183,7 @@ text/{year}/                  # Extracted plain text
 - `category`: Standard of Care, Controlled Substances, Sexual Misconduct, etc.
 
 ### Settlement Extraction (LLM)
+- `case_numbers[]`: Array of case IDs this settlement resolves (one-to-many)
 - `license_action`: revoked, suspended, surrendered, probation, reprimand, none
 - `probation_months`: Duration of probation
 - `fine_amount`: Dollar amount of fine

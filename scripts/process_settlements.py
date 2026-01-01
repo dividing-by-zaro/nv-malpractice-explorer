@@ -57,7 +57,11 @@ def load_filings_metadata(data_dir: Path) -> list[dict]:
 
 def filter_settlements(filings: list[dict]) -> list[dict]:
     """
-    Filter filings to only include settlements.
+    Filter filings to only include settlements, deduplicated by pdf_url.
+
+    Multi-case settlements (e.g., "Case Nos 19-28023-1, 19-28023-2, 19-28023-3")
+    are expanded into multiple entries in filings_normalized.json, but they all
+    share the same PDF. We consolidate them into a single entry with all case_numbers.
     """
     settlement_types = [
         "Settlement Agreement and Order",
@@ -66,27 +70,54 @@ def filter_settlements(filings: list[dict]) -> list[dict]:
         "Amended Settlement Agreement and Order",
     ]
 
-    return [f for f in filings if f.get("type") in settlement_types]
+    # Filter to only settlements
+    all_settlements = [f for f in filings if f.get("type") in settlement_types]
+
+    # Deduplicate by pdf_url, collecting all case_numbers for each unique PDF
+    by_pdf_url: dict[str, dict] = {}
+    for filing in all_settlements:
+        pdf_url = filing.get("pdf_url", "")
+        if not pdf_url:
+            # If no pdf_url, use case_number as fallback key
+            pdf_url = f"no_url_{filing.get('case_number', 'unknown')}"
+
+        if pdf_url not in by_pdf_url:
+            # First time seeing this PDF - create entry with case_numbers array
+            entry = filing.copy()
+            entry["case_numbers"] = [filing["case_number"]]
+            by_pdf_url[pdf_url] = entry
+        else:
+            # Already seen this PDF - add case_number to array
+            existing = by_pdf_url[pdf_url]
+            if filing["case_number"] not in existing["case_numbers"]:
+                existing["case_numbers"].append(filing["case_number"])
+
+    return list(by_pdf_url.values())
 
 
 def get_text_file_path(filing: dict, text_dir: Path) -> Path | None:
-    """Construct the path to the cleaned text file for a filing."""
+    """Construct the path to the cleaned text file for a filing.
+
+    For multi-case settlements, the file is named with the first case_number.
+    """
     year = filing["year"]
-    case_number = filing["case_number"]
+    # Use case_numbers array if available, otherwise fall back to case_number
+    case_numbers = filing.get("case_numbers", [filing.get("case_number", "")])
+    primary_case_number = case_numbers[0] if case_numbers else filing.get("case_number", "")
     doc_type = filing["type"]
 
     # Normalize document type for filename
     type_slug = doc_type.replace(" ", "_").replace(",", "")
 
-    # Try different filename patterns
-    patterns = [
-        f"{case_number}_{type_slug}.txt",
-        f"{case_number}_{type_slug[:30]}.txt",  # Truncated
-    ]
-
     year_dir = text_dir / str(year)
     if not year_dir.exists():
         return None
+
+    # Try different filename patterns with primary case number
+    patterns = [
+        f"{primary_case_number}_{type_slug}.txt",
+        f"{primary_case_number}_{type_slug[:30]}.txt",  # Truncated
+    ]
 
     # Search for matching file
     for pattern in patterns:
@@ -94,11 +125,12 @@ def get_text_file_path(filing: dict, text_dir: Path) -> Path | None:
         if candidate.exists():
             return candidate
 
-    # Fallback: search for files starting with case number
-    for txt_file in year_dir.glob(f"{case_number}_*.txt"):
-        fname_lower = txt_file.name.lower()
-        if "settlement" in fname_lower:
-            return txt_file
+    # Fallback: search for files starting with any of the case numbers
+    for case_number in case_numbers:
+        for txt_file in year_dir.glob(f"{case_number}_*.txt"):
+            fname_lower = txt_file.name.lower()
+            if "settlement" in fname_lower:
+                return txt_file
 
     return None
 
@@ -170,8 +202,10 @@ def main():
         settlements_collection = db["settlements"]
         complaints_collection = db["complaints"]
 
-        # Create unique index on case_number
-        settlements_collection.create_index("case_number", unique=True)
+        # Create unique index on pdf_url (one settlement per PDF)
+        settlements_collection.create_index("pdf_url", unique=True)
+        # Create index on case_numbers for lookups
+        settlements_collection.create_index("case_numbers")
 
         print("Connecting to OpenAI...")
         openai_client = get_openai_client()
@@ -187,14 +221,15 @@ def main():
 
     # Filter out already processed (unless reprocessing)
     if not args.dry_run and not args.reprocess:
-        processed_cases = set(
-            doc["case_number"]
+        processed_pdf_urls = set(
+            doc["pdf_url"]
             for doc in settlements_collection.find(
                 {"llm_extracted": {"$exists": True}},
-                {"case_number": 1}
+                {"pdf_url": 1}
             )
+            if doc.get("pdf_url")
         )
-        settlements = [s for s in settlements if s["case_number"] not in processed_cases]
+        settlements = [s for s in settlements if s.get("pdf_url") not in processed_pdf_urls]
         print(f"{len(settlements)} settlements remaining to process")
 
     # Apply limit
@@ -208,8 +243,14 @@ def main():
     skipped = 0
 
     for i, filing in enumerate(settlements, 1):
-        case_number = filing["case_number"]
-        print(f"\n[{i}/{len(settlements)}] Processing {case_number}...")
+        case_numbers = filing.get("case_numbers", [filing.get("case_number", "")])
+        primary_case_number = case_numbers[0] if case_numbers else "unknown"
+        pdf_url = filing.get("pdf_url", "")
+
+        if len(case_numbers) > 1:
+            print(f"\n[{i}/{len(settlements)}] Processing {primary_case_number} (+{len(case_numbers)-1} sibling cases)...")
+        else:
+            print(f"\n[{i}/{len(settlements)}] Processing {primary_case_number}...")
 
         # Find text file
         text_path = get_text_file_path(filing, args.text_dir)
@@ -238,27 +279,30 @@ def main():
             continue
 
         try:
-            # Look up linked complaint
-            complaint_id = None
+            # Look up linked complaints for ALL case_numbers
+            complaint_ids = []
             if complaints_collection is not None:
-                complaint = complaints_collection.find_one(
-                    {"case_number": case_number},
-                    {"_id": 1}
-                )
-                if complaint:
-                    complaint_id = complaint["_id"]
-                    print(f"  🔗 Linked to complaint {complaint_id}")
+                for cn in case_numbers:
+                    complaint = complaints_collection.find_one(
+                        {"case_number": cn},
+                        {"_id": 1}
+                    )
+                    if complaint:
+                        complaint_ids.append(complaint["_id"])
+
+                if complaint_ids:
+                    print(f"  🔗 Linked to {len(complaint_ids)} complaint(s)")
 
             # Build base document for MongoDB
             document = {
-                "case_number": case_number,
-                "complaint_id": complaint_id,
+                "case_numbers": case_numbers,  # Array of all case numbers
+                "complaint_ids": complaint_ids,  # Array of complaint ObjectIds
                 "year": filing["year"],
                 "date": filing["date"],
                 "title": filing["title"],
                 "type": filing["type"],
                 "respondent": filing["respondent"],
-                "pdf_url": filing.get("pdf_url"),
+                "pdf_url": pdf_url,
                 "text_content": text_content,
                 "text_file": str(text_path),
                 "ocr_failed": ocr_failed,
@@ -275,9 +319,9 @@ def main():
                 document["llm_extracted"] = llm_result
                 document["llm_model"] = args.model
 
-            # Upsert to MongoDB
+            # Upsert to MongoDB by pdf_url (one settlement per PDF)
             settlements_collection.update_one(
-                {"case_number": case_number},
+                {"pdf_url": pdf_url},
                 {"$set": document},
                 upsert=True
             )
@@ -300,12 +344,14 @@ def main():
         total_in_db = settlements_collection.count_documents({})
         with_extraction = settlements_collection.count_documents({"llm_extracted": {"$exists": True}})
         ocr_failures = settlements_collection.count_documents({"ocr_failed": True})
-        linked = settlements_collection.count_documents({"complaint_id": {"$ne": None}})
+        linked = settlements_collection.count_documents({"complaint_ids.0": {"$exists": True}})
+        multi_case = settlements_collection.count_documents({"case_numbers.1": {"$exists": True}})
         print(f"\nMongoDB stats:")
         print(f"  Total settlements: {total_in_db}")
         print(f"  With LLM extraction: {with_extraction}")
         print(f"  OCR failures (no LLM): {ocr_failures}")
         print(f"  Linked to complaints: {linked}")
+        print(f"  Multi-case settlements: {multi_case}")
 
 
 if __name__ == "__main__":

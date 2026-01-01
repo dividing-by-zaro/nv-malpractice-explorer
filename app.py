@@ -1413,10 +1413,12 @@ def get_complaints(
 
     # Filter by settlement existence
     if has_settlement:
-        # Get all case numbers that have settlements
-        settlement_case_numbers = set(
-            doc["case_number"] for doc in settlements_coll.find({}, {"case_number": 1})
-        )
+        # Get all case numbers that have settlements (flatten case_numbers arrays)
+        settlement_case_numbers = set()
+        for doc in settlements_coll.find({}, {"case_numbers": 1}):
+            case_nums = doc.get("case_numbers", [])
+            settlement_case_numbers.update(case_nums)
+
         if has_settlement == "yes":
             query["case_number"] = {"$in": list(settlement_case_numbers)}
         elif has_settlement == "no":
@@ -1480,13 +1482,22 @@ def get_complaint(case_number: str):
 
 @app.get("/api/settlement/{case_number}")
 def get_settlement(case_number: str):
-    """Get a settlement by case number."""
+    """Get a settlement by case number.
+
+    Settlements now use case_numbers array, so we check if the requested
+    case_number is in the array.
+    """
     settlements = db["settlements"]
-    doc = settlements.find_one({"case_number": case_number})
+    # Query where case_number is in the case_numbers array
+    doc = settlements.find_one({"case_numbers": case_number})
     if doc:
         doc["_id"] = str(doc["_id"])
-        if doc.get("complaint_id"):
-            doc["complaint_id"] = str(doc["complaint_id"])
+        # Convert ObjectIds in complaint_ids array to strings
+        if doc.get("complaint_ids"):
+            doc["complaint_ids"] = [str(cid) for cid in doc["complaint_ids"]]
+        # Keep backward compatibility - also set singular fields for UI
+        if doc.get("case_numbers"):
+            doc["case_number"] = doc["case_numbers"][0]
         return doc
     return None
 

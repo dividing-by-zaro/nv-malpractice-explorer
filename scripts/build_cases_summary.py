@@ -65,16 +65,21 @@ def main():
 
     print(f"Found {len(complaint_docs)} complaints in DB")
 
-    # Build settlement lookup
+    # Build settlement lookup (now keyed by each case_number in the array)
     settlement_docs = {}
-    for doc in settlements.find({}, {"case_number": 1, "ocr_failed": 1, "llm_extracted": 1}):
-        settlement_docs[doc["case_number"]] = {
+    unique_settlement_count = 0
+    for doc in settlements.find({}, {"case_numbers": 1, "ocr_failed": 1, "llm_extracted": 1}):
+        unique_settlement_count += 1
+        status = {
             "has_text": not doc.get("ocr_failed", False),
             "has_extraction": "llm_extracted" in doc and doc["llm_extracted"] is not None,
             "ocr_failed": doc.get("ocr_failed", False)
         }
+        # Map each case_number in the array to the same settlement status
+        for cn in doc.get("case_numbers", []):
+            settlement_docs[cn] = status
 
-    print(f"Found {len(settlement_docs)} settlements in DB")
+    print(f"Found {unique_settlement_count} settlements in DB (covering {len(settlement_docs)} case numbers)")
 
     # Build summary for each case
     summaries = []
