@@ -149,13 +149,19 @@ app.py → Web UI at http://localhost:8000
   - Histograms: Fine/cost distributions (capped at 90th percentile)
 
 ### Key Files
-- `app.py`: FastAPI app (~390 lines, API routes only)
+- `app.py`: FastAPI app (~580 lines) with Pydantic models and dependency injection
 - `static/index.html`: Frontend HTML + JavaScript
 - `static/css/styles.css`: Frontend styles
 - `scripts/process_complaints.py`: LLM extraction for complaints (GPT-4o)
 - `scripts/process_settlements.py`: LLM extraction for settlements (GPT-4o)
 - `scripts/prompts/complaint_extraction.md`: LLM prompt for complaints
 - `scripts/prompts/settlement_extraction.md`: LLM prompt for settlements
+
+### FastAPI Architecture
+- **Lifespan**: Uses `@asynccontextmanager` lifespan for startup/shutdown (not deprecated `@app.on_event`)
+- **Dependency Injection**: `DB = Annotated[Database, Depends(get_db)]` for testable DB access
+- **Response Models**: Pydantic models for all API responses (see `/docs` for OpenAPI schema)
+- **DatabaseConnection**: Class managing MongoDB connection lifecycle
 
 ### Environment Variables (.env)
 ```

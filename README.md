@@ -35,6 +35,7 @@ uv run uvicorn app:app --reload --port 8000
   - Totals: Fines collected, investigation costs, CME hours, probation time
   - Charts: Cases by year, category breakdown, top specialties, license actions
   - Histograms: Fine/cost distributions (capped at 90th percentile for readability)
+- **API Documentation**: Interactive OpenAPI docs at `/docs` with typed response schemas
 
 ## Data Pipeline
 
@@ -140,7 +141,7 @@ uv run python scripts/build_cases_summary.py
 ## Directory Structure
 
 ```
-app.py                        # FastAPI API routes (~390 lines)
+app.py                        # FastAPI API (~580 lines, Pydantic models + DI)
 static/
 ├── index.html                # Frontend HTML + JavaScript
 └── css/
