@@ -145,11 +145,15 @@ app.py → Web UI at http://localhost:8000
 - **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, year, settlement status)
   - Filters auto-search on change, support multi-selection with Select All/Clear buttons
   - API accepts comma-separated values for multi-select filters
+  - Content wrapper has max-width 900px, centered
 - **Case Cards**: Display all fields with "—" for missing data
-  - Header: License action tag (severity colors: yellow→red) + category tag
-  - Body: Respondent, specialty, summary
-  - Footer: Procedure, fine amount, investigation costs (each with icon)
+  - Row 1: Doctor name (left) + License action tag + category tag (right)
+  - Row 2: Specialty with icon (left) + "Case x of y in year" (right)
+  - Body: Summary (max-width 65ch for readability)
+  - Footer: Procedure, fine, investigative costs (text labels with colored icons)
+  - Case numbering derived from case_number suffix (e.g., "19-28023-1" → Case 1, counted by prefix)
 - **Modal View**: Click any case to see details + embedded PDF viewer with tabs for complaint/settlement
+  - **Timeline section** at top: Complaint date, Settlement date, Time to Resolution
   - Amended complaints show "Amended Complaint" tab label and "Original Complaint" tab for viewing both PDFs
   - "Changes from Original" section displays LLM-generated amendment summary
 - **Statistics Tab**: Aggregate analytics with Chart.js
@@ -213,7 +217,10 @@ app.py → Web UI at http://localhost:8000
 - Select All / Clear buttons
 - Auto-search on selection change
 
-**API Enhancement**: `/api/complaints` accepts comma-separated values for multi-select filters and includes `settlement_summary` object with license_action, fine_amount, investigation_costs, cme_hours, probation_months for each complaint.
+**API Enhancement**: `/api/complaints` accepts comma-separated values for multi-select filters and includes:
+- `settlement_summary`: license_action, fine_amount, investigation_costs, cme_hours, probation_months, date
+- `case_index`: Position of this case in the series (from case_number suffix, e.g., -1, -2)
+- `total_cases`: Total cases with same prefix (e.g., "19-28023-*")
 
 ### FastAPI Architecture
 - **Lifespan**: Uses `@asynccontextmanager` lifespan for startup/shutdown (not deprecated `@app.on_event`)

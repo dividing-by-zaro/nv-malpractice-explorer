@@ -176,6 +176,8 @@ h1 {
 
 .content-wrapper {
   padding: 32px 40px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -587,32 +589,55 @@ button.secondary:hover {
   box-shadow: var(--shadow-md);
 }
 
-/* Header - date, case number, category */
+/* Header - two rows: name+tags, then dates+case-id */
 .case-card__header {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px 12px;
+}
+
+.case-card__row {
+  display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 12px 20px;
-  background: var(--off-white);
-  border-bottom: var(--border-weight) solid rgba(52, 49, 45, 0.08);
+  align-items: flex-start;
   gap: 16px;
 }
 
-.case-card__topline {
+.case-card__name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.case-card__meta {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.case-card__date {
+.case-card__specialty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-mono);
   font-size: 12px;
-  font-weight: 600;
-  color: var(--charcoal);
-  letter-spacing: 0.3px;
+  color: var(--gray);
 }
 
-.case-card__id {
+.case-card__specialty [data-lucide] {
+  width: 14px;
+  height: 14px;
+}
+
+.case-card__case-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--gray);
@@ -696,35 +721,8 @@ button.secondary:hover {
 
 /* Body - main content */
 .case-card__body {
-  padding: 20px;
+  padding: 0 20px 20px;
   flex: 1;
-}
-
-.case-card__main {
-  margin-bottom: 12px;
-}
-
-.case-card__name {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--black);
-  line-height: 1.2;
-  margin: 0 0 6px 0;
-}
-
-.case-card__specialty {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--gray);
-}
-
-.case-card__specialty [data-lucide] {
-  width: 14px;
-  height: 14px;
 }
 
 .case-card__summary {
@@ -733,66 +731,63 @@ button.secondary:hover {
   line-height: 1.55;
   color: var(--charcoal);
   margin: 0;
+  max-width: 65ch;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.case-card__details {
+/* Footer - text-based data row */
+.case-card__footer {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: var(--border-weight) dashed rgba(52, 49, 45, 0.12);
+  gap: 20px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: var(--border-weight) solid rgba(52, 49, 45, 0.1);
 }
 
-.case-card__procedure {
+.case-card__stat {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--charcoal);
+}
+
+.case-card__stat-label {
+  font-weight: 400;
   color: var(--gray);
 }
 
-.case-card__procedure [data-lucide] {
-  width: 14px;
-  height: 14px;
+.case-card__stat-value {
+  font-weight: 600;
+  color: var(--black);
+}
+
+/* Footer stat icons with colors */
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.stat-icon--procedure {
   color: var(--accent-red);
 }
 
-.case-card__drugs {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--gray);
-  background: var(--tan-light);
-  padding: 3px 8px;
-  border-radius: 2px;
-}
-
-.case-card__fine,
-.case-card__costs {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--gray);
-}
-
-.case-card__fine [data-lucide] {
-  width: 14px;
-  height: 14px;
+.stat-icon--fine {
   color: var(--accent-green);
 }
 
-.case-card__costs [data-lucide] {
-  width: 14px;
-  height: 14px;
+.stat-icon--costs {
   color: var(--accent-purple);
+}
+
+.stat-icon--settlement {
+  color: var(--accent-amber);
 }
 
 /* Outcomes footer - consequences bar (legacy) */
@@ -1154,6 +1149,57 @@ button.secondary:hover {
   text-transform: uppercase;
   color: var(--gray);
   margin: 0 0 10px 0;
+}
+
+/* Timeline section */
+.timeline-section {
+  background: var(--off-white);
+  margin: -24px -24px 24px -24px;
+  padding: 20px 24px;
+  border-bottom: var(--border-weight) solid rgba(52, 49, 45, 0.15);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeline-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: var(--border-weight) dashed rgba(52, 49, 45, 0.1);
+}
+
+.timeline-item:last-child {
+  border-bottom: none;
+}
+
+.timeline-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.timeline-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.timeline-elapsed {
+  background: rgba(217, 197, 178, 0.3);
+  margin: 4px -12px 0;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border-bottom: none;
+}
+
+.timeline-elapsed .timeline-value {
+  color: var(--accent-amber);
 }
 
 .info-section p {
@@ -1546,7 +1592,12 @@ button.secondary:hover {
   }
 
   .case-card__name {
-    font-size: 18px;
+    font-size: 16px;
+  }
+
+  .case-card__footer {
+    flex-direction: column;
+    gap: 8px;
   }
 
   .case-card__outcomes {

@@ -514,10 +514,24 @@
         }
 
         function formatCurrency(amount) {
-            if (amount >= 1000) {
-                return '$' + (amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1) + 'k';
-            }
             return '$' + amount.toLocaleString();
+        }
+
+        function formatTimeElapsed(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            const diffMs = Math.abs(d2 - d1);
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const years = Math.floor(diffDays / 365);
+            const months = Math.floor((diffDays % 365) / 30);
+            const days = diffDays % 30;
+
+            const parts = [];
+            if (years > 0) parts.push(`${years} year${years > 1 ? 's' : ''}`);
+            if (months > 0) parts.push(`${months} month${months > 1 ? 's' : ''}`);
+            if (days > 0 && years === 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
+
+            return parts.length > 0 ? parts.join(', ') : '0 days';
         }
 
         function getActionClass(action) {
@@ -536,40 +550,42 @@
             complaintsCache[c.case_number] = c;
 
             const ext = c.llm_extracted || {};
-            const drugs = ext.drugs || [];
             const settlement = c.settlement_summary || {};
             const hasSettlement = Object.values(settlement).some(v => v);
 
-            // Build financial details - always show, use dash if missing
+            // Build display values - use dash if missing
             const fineDisplay = settlement.fine_amount ? `${formatCurrency(settlement.fine_amount)}` : '—';
             const costsDisplay = settlement.investigation_costs ? `${formatCurrency(settlement.investigation_costs)}` : '—';
+            const settlementDisplay = settlement.license_action && settlement.license_action !== 'none'
+                ? settlement.license_action.charAt(0).toUpperCase() + settlement.license_action.slice(1)
+                : '—';
 
             return `
                 <article class="case-card" onclick="openModal('${c.case_number}')">
                     <header class="case-card__header">
-                        <div class="case-card__topline">
-                            <time class="case-card__date">${formatDate(c.date)}</time>
-                            <span class="case-card__id">Case ${c.case_number}</span>
-                            ${c.is_amended ? '<span class="amended-badge">Amended</span>' : ''}
+                        <div class="case-card__row">
+                            <h3 class="case-card__name">${c.respondent}</h3>
+                            <div class="case-card__tags">
+                                <span class="case-card__action-tag ${settlement.license_action && settlement.license_action !== 'none' ? getActionClass(settlement.license_action) : 'action-none'}">${settlement.license_action && settlement.license_action !== 'none' ? settlement.license_action : 'no settlement'}</span>
+                                <span class="case-card__category ${ext.category ? getCategoryClass(ext.category) : ''}">${ext.category || '—'}</span>
+                            </div>
                         </div>
-                        <div class="case-card__tags">
-                            <span class="case-card__action-tag ${settlement.license_action && settlement.license_action !== 'none' ? getActionClass(settlement.license_action) : 'action-none'}">${settlement.license_action && settlement.license_action !== 'none' ? settlement.license_action : 'no settlement'}</span>
-                            <span class="case-card__category ${ext.category ? getCategoryClass(ext.category) : ''}">${ext.category || '—'}</span>
+                        <div class="case-card__meta">
+                            <div class="case-card__specialty"><i data-lucide="briefcase-medical"></i> ${ext.specialty || '—'}</div>
+                            <div class="case-card__case-id">
+                                ${c.is_amended ? '<span class="amended-badge">Amended</span>' : ''}
+                                <span>Case ${c.case_index || 1} of ${c.total_cases || 1} in ${c.year}</span>
+                            </div>
                         </div>
                     </header>
 
                     <div class="case-card__body">
-                        <div class="case-card__main">
-                            <h3 class="case-card__name">${c.respondent}</h3>
-                            <div class="case-card__specialty"><i data-lucide="briefcase-medical"></i> ${ext.specialty || '—'}</div>
-                        </div>
-
                         <p class="case-card__summary">${ext.summary || 'No summary available'}</p>
 
-                        <div class="case-card__details">
-                            <span class="case-card__procedure"><i data-lucide="heart-pulse"></i> ${ext.procedure || '—'}</span>
-                            <span class="case-card__fine"><i data-lucide="banknote"></i> ${fineDisplay}</span>
-                            <span class="case-card__costs"><i data-lucide="file-search"></i> ${costsDisplay}</span>
+                        <div class="case-card__footer">
+                            <span class="case-card__stat"><i data-lucide="heart-pulse" class="stat-icon stat-icon--procedure"></i><span class="case-card__stat-label">Procedure:</span> <span class="case-card__stat-value">${ext.procedure || '—'}</span></span>
+                            <span class="case-card__stat"><i data-lucide="banknote" class="stat-icon stat-icon--fine"></i><span class="case-card__stat-label">Fine:</span> <span class="case-card__stat-value">${fineDisplay}</span></span>
+                            <span class="case-card__stat"><i data-lucide="file-search" class="stat-icon stat-icon--costs"></i><span class="case-card__stat-label">Investigative costs:</span> <span class="case-card__stat-value">${costsDisplay}</span></span>
                         </div>
                     </div>
                 </article>
@@ -592,6 +608,29 @@
 
             // Build complaint info panel
             let infoHtml = '';
+
+            // Timeline section - will be updated after fetching settlement
+            const timelineHtml = (settlementDate) => `
+                <div class="info-section timeline-section">
+                    <h3>Timeline</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <span class="timeline-label">Complaint Filed</span>
+                            <span class="timeline-value">${formatDate(c.date)}</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="timeline-label">Settlement</span>
+                            <span class="timeline-value">${settlementDate ? formatDate(settlementDate) : '—'}</span>
+                        </div>
+                        ${settlementDate ? `
+                        <div class="timeline-item timeline-elapsed">
+                            <span class="timeline-label">Time to Resolution</span>
+                            <span class="timeline-value">${formatTimeElapsed(c.date, settlementDate)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
 
             if (ext.category) {
                 infoHtml += `
@@ -666,11 +705,13 @@
             }
 
             // Fetch settlement data
+            let settlementDate = null;
             try {
                 const res = await fetch(`/api/settlement/${caseNumber}`);
                 const settlement = await res.json();
                 if (settlement && settlement.case_number) {
                     currentSettlement = settlement;
+                    settlementDate = settlement.date;
                     infoHtml += renderSettlementInfo(settlement);
                     document.getElementById('settlement-tab').style.display = 'block';
                     settlementPdfPath = buildSettlementPdfPath(settlement);
@@ -683,7 +724,8 @@
                 settlementPdfPath = null;
             }
 
-            document.getElementById('modal-info').innerHTML = infoHtml;
+            // Prepend timeline section with settlement date
+            document.getElementById('modal-info').innerHTML = timelineHtml(settlementDate) + infoHtml;
             lucide.createIcons();
 
             // Build PDF paths

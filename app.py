@@ -432,17 +432,52 @@ def get_complaints(
             "investigation_costs": ext.get("investigation_costs"),
             "cme_hours": ext.get("cme_hours"),
             "probation_months": ext.get("probation_months"),
+            "date": doc.get("date"),
         }
         for cn in doc.get("case_numbers", []):
             settlement_lookup[cn] = summary
 
+    # Build lookup of case counts by case number prefix (e.g., "19-28023")
+    # Case numbers are formatted as "YY-XXXXX-N" where N is the case index
+    results_list = list(cursor)
+
+    # Extract unique prefixes from results
+    def get_case_prefix(case_num: str) -> str:
+        """Extract prefix from case number (e.g., '19-28023' from '19-28023-1')"""
+        parts = case_num.rsplit("-", 1)
+        return parts[0] if len(parts) > 1 else case_num
+
+    def get_case_suffix(case_num: str) -> int:
+        """Extract suffix from case number (e.g., 1 from '19-28023-1')"""
+        parts = case_num.rsplit("-", 1)
+        try:
+            return int(parts[1]) if len(parts) > 1 else 1
+        except ValueError:
+            return 1
+
+    prefixes_in_results = set(get_case_prefix(doc.get("case_number", "")) for doc in results_list)
+
+    # Count total cases for each prefix
+    prefix_counts = {}
+    for prefix in prefixes_in_results:
+        if prefix:
+            count = complaints.count_documents({
+                "case_number": {"$regex": f"^{prefix}-"},
+                "llm_extracted": {"$exists": True}
+            })
+            prefix_counts[prefix] = count
+
     results = []
-    for doc in cursor:
+    for doc in results_list:
         doc["_id"] = str(doc["_id"])
         # Attach settlement summary if available
-        case_num = doc.get("case_number")
+        case_num = doc.get("case_number", "")
         if case_num in settlement_lookup:
             doc["settlement_summary"] = settlement_lookup[case_num]
+        # Attach case index and total based on case number prefix
+        prefix = get_case_prefix(case_num)
+        doc["case_index"] = get_case_suffix(case_num)
+        doc["total_cases"] = prefix_counts.get(prefix, 1)
         results.append(doc)
 
     return ComplaintsResponse(complaints=results, total=total)
