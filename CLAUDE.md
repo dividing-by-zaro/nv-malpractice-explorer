@@ -149,7 +149,9 @@ app.py → Web UI at http://localhost:8000
   - Histograms: Fine/cost distributions (capped at 90th percentile)
 
 ### Key Files
-- `app.py`: FastAPI app with embedded HTML/JS frontend
+- `app.py`: FastAPI app (~390 lines, API routes only)
+- `static/index.html`: Frontend HTML + JavaScript
+- `static/css/styles.css`: Frontend styles
 - `scripts/process_complaints.py`: LLM extraction for complaints (GPT-4o)
 - `scripts/process_settlements.py`: LLM extraction for settlements (GPT-4o)
 - `scripts/prompts/complaint_extraction.md`: LLM prompt for complaints

@@ -1,0 +1,528 @@
+/* Nevada Medical Malpractice Explorer Styles */
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f5f5f5;
+}
+
+h1 { color: #333; margin-bottom: 5px; }
+
+.subtitle { color: #666; margin-bottom: 20px; }
+
+/* Filters */
+.filters {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+select, input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Buttons */
+button {
+    padding: 10px 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+button:hover { background: #1d4ed8; }
+
+button.secondary {
+    background: #6b7280;
+}
+
+button.secondary:hover { background: #4b5563; }
+
+/* Stats */
+.stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.stat {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.stat-value { font-size: 24px; font-weight: bold; color: #2563eb; }
+.stat-label { font-size: 12px; color: #666; text-transform: uppercase; }
+
+/* Results */
+.results {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.complaint {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.complaint:last-child { border-bottom: none; }
+.complaint:hover { background: #f9fafb; }
+
+.complaint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.respondent { font-weight: 600; font-size: 16px; color: #333; }
+.case-number { font-size: 12px; color: #888; }
+
+/* Category badges */
+.category {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.category.controlled { background: #fef3c7; color: #92400e; }
+.category.license { background: #fce7f3; color: #9d174d; }
+.category.sexual { background: #fee2e2; color: #991b1b; }
+.category.impairment { background: #e0e7ff; color: #3730a3; }
+
+.summary { color: #444; margin: 10px 0; line-height: 1.5; }
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 13px;
+    color: #666;
+}
+
+.meta-item { display: flex; align-items: center; gap: 4px; }
+
+/* Drugs */
+.drugs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.drug {
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #374151;
+}
+
+.complainants {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #666;
+}
+
+.no-results {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+}
+
+.loading {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+}
+
+/* Modal styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    overflow: auto;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal {
+    background: white;
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1400px;
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-close:hover { color: #333; }
+
+.modal-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.modal-info {
+    width: 400px;
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.modal-pdf {
+    flex: 1;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-pdf iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.modal-pdf .no-pdf {
+    color: #999;
+    text-align: center;
+    padding: 40px;
+}
+
+.info-section {
+    margin-bottom: 20px;
+}
+
+.info-section h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.info-section p {
+    margin: 0;
+    color: #333;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-list li {
+    padding: 4px 0;
+    color: #333;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 14px;
+    color: #666;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.tab:hover { color: #333; }
+
+.tab.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    font-weight: 500;
+}
+
+/* Settlement section */
+.settlement-section {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.settlement-section h3 {
+    color: #166534;
+    margin-top: 0;
+}
+
+.penalty-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #dcfce7;
+}
+
+.penalty-item:last-child { border-bottom: none; }
+.penalty-label { color: #555; }
+.penalty-value { font-weight: 600; color: #166534; }
+
+.violation-item {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.violation-item.dismissed {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+}
+
+.violation-code { font-weight: 600; color: #991b1b; }
+.violation-item.dismissed .violation-code { color: #0369a1; }
+
+.no-settlement {
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Main navigation tabs */
+.main-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.main-tab {
+    flex: 1;
+    padding: 15px 30px;
+    border: none;
+    background: white;
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.main-tab:hover { background: #f9fafb; }
+
+.main-tab.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background: #eff6ff;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* Statistics page styles */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chart-card h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.chart-container.tall { height: 400px; }
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.summary-card .value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+.summary-card .label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+/* Totals section */
+.totals-section {
+    margin-bottom: 25px;
+}
+
+.totals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.total-card {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border-radius: 12px;
+    padding: 25px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+}
+
+.total-card.green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+}
+
+.total-card.amber {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+}
+
+.total-card.purple {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);
+}
+
+.total-card.cyan {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    box-shadow: 0 4px 6px rgba(6, 182, 212, 0.3);
+}
+
+.total-card .value {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.total-card .label {
+    font-size: 13px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.total-card .sublabel {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 8px;
+}
+
+.histogram-info {
+    font-size: 13px;
+    color: #666;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+}

@@ -140,7 +140,11 @@ uv run python scripts/build_cases_summary.py
 ## Directory Structure
 
 ```
-app.py                        # FastAPI web app
+app.py                        # FastAPI API routes (~390 lines)
+static/
+├── index.html                # Frontend HTML + JavaScript
+└── css/
+    └── styles.css            # Frontend styles
 scripts/
 ├── scraper.py                # Download filings from Nevada Board
 ├── normalize_filings.py      # Clean/standardize metadata
