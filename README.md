@@ -29,11 +29,17 @@ uv run uvicorn app:app --reload --port 8000
 
 ## Web App Features
 
-- **Cases Tab**: Browse complaints with filters (category, specialty, year, drug, patient sex, settlement status)
-  - Case cards display date, respondent, specialty, summary, and settlement outcomes (license action, fines, CME hours)
-  - Color-coded category badges indicate case type (controlled substances, sexual misconduct, etc.)
+- **Cases Tab**: Browse complaints with custom multi-select filters
+  - Filters: Category, specialty, year, settlement status (with Select All/Clear buttons)
+  - Auto-search on filter change, no manual submit needed
+  - Case cards show all fields (with "—" for missing data):
+    - Header: License action tag (color-coded by severity) + category tag
+    - Body: Respondent name, specialty, summary
+    - Details: Procedure, fine amount, investigation costs
+  - License action colors indicate severity (yellow reprimand → red revocation)
 - **Case Details**: Click any case to view extracted data + embedded PDF viewer (tabs for complaint/settlement)
 - **Statistics Tab**: Aggregate analytics dashboard
+  - Stats cards: Total complaints, processed count, settlements, categories
   - Totals: Fines collected, investigation costs, CME hours, probation time
   - Charts: Cases by year, category breakdown, top specialties, license actions
   - Histograms: Fine/cost distributions (capped at 90th percentile for readability)

@@ -330,7 +330,7 @@ def get_complaints(
     db: DB,
     category: Optional[str] = None,
     specialty: Optional[str] = None,
-    year: Optional[int] = None,
+    year: Optional[str] = None,
     drug: Optional[str] = None,
     sex: Optional[str] = None,
     has_settlement: Optional[str] = None,
@@ -338,22 +338,48 @@ def get_complaints(
     skip: int = 0,
     limit: int = Query(default=20, le=100)
 ):
-    """Get complaints with filtering and sorting."""
+    """Get complaints with filtering and sorting. Multi-value filters accept comma-separated values."""
     complaints = db["complaints"]
     settlements = db["settlements"]
 
     query = {"llm_extracted": {"$exists": True}}
 
+    # Multi-value filters (comma-separated)
     if category:
-        query["llm_extracted.category"] = category
+        categories = [c.strip() for c in category.split(",")]
+        if len(categories) == 1:
+            query["llm_extracted.category"] = categories[0]
+        else:
+            query["llm_extracted.category"] = {"$in": categories}
+
     if specialty:
-        query["llm_extracted.specialty"] = specialty
+        specialties = [s.strip() for s in specialty.split(",")]
+        if len(specialties) == 1:
+            query["llm_extracted.specialty"] = specialties[0]
+        else:
+            query["llm_extracted.specialty"] = {"$in": specialties}
+
     if year:
-        query["year"] = year
+        years = [int(y.strip()) for y in year.split(",")]
+        if len(years) == 1:
+            query["year"] = years[0]
+        else:
+            query["year"] = {"$in": years}
+
     if drug:
-        query["llm_extracted.drugs"] = {"$regex": drug, "$options": "i"}
+        drugs = [d.strip() for d in drug.split(",")]
+        if len(drugs) == 1:
+            query["llm_extracted.drugs"] = {"$regex": drugs[0], "$options": "i"}
+        else:
+            # Match any of the drugs using $or
+            query["$or"] = [{"llm_extracted.drugs": {"$regex": d, "$options": "i"}} for d in drugs]
+
     if sex:
-        query["llm_extracted.complainants.sex"] = sex
+        sexes = [s.strip() for s in sex.split(",")]
+        if len(sexes) == 1:
+            query["llm_extracted.complainants.sex"] = sexes[0]
+        else:
+            query["llm_extracted.complainants.sex"] = {"$in": sexes}
 
     # Filter by settlement existence
     if has_settlement:

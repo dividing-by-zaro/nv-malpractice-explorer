@@ -38,17 +38,42 @@ Examples:
 - "Respondent billed for 45-minute patient visits while seeing up to 67 patients in 6.5 hours."
 
 ### specialty (string or null)
-The board-certified medical specialty of the respondent physician ONLY if explicitly stated or clearly inferable from the document. Use standard medical specialty names recognized by the American Board of Medical Specialties.
+The board-certified medical specialty of the respondent physician ONLY if explicitly stated or clearly inferable from the document. Use one of the standardized specialty names below.
 
-Valid examples include:
+**Use one of these existing specialties when applicable:**
 - "Anesthesiology"
 - "Cardiology"
+- "Cardiothoracic Surgery"
 - "Dermatology"
+- "Dermatopathology"
 - "Emergency Medicine"
+- "Family Medicine"
+- "Gastroenterology"
+- "General Surgery"
+- "Infectious Disease"
+- "Internal Medicine"
+- "Interventional Radiology"
+- "Nephrology"
+- "Neurological Surgery" (use this for neurosurgery)
 - "Neurology"
+- "Obstetrics and Gynecology" (use this for OB/GYN, gynecology)
+- "Ophthalmology"
+- "Orthopedic Surgery" (use American spelling, not "Orthopaedic")
+- "Otolaryngology"
+- "Pediatric Cardiology"
+- "Pediatric Critical Care Medicine"
+- "Pediatric Emergency Medicine"
+- "Pediatrics"
+- "Plastic Surgery"
+- "Psychiatry"
+- "Radiation Oncology"
+- "Radiology" (use this for diagnostic radiology)
+- "Rheumatology"
+- "Urology"
 
+**If the specialty is not in the list above**, you may create a new ABMS-recognized specialty name. Do NOT use practice areas like "Wound Care", "Pain Management", or "Urgent Care" - these are not board-certified specialties.
 
-Do NOT use practice areas like "Wound Care", "Pain Management", or "Urgent Care" - these are not specialties. If the specialty cannot be determined, set to null.
+If the specialty cannot be determined, set to null.
 
 ### num_complainants (required integer)
 The number of distinct patients or complainants mentioned in the document. Count each unique "Patient A", "Patient B", etc. as separate complainants. If only one patient is discussed, return 1.

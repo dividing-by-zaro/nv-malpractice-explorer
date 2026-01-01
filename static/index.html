@@ -22,68 +22,84 @@
     <!-- Cases View -->
     <div id="cases-view" class="view active">
         <div class="content-wrapper">
-            <div class="stats" id="stats"></div>
-
             <div class="filters">
                 <div class="filters-header">Search Filters</div>
                 <div class="filter-row">
-            <div class="filter-group">
-                <label>Category</label>
-                <select id="category">
-                    <option value="">All Categories</option>
-                </select>
+                    <div class="filter-group">
+                        <label>Category</label>
+                        <div class="custom-select" id="category-select" data-multi="true" data-filter="category">
+                            <div class="custom-select__trigger">
+                                <span class="custom-select__value">All Categories</span>
+                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
+                            </div>
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__options"></div>
+                                <div class="custom-select__actions">
+                                    <button type="button" class="custom-select__btn custom-select__btn--select">Select All</button>
+                                    <button type="button" class="custom-select__btn custom-select__btn--clear">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Specialty</label>
+                        <div class="custom-select" id="specialty-select" data-multi="true" data-filter="specialty">
+                            <div class="custom-select__trigger">
+                                <span class="custom-select__value">All Specialties</span>
+                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
+                            </div>
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__options"></div>
+                                <div class="custom-select__actions">
+                                    <button type="button" class="custom-select__btn custom-select__btn--select">Select All</button>
+                                    <button type="button" class="custom-select__btn custom-select__btn--clear">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Year</label>
+                        <div class="custom-select" id="year-select" data-multi="true" data-filter="year">
+                            <div class="custom-select__trigger">
+                                <span class="custom-select__value">All Years</span>
+                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
+                            </div>
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__options"></div>
+                                <div class="custom-select__actions">
+                                    <button type="button" class="custom-select__btn custom-select__btn--select">Select All</button>
+                                    <button type="button" class="custom-select__btn custom-select__btn--clear">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Settlement</label>
+                        <div class="custom-select custom-select--single" id="settlement-select" data-multi="false" data-filter="has_settlement">
+                            <div class="custom-select__trigger">
+                                <span class="custom-select__value">All</span>
+                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
+                            </div>
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__options"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-spacer"></div>
+                    <div class="filter-group">
+                        <label>Sort By</label>
+                        <div class="custom-select custom-select--single" id="sort-select" data-multi="false" data-filter="sort">
+                            <div class="custom-select__trigger">
+                                <span class="custom-select__value">Date (Newest)</span>
+                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
+                            </div>
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__options"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="filter-group">
-                <label>Specialty</label>
-                <select id="specialty">
-                    <option value="">All Specialties</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Year</label>
-                <select id="year">
-                    <option value="">All Years</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Drug Mentioned</label>
-                <select id="drug">
-                    <option value="">Any Drug</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Patient Sex</label>
-                <select id="sex">
-                    <option value="">Any</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Sort By</label>
-                <select id="sort">
-                    <option value="date_desc">Date (Newest)</option>
-                    <option value="date_asc">Date (Oldest)</option>
-                    <option value="year_desc">Year (Newest)</option>
-                    <option value="year_asc">Year (Oldest)</option>
-                    <option value="respondent">Respondent Name</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Settlement</label>
-                <select id="has_settlement">
-                    <option value="">All</option>
-                    <option value="yes">Has Settlement</option>
-                    <option value="no">No Settlement</option>
-                </select>
-            </div>
-        </div>
-        <div class="filter-row">
-            <button onclick="search()">Search</button>
-            <button class="secondary" onclick="loadRandom()">Random Complaint</button>
-            <button class="secondary" onclick="resetFilters()">Reset</button>
-            </div>
-        </div>
 
             <div class="results" id="results">
                 <div class="loading">Loading...</div>
@@ -97,9 +113,10 @@
     <div id="statistics-view" class="view">
         <div class="content-wrapper">
             <div class="totals-section">
-            <div class="totals-grid" id="totals-grid"></div>
-        </div>
-        <div class="summary-grid" id="settlement-summary"></div>
+                <div class="totals-grid" id="totals-grid"></div>
+            </div>
+            <div class="stats" id="stats"></div>
+            <div class="summary-grid" id="settlement-summary"></div>
 
         <div class="stats-grid">
             <div class="chart-card">
@@ -207,45 +224,239 @@
             }
         }
 
+        // Custom Select Manager
+        const customSelects = {};
+
+        class CustomSelect {
+            constructor(element) {
+                this.element = element;
+                this.isMulti = element.dataset.multi === 'true';
+                this.filterName = element.dataset.filter;
+                this.trigger = element.querySelector('.custom-select__trigger');
+                this.valueDisplay = element.querySelector('.custom-select__value');
+                this.optionsContainer = element.querySelector('.custom-select__options');
+                this.dropdown = element.querySelector('.custom-select__dropdown');
+                this.options = [];
+                this.selected = new Set();
+                this.allLabel = this.getDefaultLabel();
+
+                this.setupEventListeners();
+            }
+
+            getDefaultLabel() {
+                const labels = {
+                    'category': 'All Categories',
+                    'specialty': 'All Specialties',
+                    'year': 'All Years',
+                    'drug': 'All Drugs',
+                    'sex': 'Any',
+                    'sort': 'Date (Newest)',
+                    'has_settlement': 'All'
+                };
+                return labels[this.filterName] || 'Select...';
+            }
+
+            setupEventListeners() {
+                // Toggle dropdown on trigger click
+                this.trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggle();
+                });
+
+                // Select all / Clear buttons
+                const selectAllBtn = this.element.querySelector('.custom-select__btn--select');
+                const clearBtn = this.element.querySelector('.custom-select__btn--clear');
+
+                if (selectAllBtn) {
+                    selectAllBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.selectAll();
+                    });
+                }
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.clearAll();
+                    });
+                }
+            }
+
+            setOptions(options) {
+                this.options = options;
+
+                // Default: all selected for multi-select, first for single-select
+                if (this.isMulti) {
+                    this.selected = new Set(options.map(o => o.value));
+                } else if (options.length > 0) {
+                    this.selected = new Set([options[0].value]);
+                }
+
+                this.renderOptions();
+                this.updateOptionStyles();
+                this.updateDisplay();
+            }
+
+            renderOptions() {
+                this.optionsContainer.innerHTML = this.options.map(opt => `
+                    <div class="custom-select__option" data-value="${opt.value}">
+                        <div class="custom-select__checkbox">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <span class="custom-select__label">${opt.label}</span>
+                    </div>
+                `).join('');
+
+                // Add click listeners to options
+                this.optionsContainer.querySelectorAll('.custom-select__option').forEach(opt => {
+                    opt.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleOption(opt.dataset.value);
+                    });
+                });
+
+                this.updateOptionStyles();
+            }
+
+            toggleOption(value) {
+                if (this.isMulti) {
+                    if (this.selected.has(value)) {
+                        this.selected.delete(value);
+                    } else {
+                        this.selected.add(value);
+                    }
+                } else {
+                    this.selected = new Set([value]);
+                    this.close();
+                }
+                this.updateOptionStyles();
+                this.updateDisplay();
+                this.onChange();
+            }
+
+            selectAll() {
+                this.selected = new Set(this.options.map(o => o.value));
+                this.updateOptionStyles();
+                this.updateDisplay();
+                this.onChange();
+            }
+
+            clearAll() {
+                this.selected = new Set();
+                this.updateOptionStyles();
+                this.updateDisplay();
+                this.onChange();
+            }
+
+            updateOptionStyles() {
+                this.optionsContainer.querySelectorAll('.custom-select__option').forEach(opt => {
+                    if (this.selected.has(opt.dataset.value)) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+            }
+
+            updateDisplay() {
+                const count = this.selected.size;
+                const total = this.options.length;
+
+                if (count === 0) {
+                    this.valueDisplay.textContent = 'None selected';
+                    this.valueDisplay.classList.add('placeholder');
+                } else if (count === total && this.isMulti) {
+                    this.valueDisplay.textContent = this.allLabel;
+                    this.valueDisplay.classList.remove('placeholder');
+                } else if (count === 1) {
+                    const selectedOpt = this.options.find(o => this.selected.has(o.value));
+                    this.valueDisplay.textContent = selectedOpt ? selectedOpt.label : '';
+                    this.valueDisplay.classList.remove('placeholder');
+                } else {
+                    this.valueDisplay.textContent = `${count} selected`;
+                    this.valueDisplay.classList.remove('placeholder');
+                }
+            }
+
+            toggle() {
+                if (this.element.classList.contains('open')) {
+                    this.close();
+                } else {
+                    this.open();
+                }
+            }
+
+            open() {
+                // Close all other dropdowns first
+                document.querySelectorAll('.custom-select.open').forEach(el => {
+                    if (el !== this.element) {
+                        el.classList.remove('open');
+                    }
+                });
+                this.element.classList.add('open');
+            }
+
+            close() {
+                this.element.classList.remove('open');
+            }
+
+            getValue() {
+                // For multi-select: return array if not all selected, empty if all selected
+                // For single-select: return the single value
+                if (this.isMulti) {
+                    if (this.selected.size === this.options.length) {
+                        return []; // All selected = no filter
+                    }
+                    return Array.from(this.selected);
+                } else {
+                    return Array.from(this.selected)[0] || '';
+                }
+            }
+
+            onChange() {
+                // Trigger search
+                search();
+            }
+        }
+
         async function loadFilters() {
             const res = await fetch('/api/filters');
             const data = await res.json();
 
-            // Populate category dropdown
-            const categorySelect = document.getElementById('category');
-            data.categories.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                categorySelect.appendChild(opt);
-            });
+            // Initialize Category dropdown
+            customSelects['category'] = new CustomSelect(document.getElementById('category-select'));
+            customSelects['category'].setOptions(data.categories.map(c => ({ value: c, label: c })));
 
-            // Populate specialty dropdown
-            const specialtySelect = document.getElementById('specialty');
-            data.specialties.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s;
-                opt.textContent = s;
-                specialtySelect.appendChild(opt);
-            });
+            // Initialize Specialty dropdown
+            customSelects['specialty'] = new CustomSelect(document.getElementById('specialty-select'));
+            customSelects['specialty'].setOptions(data.specialties.map(s => ({ value: s, label: s })));
 
-            // Populate year dropdown
-            const yearSelect = document.getElementById('year');
-            data.years.forEach(y => {
-                const opt = document.createElement('option');
-                opt.value = y;
-                opt.textContent = y;
-                yearSelect.appendChild(opt);
-            });
+            // Initialize Year dropdown
+            customSelects['year'] = new CustomSelect(document.getElementById('year-select'));
+            customSelects['year'].setOptions(data.years.map(y => ({ value: String(y), label: String(y) })));
 
-            // Populate drug dropdown
-            const drugSelect = document.getElementById('drug');
-            data.drugs.slice(0, 50).forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d;
-                opt.textContent = d;
-                drugSelect.appendChild(opt);
-            });
+            // Initialize Sort dropdown (single select)
+            customSelects['sort'] = new CustomSelect(document.getElementById('sort-select'));
+            customSelects['sort'].setOptions([
+                { value: 'date_desc', label: 'Date (Newest)' },
+                { value: 'date_asc', label: 'Date (Oldest)' },
+                { value: 'year_desc', label: 'Year (Newest)' },
+                { value: 'year_asc', label: 'Year (Oldest)' },
+                { value: 'respondent', label: 'Respondent Name' }
+            ]);
+
+            // Initialize Settlement dropdown (single select)
+            customSelects['has_settlement'] = new CustomSelect(document.getElementById('settlement-select'));
+            customSelects['has_settlement'].setOptions([
+                { value: '', label: 'All' },
+                { value: 'yes', label: 'Has Settlement' },
+                { value: 'no', label: 'No Settlement' }
+            ]);
+
+            // Re-render Lucide icons for dropdown arrows
+            lucide.createIcons();
         }
 
         async function loadStats() {
@@ -307,6 +518,18 @@
             return '$' + amount.toLocaleString();
         }
 
+        function getActionClass(action) {
+            // Severity from least to most: none < reprimand < probation < suspended < surrendered < revoked
+            const classes = {
+                'reprimand': 'action-reprimand',
+                'probation': 'action-probation',
+                'suspended': 'action-suspended',
+                'surrendered': 'action-surrendered',
+                'revoked': 'action-revoked'
+            };
+            return classes[action] || '';
+        }
+
         function renderComplaint(c) {
             complaintsCache[c.case_number] = c;
 
@@ -315,11 +538,9 @@
             const settlement = c.settlement_summary || {};
             const hasSettlement = Object.values(settlement).some(v => v);
 
-            // License action badge styling
-            const actionClass = settlement.license_action ?
-                (settlement.license_action === 'revoked' ? 'severe' :
-                 settlement.license_action === 'suspended' ? 'serious' :
-                 settlement.license_action === 'surrendered' ? 'serious' : 'moderate') : '';
+            // Build financial details - always show, use dash if missing
+            const fineDisplay = settlement.fine_amount ? `${formatCurrency(settlement.fine_amount)}` : '—';
+            const costsDisplay = settlement.investigation_costs ? `${formatCurrency(settlement.investigation_costs)}` : '—';
 
             return `
                 <article class="case-card" onclick="openModal('${c.case_number}')">
@@ -328,50 +549,26 @@
                             <time class="case-card__date">${formatDate(c.date)}</time>
                             <span class="case-card__id">Case ${c.case_number}</span>
                         </div>
-                        ${ext.category ? `<span class="case-card__category ${getCategoryClass(ext.category)}">${ext.category}</span>` : ''}
+                        <div class="case-card__tags">
+                            <span class="case-card__action-tag ${settlement.license_action && settlement.license_action !== 'none' ? getActionClass(settlement.license_action) : 'action-none'}">${settlement.license_action && settlement.license_action !== 'none' ? settlement.license_action : 'no settlement'}</span>
+                            <span class="case-card__category ${ext.category ? getCategoryClass(ext.category) : ''}">${ext.category || '—'}</span>
+                        </div>
                     </header>
 
                     <div class="case-card__body">
                         <div class="case-card__main">
                             <h3 class="case-card__name">${c.respondent}</h3>
-                            ${ext.specialty ? `<div class="case-card__specialty"><i data-lucide="briefcase-medical"></i> ${ext.specialty}</div>` : ''}
+                            <div class="case-card__specialty"><i data-lucide="briefcase-medical"></i> ${ext.specialty || '—'}</div>
                         </div>
 
                         <p class="case-card__summary">${ext.summary || 'No summary available'}</p>
 
-                        ${ext.procedure || drugs.length > 0 ? `
-                            <div class="case-card__details">
-                                ${ext.procedure ? `<span class="case-card__procedure"><i data-lucide="heart-pulse"></i> ${ext.procedure}</span>` : ''}
-                                ${drugs.length > 0 ? `<span class="case-card__drugs">${drugs.slice(0, 3).join(', ')}${drugs.length > 3 ? ` +${drugs.length - 3}` : ''}</span>` : ''}
-                            </div>
-                        ` : ''}
+                        <div class="case-card__details">
+                            <span class="case-card__procedure"><i data-lucide="heart-pulse"></i> ${ext.procedure || '—'}</span>
+                            <span class="case-card__fine"><i data-lucide="banknote"></i> ${fineDisplay}</span>
+                            <span class="case-card__costs"><i data-lucide="file-search"></i> ${costsDisplay}</span>
+                        </div>
                     </div>
-
-                    ${hasSettlement ? `
-                        <footer class="case-card__outcomes">
-                            ${settlement.license_action && settlement.license_action !== 'none' ? `
-                                <span class="case-card__action ${actionClass}">
-                                    <i data-lucide="shield-alert"></i>
-                                    ${settlement.license_action}
-                                </span>
-                            ` : ''}
-                            ${settlement.fine_amount ? `
-                                <span class="case-card__penalty">
-                                    ${formatCurrency(settlement.fine_amount)} fine
-                                </span>
-                            ` : ''}
-                            ${settlement.investigation_costs ? `
-                                <span class="case-card__penalty">
-                                    ${formatCurrency(settlement.investigation_costs)} costs
-                                </span>
-                            ` : ''}
-                            ${settlement.cme_hours ? `
-                                <span class="case-card__penalty">
-                                    ${settlement.cme_hours}hr CME
-                                </span>
-                            ` : ''}
-                        </footer>
-                    ` : ''}
                 </article>
             `;
         }
@@ -594,19 +791,17 @@
             currentPage = page;
             const params = new URLSearchParams();
 
-            const category = document.getElementById('category').value;
-            const specialty = document.getElementById('specialty').value;
-            const year = document.getElementById('year').value;
-            const drug = document.getElementById('drug').value;
-            const sex = document.getElementById('sex').value;
-            const sort = document.getElementById('sort').value;
-            const hasSettlement = document.getElementById('has_settlement').value;
+            // Get values from custom selects
+            const category = customSelects['category']?.getValue() || [];
+            const specialty = customSelects['specialty']?.getValue() || [];
+            const year = customSelects['year']?.getValue() || [];
+            const sort = customSelects['sort']?.getValue() || 'date_desc';
+            const hasSettlement = customSelects['has_settlement']?.getValue() || '';
 
-            if (category) params.set('category', category);
-            if (specialty) params.set('specialty', specialty);
-            if (year) params.set('year', year);
-            if (drug) params.set('drug', drug);
-            if (sex) params.set('sex', sex);
+            // Multi-select filters: send as comma-separated
+            if (category.length > 0) params.set('category', category.join(','));
+            if (specialty.length > 0) params.set('specialty', specialty.join(','));
+            if (year.length > 0) params.set('year', year.join(','));
             if (sort) params.set('sort', sort);
             if (hasSettlement) params.set('has_settlement', hasSettlement);
             params.set('skip', page * pageSize);
@@ -653,13 +848,23 @@
         }
 
         function resetFilters() {
-            document.getElementById('category').value = '';
-            document.getElementById('specialty').value = '';
-            document.getElementById('year').value = '';
-            document.getElementById('drug').value = '';
-            document.getElementById('sex').value = '';
-            document.getElementById('sort').value = 'date_desc';
-            document.getElementById('has_settlement').value = '';
+            // Reset all multi-select filters to "all selected"
+            ['category', 'specialty', 'year'].forEach(key => {
+                if (customSelects[key]) {
+                    customSelects[key].selectAll();
+                }
+            });
+            // Reset single-select filters to first option
+            if (customSelects['sort']) {
+                customSelects['sort'].selected = new Set(['date_desc']);
+                customSelects['sort'].updateOptionStyles();
+                customSelects['sort'].updateDisplay();
+            }
+            if (customSelects['has_settlement']) {
+                customSelects['has_settlement'].selected = new Set(['']);
+                customSelects['has_settlement'].updateOptionStyles();
+                customSelects['has_settlement'].updateDisplay();
+            }
             search();
         }
 
@@ -901,10 +1106,32 @@
             `;
         }
 
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-select')) {
+                document.querySelectorAll('.custom-select.open').forEach(el => {
+                    el.classList.remove('open');
+                });
+            }
+        });
+
+        // Close dropdowns on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.custom-select.open').forEach(el => {
+                    el.classList.remove('open');
+                });
+            }
+        });
+
         // Initialize
-        loadFilters();
-        loadStats();
-        search();
+        async function init() {
+            await loadFilters();
+            loadStats();
+            lucide.createIcons();
+            search();
+        }
+        init();
     </script>
 </body>
 </html>

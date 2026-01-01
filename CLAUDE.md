@@ -141,9 +141,16 @@ app.py → Web UI at http://localhost:8000
 - `cases_summary`: Status tracking for each case (OCR status, extraction status)
 
 ### Web App Features (app.py)
-- **Cases Tab**: Browse complaints with filters (category, specialty, year, drug, patient sex, has settlement)
+- **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, year, settlement status)
+  - Filters auto-search on change, support multi-selection with Select All/Clear buttons
+  - API accepts comma-separated values for multi-select filters
+- **Case Cards**: Display all fields with "—" for missing data
+  - Header: License action tag (severity colors: yellow→red) + category tag
+  - Body: Respondent, specialty, summary
+  - Footer: Procedure, fine amount, investigation costs (each with icon)
 - **Modal View**: Click any case to see details + embedded PDF viewer with tabs for complaint/settlement
 - **Statistics Tab**: Aggregate analytics with Chart.js
+  - Stats cards: Total complaints, processed, settlements, categories, unique drugs
   - Totals cards: Fines collected, investigation costs, CME hours, probation time
   - Charts: Cases by year, category breakdown, top specialties, license actions
   - Histograms: Fine/cost distributions (capped at 90th percentile)
@@ -171,12 +178,19 @@ app.py → Web UI at http://localhost:8000
 
 **Accent Colors** (for category tags and status indicators):
 - `--accent-blue`: #2563eb (treatment/procedures)
-- `--accent-green`: #059669 (positive outcomes)
+- `--accent-green`: #059669 (positive outcomes, fine icon)
 - `--accent-amber`: #d97706 (warnings, probation)
 - `--accent-red`: #dc2626 (severe actions like revocation)
-- `--accent-purple`: #7c3aed (controlled substances)
+- `--accent-purple`: #7c3aed (controlled substances, costs icon)
 - `--accent-pink`: #db2777 (sexual misconduct)
 - `--accent-teal`: #0891b2 (license issues)
+
+**License Action Severity Colors** (yellow to red gradient):
+- Reprimand: #eab308 (yellow)
+- Probation: #f59e0b (amber)
+- Suspended: #f97316 (orange)
+- Surrendered: #ef4444 (red-orange)
+- Revoked: #dc2626 (red)
 
 **Typography**:
 - Display: Libre Baskerville (serif, headers)
@@ -188,7 +202,13 @@ app.py → Web UI at http://localhost:8000
 
 **Component Naming**: BEM convention for case cards (`.case-card`, `.case-card__header`, `.case-card__body`, etc.)
 
-**API Enhancement**: `/api/complaints` includes `settlement_summary` object with license_action, fine_amount, investigation_costs, cme_hours, probation_months for each complaint that has a linked settlement.
+**Custom Multi-Select Dropdowns**: JavaScript `CustomSelect` class manages filter dropdowns with:
+- Multi-select with checkboxes (category, specialty, year)
+- Single-select with radio style (sort, settlement)
+- Select All / Clear buttons
+- Auto-search on selection change
+
+**API Enhancement**: `/api/complaints` accepts comma-separated values for multi-select filters and includes `settlement_summary` object with license_action, fine_amount, investigation_costs, cme_hours, probation_months for each complaint.
 
 ### FastAPI Architecture
 - **Lifespan**: Uses `@asynccontextmanager` lifespan for startup/shutdown (not deprecated `@app.on_event`)
