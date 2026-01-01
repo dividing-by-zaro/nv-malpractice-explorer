@@ -677,15 +677,17 @@ button.secondary:hover {
   white-space: nowrap;
 }
 
-/* Category colors */
-.case-card__category.treatment { border-left-color: var(--accent-blue); background: var(--accent-blue-light); color: var(--accent-blue); }
-.case-card__category.controlled { border-left-color: var(--accent-amber); background: var(--accent-amber-light); color: var(--accent-amber); }
-.case-card__category.license { border-left-color: var(--accent-purple); background: var(--accent-purple-light); color: var(--accent-purple); }
-.case-card__category.sexual { border-left-color: var(--accent-red); background: var(--accent-red-light); color: var(--accent-red); }
-.case-card__category.impairment { border-left-color: var(--accent-teal); background: var(--accent-teal-light); color: var(--accent-teal); }
-.case-card__category.fraud { border-left-color: var(--accent-pink); background: var(--accent-pink-light); color: var(--accent-pink); }
-.case-card__category.records { border-left-color: var(--accent-green); background: var(--accent-green-light); color: var(--accent-green); }
-.case-card__category.negligence { border-left-color: var(--black); background: var(--off-white); color: var(--black); }
+/* Category colors - Blue/Purple palette */
+.case-card__category.treatment { border-left-color: #2563eb; background: #dbeafe; color: #1d4ed8; }
+.case-card__category.diagnosis { border-left-color: #4f46e5; background: #e0e7ff; color: #4338ca; }
+.case-card__category.medication { border-left-color: #0284c7; background: #e0f2fe; color: #0369a1; }
+.case-card__category.surgical { border-left-color: #6366f1; background: #e0e7ff; color: #4f46e5; }
+.case-card__category.controlled { border-left-color: #9333ea; background: #f3e8ff; color: #7e22ce; }
+.case-card__category.license { border-left-color: #7c3aed; background: #ede9fe; color: #6d28d9; }
+.case-card__category.sexual { border-left-color: #c026d3; background: #fae8ff; color: #a21caf; }
+.case-card__category.impairment { border-left-color: #1e3a8a; background: #dbeafe; color: #1e3a8a; }
+.case-card__category.unprofessional { border-left-color: #a855f7; background: #faf5ff; color: #9333ea; }
+.case-card__category.other { border-left-color: #8b5cf6; background: #f5f3ff; color: #7c3aed; }
 
 /* License action severity colors (yellow to red gradient) */
 .case-card__action-tag.action-reprimand {
@@ -731,7 +733,7 @@ button.secondary:hover {
   line-height: 1.55;
   color: var(--charcoal);
   margin: 0;
-  max-width: 65ch;
+  max-width: 82ch;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -878,61 +880,17 @@ button.secondary:hover {
 }
 
 
-/* Controlled Substances - Amber */
-.category.controlled {
-  border-left-color: var(--accent-amber);
-  background: var(--accent-amber-light);
-  color: var(--accent-amber);
-}
-
-/* License Issues - Purple */
-.category.license {
-  border-left-color: var(--accent-purple);
-  background: var(--accent-purple-light);
-  color: var(--accent-purple);
-}
-
-/* Sexual Misconduct - Red */
-.category.sexual {
-  border-left-color: var(--accent-red);
-  background: var(--accent-red-light);
-  color: var(--accent-red);
-}
-
-/* Impairment - Teal */
-.category.impairment {
-  border-left-color: var(--accent-teal);
-  background: var(--accent-teal-light);
-  color: var(--accent-teal);
-}
-
-/* Treatment / Standard of Care - Blue */
-.category.treatment {
-  border-left-color: var(--accent-blue);
-  background: var(--accent-blue-light);
-  color: var(--accent-blue);
-}
-
-/* Fraud / Billing - Pink */
-.category.fraud {
-  border-left-color: var(--accent-pink);
-  background: var(--accent-pink-light);
-  color: var(--accent-pink);
-}
-
-/* Records / Documentation - Green */
-.category.records {
-  border-left-color: var(--accent-green);
-  background: var(--accent-green-light);
-  color: var(--accent-green);
-}
-
-/* Negligence / Death - Dark charcoal */
-.category.negligence {
-  border-left-color: var(--black);
-  background: var(--off-white);
-  color: var(--black);
-}
+/* Category colors for modal - Blue/Purple palette */
+.category.treatment { border-left-color: #2563eb; background: #dbeafe; color: #1d4ed8; }
+.category.diagnosis { border-left-color: #4f46e5; background: #e0e7ff; color: #4338ca; }
+.category.medication { border-left-color: #0284c7; background: #e0f2fe; color: #0369a1; }
+.category.surgical { border-left-color: #6366f1; background: #e0e7ff; color: #4f46e5; }
+.category.controlled { border-left-color: #9333ea; background: #f3e8ff; color: #7e22ce; }
+.category.license { border-left-color: #7c3aed; background: #ede9fe; color: #6d28d9; }
+.category.sexual { border-left-color: #c026d3; background: #fae8ff; color: #a21caf; }
+.category.impairment { border-left-color: #1e3a8a; background: #dbeafe; color: #1e3a8a; }
+.category.unprofessional { border-left-color: #a855f7; background: #faf5ff; color: #9333ea; }
+.category.other { border-left-color: #8b5cf6; background: #f5f3ff; color: #7c3aed; }
 
 .summary {
   font-size: 15px;

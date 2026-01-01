@@ -58,23 +58,7 @@
                         </div>
                     </div>
                     <div class="filter-group">
-                        <label>Year</label>
-                        <div class="custom-select" id="year-select" data-multi="true" data-filter="year">
-                            <div class="custom-select__trigger">
-                                <span class="custom-select__value">All Years</span>
-                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
-                            </div>
-                            <div class="custom-select__dropdown">
-                                <div class="custom-select__options"></div>
-                                <div class="custom-select__actions">
-                                    <button type="button" class="custom-select__btn custom-select__btn--select">Select All</button>
-                                    <button type="button" class="custom-select__btn custom-select__btn--clear">Clear</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label>Settlement</label>
+                        <label>Settlement Status</label>
                         <div class="custom-select custom-select--single" id="settlement-select" data-multi="false" data-filter="has_settlement">
                             <div class="custom-select__trigger">
                                 <span class="custom-select__value">All</span>
@@ -248,7 +232,6 @@
                 const labels = {
                     'category': 'All Categories',
                     'specialty': 'All Specialties',
-                    'year': 'All Years',
                     'drug': 'All Drugs',
                     'sex': 'Any',
                     'sort': 'Date (Newest)',
@@ -434,18 +417,13 @@
             customSelects['specialty'] = new CustomSelect(document.getElementById('specialty-select'));
             customSelects['specialty'].setOptions(data.specialties.map(s => ({ value: s, label: s })));
 
-            // Initialize Year dropdown
-            customSelects['year'] = new CustomSelect(document.getElementById('year-select'));
-            customSelects['year'].setOptions(data.years.map(y => ({ value: String(y), label: String(y) })));
-
             // Initialize Sort dropdown (single select)
             customSelects['sort'] = new CustomSelect(document.getElementById('sort-select'));
             customSelects['sort'].setOptions([
                 { value: 'date_desc', label: 'Date (Newest)' },
                 { value: 'date_asc', label: 'Date (Oldest)' },
-                { value: 'year_desc', label: 'Year (Newest)' },
-                { value: 'year_asc', label: 'Year (Oldest)' },
-                { value: 'respondent', label: 'Respondent Name' }
+                { value: 'respondent_asc', label: 'Respondent A-Z' },
+                { value: 'respondent_desc', label: 'Respondent Z-A' }
             ]);
 
             // Initialize Settlement dropdown (single select)
@@ -489,14 +467,18 @@
         }
 
         function getCategoryClass(category) {
-            if (category?.includes('Controlled')) return 'controlled';
-            if (category?.includes('License')) return 'license';
-            if (category?.includes('Sexual')) return 'sexual';
-            if (category?.includes('Impairment')) return 'impairment';
-            if (category?.includes('Fraud') || category?.includes('Billing')) return 'fraud';
-            if (category?.includes('Records') || category?.includes('Documentation')) return 'records';
-            if (category?.includes('Negligence') || category?.includes('Death')) return 'negligence';
-            return 'treatment'; // Default: Standard of Care / Malpractice - Treatment
+            if (!category) return 'other';
+            if (category.includes('Diagnosis')) return 'diagnosis';
+            if (category.includes('Medication')) return 'medication';
+            if (category.includes('Surgical')) return 'surgical';
+            if (category.includes('Treatment')) return 'treatment';
+            if (category.includes('Controlled')) return 'controlled';
+            if (category.includes('License')) return 'license';
+            if (category.includes('Sexual')) return 'sexual';
+            if (category.includes('Impairment')) return 'impairment';
+            if (category.includes('Unprofessional')) return 'unprofessional';
+            if (category.includes('Other')) return 'other';
+            return 'treatment'; // Default fallback
         }
 
         // Store complaints and settlements for modal access
@@ -536,14 +518,15 @@
 
         function getActionClass(action) {
             // Severity from least to most: none < reprimand < probation < suspended < surrendered < revoked
-            const classes = {
-                'reprimand': 'action-reprimand',
-                'probation': 'action-probation',
-                'suspended': 'action-suspended',
-                'surrendered': 'action-surrendered',
-                'revoked': 'action-revoked'
-            };
-            return classes[action] || '';
+            // Use case-insensitive partial matching to handle variations like "SUSPENSION (STAYED)"
+            if (!action) return '';
+            const lowerAction = action.toLowerCase();
+            if (lowerAction.includes('revok')) return 'action-revoked';
+            if (lowerAction.includes('surrender')) return 'action-surrendered';
+            if (lowerAction.includes('suspen')) return 'action-suspended';
+            if (lowerAction.includes('probation')) return 'action-probation';
+            if (lowerAction.includes('reprimand')) return 'action-reprimand';
+            return '';
         }
 
         function renderComplaint(c) {
@@ -876,14 +859,12 @@
             // Get values from custom selects
             const category = customSelects['category']?.getValue() || [];
             const specialty = customSelects['specialty']?.getValue() || [];
-            const year = customSelects['year']?.getValue() || [];
             const sort = customSelects['sort']?.getValue() || 'date_desc';
             const hasSettlement = customSelects['has_settlement']?.getValue() || '';
 
             // Multi-select filters: send as comma-separated
             if (category.length > 0) params.set('category', category.join(','));
             if (specialty.length > 0) params.set('specialty', specialty.join(','));
-            if (year.length > 0) params.set('year', year.join(','));
             if (sort) params.set('sort', sort);
             if (hasSettlement) params.set('has_settlement', hasSettlement);
             params.set('skip', page * pageSize);
@@ -931,7 +912,7 @@
 
         function resetFilters() {
             // Reset all multi-select filters to "all selected"
-            ['category', 'specialty', 'year'].forEach(key => {
+            ['category', 'specialty'].forEach(key => {
                 if (customSelects[key]) {
                     customSelects[key].selectAll();
                 }

@@ -142,14 +142,15 @@ app.py → Web UI at http://localhost:8000
 - `cases_summary`: Status tracking for each case (OCR status, extraction status)
 
 ### Web App Features (app.py)
-- **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, year, settlement status)
+- **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, settlement status)
   - Filters auto-search on change, support multi-selection with Select All/Clear buttons
   - API accepts comma-separated values for multi-select filters
+  - Sort options: Date (Newest/Oldest), Respondent A-Z/Z-A
   - Content wrapper has max-width 900px, centered
 - **Case Cards**: Display all fields with "—" for missing data
   - Row 1: Doctor name (left) + License action tag + category tag (right)
   - Row 2: Specialty with icon (left) + "Case x of y in year" (right)
-  - Body: Summary (max-width 65ch for readability)
+  - Body: Summary (max-width 82ch for readability)
   - Footer: Procedure, fine, investigative costs (text labels with colored icons)
   - Case numbering derived from case_number suffix (e.g., "19-28023-1" → Case 1, counted by prefix)
 - **Modal View**: Click any case to see details + embedded PDF viewer with tabs for complaint/settlement
@@ -185,16 +186,19 @@ app.py → Web UI at http://localhost:8000
 - `--off-white`: #F3F3F4 (backgrounds)
 - `--warm-white`: #faf9f7 (card backgrounds)
 
-**Accent Colors** (for category tags and status indicators):
-- `--accent-blue`: #2563eb (treatment/procedures)
-- `--accent-green`: #059669 (positive outcomes, fine icon)
-- `--accent-amber`: #d97706 (warnings, probation)
-- `--accent-red`: #dc2626 (severe actions like revocation)
-- `--accent-purple`: #7c3aed (controlled substances, costs icon)
-- `--accent-pink`: #db2777 (sexual misconduct)
-- `--accent-teal`: #0891b2 (license issues)
+**Category Colors** (blue/purple palette to distinguish from license actions):
+- Treatment: #2563eb (blue)
+- Diagnosis: #4f46e5 (indigo)
+- Medication: #0284c7 (sky blue)
+- Surgical: #6366f1 (slate)
+- Controlled Substances: #9333ea (purple)
+- License Violation: #7c3aed (violet)
+- Sexual Misconduct: #c026d3 (fuchsia)
+- Impairment: #1e3a8a (deep blue)
+- Unprofessional Conduct: #a855f7 (light purple)
+- Other: #8b5cf6 (medium purple)
 
-**License Action Severity Colors** (yellow to red gradient):
+**License Action Severity Colors** (yellow to red gradient, uses partial matching for variations like "SUSPENSION (STAYED)"):
 - Reprimand: #eab308 (yellow)
 - Probation: #f59e0b (amber)
 - Suspended: #f97316 (orange)
@@ -212,10 +216,12 @@ app.py → Web UI at http://localhost:8000
 **Component Naming**: BEM convention for case cards (`.case-card`, `.case-card__header`, `.case-card__body`, etc.)
 
 **Custom Multi-Select Dropdowns**: JavaScript `CustomSelect` class manages filter dropdowns with:
-- Multi-select with checkboxes (category, specialty, year)
-- Single-select with radio style (sort, settlement)
+- Multi-select with checkboxes (category, specialty)
+- Single-select with radio style (sort, settlement status)
 - Select All / Clear buttons
 - Auto-search on selection change
+
+**Date Sorting**: Uses MongoDB aggregation pipeline with `$dateFromString` to parse M/D/YYYY date strings for correct chronological sorting.
 
 **API Enhancement**: `/api/complaints` accepts comma-separated values for multi-select filters and includes:
 - `settlement_summary`: license_action, fine_amount, investigation_costs, cme_hours, probation_months, date

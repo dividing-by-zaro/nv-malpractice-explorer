@@ -403,24 +403,57 @@ def get_complaints(
         elif has_settlement == "no":
             query["case_number"] = {"$nin": list(settlement_case_numbers)}
 
-    # Sorting
-    sort_field = "date"
-    sort_dir = -1
-    if sort == "date_asc":
-        sort_field, sort_dir = "date", 1
-    elif sort == "year_desc":
-        sort_field, sort_dir = "year", -1
-    elif sort == "year_asc":
-        sort_field, sort_dir = "year", 1
-    elif sort == "respondent":
-        sort_field, sort_dir = "respondent", 1
-
+    # Sorting - need aggregation pipeline for date sorting since dates are stored as M/D/YYYY strings
     total = complaints.count_documents(query)
 
-    cursor = complaints.find(
-        query,
-        {"text_content": 0}
-    ).sort(sort_field, sort_dir).skip(skip).limit(limit)
+    # Build aggregation pipeline for proper date sorting
+    pipeline = [
+        {"$match": query},
+        {"$project": {"text_content": 0}},
+    ]
+
+    if sort in ("date_desc", "date_asc"):
+        # Parse M/D/YYYY date string to proper date for sorting
+        pipeline.append({
+            "$addFields": {
+                "_parsed_date": {
+                    "$dateFromString": {
+                        "dateString": "$date",
+                        "format": "%m/%d/%Y",
+                        "onError": None,
+                        "onNull": None
+                    }
+                }
+            }
+        })
+        sort_dir = -1 if sort == "date_desc" else 1
+        pipeline.append({"$sort": {"_parsed_date": sort_dir, "case_number": sort_dir}})
+        pipeline.append({"$project": {"_parsed_date": 0}})
+    elif sort == "respondent_asc":
+        pipeline.append({"$sort": {"respondent": 1, "case_number": 1}})
+    elif sort == "respondent_desc":
+        pipeline.append({"$sort": {"respondent": -1, "case_number": -1}})
+    else:
+        # Default to date descending
+        pipeline.append({
+            "$addFields": {
+                "_parsed_date": {
+                    "$dateFromString": {
+                        "dateString": "$date",
+                        "format": "%m/%d/%Y",
+                        "onError": None,
+                        "onNull": None
+                    }
+                }
+            }
+        })
+        pipeline.append({"$sort": {"_parsed_date": -1, "case_number": -1}})
+        pipeline.append({"$project": {"_parsed_date": 0}})
+
+    pipeline.append({"$skip": skip})
+    pipeline.append({"$limit": limit})
+
+    cursor = complaints.aggregate(pipeline)
 
     # Build a lookup of settlement data by case number
     settlement_lookup = {}

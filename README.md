@@ -30,15 +30,15 @@ uv run uvicorn app:app --reload --port 8000
 ## Web App Features
 
 - **Cases Tab**: Browse complaints with custom multi-select filters
-  - Filters: Category, specialty, year, settlement status (with Select All/Clear buttons)
+  - Filters: Category, specialty, settlement status (with Select All/Clear buttons)
+  - Sort by: Date (Newest/Oldest), Respondent A-Z/Z-A
   - Auto-search on filter change, no manual submit needed
   - Narrower layout (900px max-width) for improved readability
   - Case cards show:
-    - Row 1: Doctor name + license action tag + category tag
+    - Row 1: Doctor name + license action tag (yellow→red severity) + category tag (blue/purple)
     - Row 2: Specialty + "Case x of y in [year]" (based on case number series)
-    - Summary text with comfortable reading width (65 characters)
+    - Summary text with comfortable reading width
     - Footer: Procedure, fine, investigative costs (with colored icons)
-  - License action colors indicate severity (yellow reprimand → red revocation)
 - **Case Details**: Click any case to view extracted data + embedded PDF viewer (tabs for complaint/settlement)
   - Timeline section shows complaint date, settlement date, and time to resolution
   - Amended complaints display both original and amended PDFs in separate tabs
@@ -55,7 +55,8 @@ uv run uvicorn app:app --reload --port 8000
 The frontend uses an "Archival Brutalism" aesthetic with sharp corners, border-based separation, and a utilitarian feel:
 
 - **Color Palette**: Near-black (#14110F), charcoal (#34312D), gray (#7E7F83), tan (#D9C5B2), off-white (#F3F3F4)
-- **Accent Colors**: Blue (treatment), purple (controlled substances), pink (sexual misconduct), amber (warnings), red (severe actions)
+- **Category Colors**: Blue/purple palette (treatment, diagnosis, medication, surgical, controlled substances, etc.)
+- **License Action Colors**: Yellow→red severity gradient (reprimand, probation, suspended, surrendered, revoked)
 - **Typography**: Libre Baskerville (headers), IBM Plex Mono (data), Source Sans 3 (body)
 - **Icons**: Lucide Icons library
 
