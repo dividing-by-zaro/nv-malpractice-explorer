@@ -30,12 +30,23 @@ uv run uvicorn app:app --reload --port 8000
 ## Web App Features
 
 - **Cases Tab**: Browse complaints with filters (category, specialty, year, drug, patient sex, settlement status)
+  - Case cards display date, respondent, specialty, summary, and settlement outcomes (license action, fines, CME hours)
+  - Color-coded category badges indicate case type (controlled substances, sexual misconduct, etc.)
 - **Case Details**: Click any case to view extracted data + embedded PDF viewer (tabs for complaint/settlement)
 - **Statistics Tab**: Aggregate analytics dashboard
   - Totals: Fines collected, investigation costs, CME hours, probation time
   - Charts: Cases by year, category breakdown, top specialties, license actions
   - Histograms: Fine/cost distributions (capped at 90th percentile for readability)
 - **API Documentation**: Interactive OpenAPI docs at `/docs` with typed response schemas
+
+### Design System
+
+The frontend uses an "Archival Brutalism" aesthetic with sharp corners, border-based separation, and a utilitarian feel:
+
+- **Color Palette**: Near-black (#14110F), charcoal (#34312D), gray (#7E7F83), tan (#D9C5B2), off-white (#F3F3F4)
+- **Accent Colors**: Blue (treatment), purple (controlled substances), pink (sexual misconduct), amber (warnings), red (severe actions)
+- **Typography**: Libre Baskerville (headers), IBM Plex Mono (data), Source Sans 3 (body)
+- **Icons**: Lucide Icons library
 
 ## Data Pipeline
 

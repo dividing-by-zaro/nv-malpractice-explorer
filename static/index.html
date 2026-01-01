@@ -5,23 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nevada Medical Malpractice Explorer</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <h1>Nevada Medical Malpractice Explorer</h1>
-    <p class="subtitle">Browse complaints from the Nevada State Board of Medical Examiners</p>
+    <header class="site-header">
+        <h1>Nevada Medical Malpractice Explorer</h1>
+        <p class="subtitle">Public records from the Nevada State Board of Medical Examiners, 2008-2025</p>
+    </header>
 
-    <div class="main-tabs">
+    <nav class="main-tabs">
         <button class="main-tab active" onclick="switchView('cases')">Cases</button>
         <button class="main-tab" onclick="switchView('statistics')">Statistics</button>
-    </div>
+    </nav>
 
     <!-- Cases View -->
     <div id="cases-view" class="view active">
-        <div class="stats" id="stats"></div>
+        <div class="content-wrapper">
+            <div class="stats" id="stats"></div>
 
-        <div class="filters">
-        <div class="filter-row">
+            <div class="filters">
+                <div class="filters-header">Search Filters</div>
+                <div class="filter-row">
             <div class="filter-group">
                 <label>Category</label>
                 <select id="category">
@@ -77,19 +82,21 @@
             <button onclick="search()">Search</button>
             <button class="secondary" onclick="loadRandom()">Random Complaint</button>
             <button class="secondary" onclick="resetFilters()">Reset</button>
+            </div>
         </div>
-    </div>
 
-    <div class="results" id="results">
-        <div class="loading">Loading...</div>
-    </div>
+            <div class="results" id="results">
+                <div class="loading">Loading...</div>
+            </div>
 
-    <div class="pagination" id="pagination"></div>
+            <div class="pagination" id="pagination"></div>
+        </div>
     </div>
 
     <!-- Statistics View -->
     <div id="statistics-view" class="view">
-        <div class="totals-section">
+        <div class="content-wrapper">
+            <div class="totals-section">
             <div class="totals-grid" id="totals-grid"></div>
         </div>
         <div class="summary-grid" id="settlement-summary"></div>
@@ -156,6 +163,7 @@
                 </div>
                 <div class="histogram-info" id="probation-info"></div>
             </div>
+        </div>
         </div>
     </div>
 
@@ -273,7 +281,10 @@
             if (category?.includes('License')) return 'license';
             if (category?.includes('Sexual')) return 'sexual';
             if (category?.includes('Impairment')) return 'impairment';
-            return '';
+            if (category?.includes('Fraud') || category?.includes('Billing')) return 'fraud';
+            if (category?.includes('Records') || category?.includes('Documentation')) return 'records';
+            if (category?.includes('Negligence') || category?.includes('Death')) return 'negligence';
+            return 'treatment'; // Default: Standard of Care / Malpractice - Treatment
         }
 
         // Store complaints and settlements for modal access
@@ -283,46 +294,85 @@
         let complaintPdfPath = null;
         let settlementPdfPath = null;
 
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            if (isNaN(date)) return dateStr;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatCurrency(amount) {
+            if (amount >= 1000) {
+                return '$' + (amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1) + 'k';
+            }
+            return '$' + amount.toLocaleString();
+        }
+
         function renderComplaint(c) {
-            // Cache the complaint data
             complaintsCache[c.case_number] = c;
 
             const ext = c.llm_extracted || {};
-            const complainants = ext.complainants || [];
             const drugs = ext.drugs || [];
+            const settlement = c.settlement_summary || {};
+            const hasSettlement = Object.values(settlement).some(v => v);
 
-            let complainantText = '';
-            if (complainants.length > 0) {
-                const parts = complainants.map(p => {
-                    const age = p.age ? `${p.age}yo` : '';
-                    const sex = p.sex || '';
-                    return [age, sex].filter(Boolean).join(' ') || 'Unknown';
-                });
-                complainantText = `Patients: ${parts.join(', ')}`;
-            }
+            // License action badge styling
+            const actionClass = settlement.license_action ?
+                (settlement.license_action === 'revoked' ? 'severe' :
+                 settlement.license_action === 'suspended' ? 'serious' :
+                 settlement.license_action === 'surrendered' ? 'serious' : 'moderate') : '';
 
             return `
-                <div class="complaint" onclick="openModal('${c.case_number}')">
-                    <div class="complaint-header">
-                        <div>
-                            <div class="respondent">${c.respondent}</div>
-                            <div class="case-number">Case ${c.case_number} • ${c.date}</div>
+                <article class="case-card" onclick="openModal('${c.case_number}')">
+                    <header class="case-card__header">
+                        <div class="case-card__topline">
+                            <time class="case-card__date">${formatDate(c.date)}</time>
+                            <span class="case-card__id">Case ${c.case_number}</span>
                         </div>
-                        ${ext.category ? `<span class="category ${getCategoryClass(ext.category)}">${ext.category}</span>` : ''}
-                    </div>
-                    <div class="summary">${ext.summary || 'No summary available'}</div>
-                    <div class="meta">
-                        ${ext.specialty ? `<span class="meta-item">&#129658; ${ext.specialty}</span>` : ''}
-                        ${ext.procedure ? `<span class="meta-item">&#128137; ${ext.procedure}</span>` : ''}
-                        ${ext.num_complainants ? `<span class="meta-item">&#128101; ${ext.num_complainants} patient(s)</span>` : ''}
-                    </div>
-                    ${complainantText ? `<div class="complainants">${complainantText}</div>` : ''}
-                    ${drugs.length > 0 ? `
-                        <div class="drugs">
-                            ${drugs.map(d => `<span class="drug">${d}</span>`).join('')}
+                        ${ext.category ? `<span class="case-card__category ${getCategoryClass(ext.category)}">${ext.category}</span>` : ''}
+                    </header>
+
+                    <div class="case-card__body">
+                        <div class="case-card__main">
+                            <h3 class="case-card__name">${c.respondent}</h3>
+                            ${ext.specialty ? `<div class="case-card__specialty"><i data-lucide="briefcase-medical"></i> ${ext.specialty}</div>` : ''}
                         </div>
+
+                        <p class="case-card__summary">${ext.summary || 'No summary available'}</p>
+
+                        ${ext.procedure || drugs.length > 0 ? `
+                            <div class="case-card__details">
+                                ${ext.procedure ? `<span class="case-card__procedure"><i data-lucide="heart-pulse"></i> ${ext.procedure}</span>` : ''}
+                                ${drugs.length > 0 ? `<span class="case-card__drugs">${drugs.slice(0, 3).join(', ')}${drugs.length > 3 ? ` +${drugs.length - 3}` : ''}</span>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${hasSettlement ? `
+                        <footer class="case-card__outcomes">
+                            ${settlement.license_action && settlement.license_action !== 'none' ? `
+                                <span class="case-card__action ${actionClass}">
+                                    <i data-lucide="shield-alert"></i>
+                                    ${settlement.license_action}
+                                </span>
+                            ` : ''}
+                            ${settlement.fine_amount ? `
+                                <span class="case-card__penalty">
+                                    ${formatCurrency(settlement.fine_amount)} fine
+                                </span>
+                            ` : ''}
+                            ${settlement.investigation_costs ? `
+                                <span class="case-card__penalty">
+                                    ${formatCurrency(settlement.investigation_costs)} costs
+                                </span>
+                            ` : ''}
+                            ${settlement.cme_hours ? `
+                                <span class="case-card__penalty">
+                                    ${settlement.cme_hours}hr CME
+                                </span>
+                            ` : ''}
+                        </footer>
                     ` : ''}
-                </div>
+                </article>
             `;
         }
 
@@ -424,6 +474,7 @@
             }
 
             document.getElementById('modal-info').innerHTML = infoHtml;
+            lucide.createIcons();
 
             // Build PDF paths
             complaintPdfPath = c.pdf_path || buildPdfPath(c);
@@ -437,7 +488,7 @@
 
         function renderSettlementInfo(s) {
             const ext = s.llm_extracted || {};
-            let html = '<div class="settlement-section"><h3>&#9878; Settlement Outcome</h3>';
+            let html = '<div class="settlement-section"><h3><i data-lucide="scale"></i> Settlement Outcome</h3>';
 
             // License action
             if (ext.license_action) {
@@ -573,18 +624,20 @@
             }
 
             document.getElementById('results').innerHTML = data.complaints.map(renderComplaint).join('');
+            lucide.createIcons();
 
             // Pagination
             const totalPages = Math.ceil(data.total / pageSize);
             let paginationHtml = '';
             if (currentPage > 0) {
-                paginationHtml += `<button onclick="search(${currentPage - 1})">&#8592; Previous</button>`;
+                paginationHtml += `<button onclick="search(${currentPage - 1})"><i data-lucide="arrow-left"></i> Previous</button>`;
             }
             paginationHtml += `<span style="padding: 10px;">Page ${currentPage + 1} of ${totalPages} (${data.total} total)</span>`;
             if (currentPage < totalPages - 1) {
-                paginationHtml += `<button onclick="search(${currentPage + 1})">Next &#8594;</button>`;
+                paginationHtml += `<button onclick="search(${currentPage + 1})">Next <i data-lucide="arrow-right"></i></button>`;
             }
             document.getElementById('pagination').innerHTML = paginationHtml;
+            lucide.createIcons();
         }
 
         async function loadRandom() {
@@ -596,6 +649,7 @@
             document.getElementById('pagination').innerHTML = `
                 <button class="secondary" onclick="loadRandom()">Another Random</button>
             `;
+            lucide.createIcons();
         }
 
         function resetFilters() {
@@ -609,10 +663,10 @@
             search();
         }
 
-        // Chart colors
+        // Chart colors - complementing the archival palette
         const chartColors = [
-            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-            '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
+            '#34312D', '#7E7F83', '#D9C5B2', '#14110F', '#a89985',
+            '#5c5954', '#b5a99a', '#9a9590', '#c4b8a9', '#6b6560'
         ];
 
         async function loadAnalytics() {
@@ -691,10 +745,14 @@
                 datasets: [{
                     label: 'Cases',
                     data: data.by_year.map(d => d.count),
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#34312D',
+                    backgroundColor: 'rgba(217, 197, 178, 0.3)',
                     fill: true,
-                    tension: 0.3
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#34312D',
+                    pointBorderColor: '#34312D',
+                    pointRadius: 3
                 }]
             });
 
@@ -713,7 +771,9 @@
                 datasets: [{
                     label: 'Cases',
                     data: data.specialties.map(d => d.count),
-                    backgroundColor: '#3b82f6'
+                    backgroundColor: '#34312D',
+                    borderColor: '#14110F',
+                    borderWidth: 1
                 }]
             }, { indexAxis: 'y' });
 
@@ -723,21 +783,23 @@
                 datasets: [{
                     label: 'Settlements',
                     data: data.license_actions.map(d => d.count),
-                    backgroundColor: '#10b981'
+                    backgroundColor: '#D9C5B2',
+                    borderColor: '#34312D',
+                    borderWidth: 1
                 }]
             }, { indexAxis: 'y' });
 
             // Fine distribution (histogram) - capped at 90th percentile
-            createHistogram('fineChart', data.fine_values, 'Fines', '#f59e0b', 'fine-info', '$', '', 90);
+            createHistogram('fineChart', data.fine_values, 'Fines', '#34312D', 'fine-info', '$', '', 90);
 
             // Cost distribution (histogram) - capped at 90th percentile
-            createHistogram('costChart', data.cost_values, 'Investigation Costs', '#ef4444', 'cost-info', '$', '', 90);
+            createHistogram('costChart', data.cost_values, 'Investigation Costs', '#7E7F83', 'cost-info', '$', '', 90);
 
             // CME hours (histogram)
-            createHistogram('cmeChart', data.cme_values, 'CME Hours', '#8b5cf6', 'cme-info', '', ' hrs');
+            createHistogram('cmeChart', data.cme_values, 'CME Hours', '#D9C5B2', 'cme-info', '', ' hrs');
 
             // Probation duration (histogram)
-            createHistogram('probationChart', data.probation_values, 'Probation', '#06b6d4', 'probation-info', '', ' mo');
+            createHistogram('probationChart', data.probation_values, 'Probation', '#14110F', 'probation-info', '', ' mo');
         }
 
         function createChart(canvasId, type, data, extraOptions = {}) {
@@ -748,8 +810,24 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: type === 'doughnut' }
+                    legend: {
+                        display: type === 'doughnut',
+                        labels: {
+                            font: { family: "'IBM Plex Mono', monospace", size: 12 },
+                            color: '#34312D'
+                        }
+                    }
                 },
+                scales: type !== 'doughnut' ? {
+                    x: {
+                        ticks: { font: { family: "'IBM Plex Mono', monospace", size: 11 }, color: '#7E7F83' },
+                        grid: { color: 'rgba(52, 49, 45, 0.1)' }
+                    },
+                    y: {
+                        ticks: { font: { family: "'IBM Plex Mono', monospace", size: 11 }, color: '#7E7F83' },
+                        grid: { color: 'rgba(52, 49, 45, 0.1)' }
+                    }
+                } : undefined,
                 ...extraOptions
             };
 
@@ -808,7 +886,9 @@
                 datasets: [{
                     label: label,
                     data: bins,
-                    backgroundColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? '#9ca3af' : color)
+                    backgroundColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? '#7E7F83' : color),
+                    borderColor: '#14110F',
+                    borderWidth: 1
                 }]
             });
 

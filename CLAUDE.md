@@ -151,11 +151,44 @@ app.py → Web UI at http://localhost:8000
 ### Key Files
 - `app.py`: FastAPI app (~580 lines) with Pydantic models and dependency injection
 - `static/index.html`: Frontend HTML + JavaScript
-- `static/css/styles.css`: Frontend styles
+- `static/css/styles.css`: Frontend styles with design system
 - `scripts/process_complaints.py`: LLM extraction for complaints (GPT-4o)
 - `scripts/process_settlements.py`: LLM extraction for settlements (GPT-4o)
 - `scripts/prompts/complaint_extraction.md`: LLM prompt for complaints
 - `scripts/prompts/settlement_extraction.md`: LLM prompt for settlements
+
+### Frontend Design System
+
+**Aesthetic**: Archival Brutalism - sharp corners, border-based separation, utilitarian feel inspired by legal documents and filing systems.
+
+**Color Palette** (CSS variables in `:root`):
+- `--black`: #14110F (near-black, headers)
+- `--charcoal`: #34312D (dark charcoal, secondary backgrounds)
+- `--gray`: #7E7F83 (muted text, borders)
+- `--tan`: #D9C5B2 (warm accent, highlights)
+- `--off-white`: #F3F3F4 (backgrounds)
+- `--warm-white`: #faf9f7 (card backgrounds)
+
+**Accent Colors** (for category tags and status indicators):
+- `--accent-blue`: #2563eb (treatment/procedures)
+- `--accent-green`: #059669 (positive outcomes)
+- `--accent-amber`: #d97706 (warnings, probation)
+- `--accent-red`: #dc2626 (severe actions like revocation)
+- `--accent-purple`: #7c3aed (controlled substances)
+- `--accent-pink`: #db2777 (sexual misconduct)
+- `--accent-teal`: #0891b2 (license issues)
+
+**Typography**:
+- Display: Libre Baskerville (serif, headers)
+- UI/Data: IBM Plex Mono (monospace, case numbers, stats)
+- Body: Source Sans 3 (sans-serif, readable text)
+- Minimum font size: 11px (no smaller fonts allowed)
+
+**Icons**: Lucide Icons library (CDN). Call `lucide.createIcons()` after dynamic content renders.
+
+**Component Naming**: BEM convention for case cards (`.case-card`, `.case-card__header`, `.case-card__body`, etc.)
+
+**API Enhancement**: `/api/complaints` includes `settlement_summary` object with license_action, fine_amount, investigation_costs, cme_hours, probation_months for each complaint that has a linked settlement.
 
 ### FastAPI Architecture
 - **Lifespan**: Uses `@asynccontextmanager` lifespan for startup/shutdown (not deprecated `@app.on_event`)

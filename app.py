@@ -386,9 +386,27 @@ def get_complaints(
         {"text_content": 0}
     ).sort(sort_field, sort_dir).skip(skip).limit(limit)
 
+    # Build a lookup of settlement data by case number
+    settlement_lookup = {}
+    for doc in settlements.find({"llm_extracted": {"$exists": True}}):
+        ext = doc.get("llm_extracted", {})
+        summary = {
+            "license_action": ext.get("license_action"),
+            "fine_amount": ext.get("fine_amount"),
+            "investigation_costs": ext.get("investigation_costs"),
+            "cme_hours": ext.get("cme_hours"),
+            "probation_months": ext.get("probation_months"),
+        }
+        for cn in doc.get("case_numbers", []):
+            settlement_lookup[cn] = summary
+
     results = []
     for doc in cursor:
         doc["_id"] = str(doc["_id"])
+        # Attach settlement summary if available
+        case_num = doc.get("case_number")
+        if case_num in settlement_lookup:
+            doc["settlement_summary"] = settlement_lookup[case_num]
         results.append(doc)
 
     return ComplaintsResponse(complaints=results, total=total)
@@ -398,6 +416,7 @@ def get_complaints(
 def get_random(db: DB):
     """Get a random complaint."""
     complaints = db["complaints"]
+    settlements = db["settlements"]
 
     pipeline = [
         {"$match": {"llm_extracted": {"$exists": True}}},
@@ -406,8 +425,21 @@ def get_random(db: DB):
     ]
     result = list(complaints.aggregate(pipeline))
     if result:
-        result[0]["_id"] = str(result[0]["_id"])
-        return result[0]
+        doc = result[0]
+        doc["_id"] = str(doc["_id"])
+        # Check for settlement
+        case_num = doc.get("case_number")
+        settlement = settlements.find_one({"case_numbers": case_num, "llm_extracted": {"$exists": True}})
+        if settlement:
+            ext = settlement.get("llm_extracted", {})
+            doc["settlement_summary"] = {
+                "license_action": ext.get("license_action"),
+                "fine_amount": ext.get("fine_amount"),
+                "investigation_costs": ext.get("investigation_costs"),
+                "cme_hours": ext.get("cme_hours"),
+                "probation_months": ext.get("probation_months"),
+            }
+        return doc
     return {"error": "No complaints found"}
 
 
