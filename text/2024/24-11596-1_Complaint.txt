@@ -1,0 +1,263 @@
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+9600 Gateway Drive
+Reno, Nevada 89521
+(775) 688-2559
+
+wo oN
+
+ret
+
+BEFORE THE BOARD OF MEDICAL EXAMINERS
+OF THE STATE OF NEVADA
+
+
+In the Matter of Charges and Complaint Case No. 24-11596-1
+
+Against: FI LE D
+
+SZU NIEN YEH, M.D., APR - 2 2024
+
+Respondent. NEVADA STATE BOARD OF
+MEDI XA
+By:
+
+COMPLAINT
+
+The Investigative Committee! (IC) of the Nevada State Board of Medical Examiners
+(Board), by and through Alexander J. Hinman, Deputy General Counsel and attorney for the IC,
+having a reasonable basis to believe that Szu Nien Yeh, M.D., (Respondent) violated the provisions
+of Nevada Revised Statutes (NRS) Chapter 630 and Nevada Administrative Code (NAC) Chapter
+630 (collectively, the Medical Practice Act), hereby issues its Complaint, stating the IC’s charges
+and allegations as follows:
+
+1. Respondent was at all times relative to this Complaint a physician holding an active
+license to practice medicine in the State of Nevada (License No. 8126). Respondent was originally
+licensed by the Board on March 18, 1997, and his specialty is listed as anesthesiology.
+
+2. Patient A? was a fifty-seven (57) year-old female at the time of the events at issue.
+
+3. On July 7, 2021, Patient A presented to Summerlin Hospital Medical Center for a
+laparoscopic assisted hysterectomy and a bilateral salpingo-oophorectomy (removal of the ovaries
+and fallopian tubes).
+
+4. Respondent was the acting anesthesiologist for the procedure, and Patient A was
+
+brought to the operating room at approximately 7:45 a.m. on July 7, 2021.
+
+| The Investigative Committee of the Nevada State Board of Medical Examiners, at the time this formal
+Complaint was authorized for filing, was composed of Board members Aury Nagy, M.D., Ms. Maggie Arias-Petrel,
+and Nick M. Spirtos, M.D., F.A.C.O.G.
+
+2 Patient A’s true identity is not disclosed herein to protect her privacy, but is disclosed in the Patient
+Designation served upon Respondent along with a copy of this Complaint.
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+9600 Gateway Drive
+Reno, Nevada 89521
+(775) 688-2559
+
+
+5. Anesthesia was introduced shortly thereafter, with Propofol 200mg, Fentanyl
+100mcg, and Rocuronium 50mg; a sedative, analgesic, and paralytic, respectively.
+
+6. During the procedure, Respondent also used a Sevoflurane (Sevo) vaporizer, an
+inhalation agent, in conjunction with the aforementioned medications.
+
+7. A fundamental part of an anesthesiologist’s responsibilities are to inspect the
+medical devices they are going to use to administer anesthesia before a procedure commences. As
+such, the Sevo vaporizer needs to be examined prior to use, thus ensuring that it contains a
+sufficient amount of Sevo for adequate delivery throughout the operation.
+
+8. The preliminary check of the Sevo amount in the vaporizer is easily verified when
+looking at the device, which prominently displays the amount of Sevo it contains. Furthermore,
+this information can again be verified by the expired percentage of Sevo (“end tidal
+concentration”), which is displayed and refreshes with an updated reading every six (6) seconds.
+
+9. During the procedure, Respondent initially set the (Sevo) vaporizer at a 3% percent
+setting; however, the Sevo only rose to 2% and quickly declined after fifteen (15) minutes. This
+should have immediately put Respondent on alert that the vaporizer was empty, or near empty,
+which was later found to be the case. Further, the end tidal concentrations showed amounts well
+below this rate throughout the duration of the operation.
+
+10. At 8:30 a.m., a surgical incision was performed. At this time, the end tidal
+concentration of the Sevo was .74%. Over the next thirty (30) minutes the end tidal concentration
+varied between .65% and .90%. These dips in Sevo concentration, reaching as low as .65%, made
+it possible for Patient A to become conscious during the procedure.
+
+11. During this same period, Patient A experienced several episodes of hypotension,
+and it appears that Respondent responded to this by further lowering the Sevo concentration. This
+resulted in a return of normal blood pressure: however, as a result of the Sevo concentration being
+too low, it also caused Patient A to regain consciousness.
+
+12. When Patient A regained consciousness she was unable to move because of the
+muscle relaxant Rocuronium that she was given.
+
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+(775) 688-2559
+
+Reno, Nevada 89521
+
+
+
+13. Respondent eventually switched to another inhaled agent, Desflurane, at
+approximately 9:10 a.m., and also added 2mg of Versed, a powerful amnestic, indicating that he
+was aware the end tidal concentrations were too low, and changes needed to be made to ensure
+deep sedation; however, Patient A had been under-sedated for almost an hour.
+
+14. Patient A later notified nursing staff of this incident and it was recorded that she
+informed the nurse that she had awoken during the procedure; however, there is no documentation
+of Respondent ever following up with Patient A or documenting this adverse event.
+
+COUNT I
+NRS 630.301(4) - Malpractice
+
+15. All of the allegations contained in the above paragraphs are hereby incorporated by
+reference as though fully set forth herein.
+
+16. | NRS 630.301(4) provides that malpractice of a physician is grounds for initiating
+disciplinary action against a licensee.
+
+17. NAC 630.040 defines malpractice as “the failure of a physician, in treating a
+patient, to use the reasonable care, skill, or knowledge ordinarily used under similar
+circumstances.”
+
+18. | As demonstrated by, but not limited to, the above-outlined facts, Respondent failed
+to use the reasonable care, skill or knowledge ordinarily used under similar circumstances when
+rendering medical services to Patient A, when he failed to confirm the accurate amount of Sevo in
+the vaporizer before inducing anesthesia, which was later found to be empty, and when he failed
+to recognize that Patient A’s end tidal concentrations were too low to ensure deep sedation.
+
+19, By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+COUNT It
+NRS 630.3062(1)(a) - Failure to Maintain Complete Medical Records
+
+20. All of the allegations contained in the above paragraphs are hereby incorporated by
+reference as though fully set forth herein.
+
+
+9600 Gateway Drive
+Reno, Nevada 89521
+(775) 688-2559
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+13,
+15,
+
+21. — NRS 630.3062(1)(a) provides that the “failure to maintain timely, legible, accurate
+and complete medical records relating to the diagnosis, treatment and care of a patient” constitute
+grounds for initiating discipline against a licensee.
+
+22. Respondent failed to maintain complete medical records relating to the diagnosis,
+treatment and care of Patient A, by failing to correctly document his actions when he treated
+Patient A, whose medical records were not timely, legible, accurate, and complete, when
+Respondent failed to document the adverse event during Patient A’s procedure, and failed to
+provide any follow-up notes documenting any discussion with Patient A after her procedure.
+
+23. By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+WHEREFORE, the Investigative Committee prays:
+
+1. That the Board give Respondent notice of the charges herein against him and give
+him notice that he may file an answer to the Complaint herein as set forth in
+NRS 630.339(2) within twenty (20) days of service of the Complaint;
+
+2. That the Board set a time and place for a formal hearing after holding an Early
+Case Conference pursuant to NRS 630.339(3);
+
+3. That the Board determine what sanctions to impose if it determines there has been
+a violation or violations of the Medical Practice Act committed by Respondent;
+
+4. That the Board award fees and costs for the investigation and prosecution of this
+case as outlined in NRS 622.400;
+
+5. That the Board make, issue and serve on Respondent its findings of fact,
+conclusions of law and order, in writing, that includes the sanctions imposed; and
+
+
+4 0f6
+
+OFFICE OF THE GENERAL COUNSEL
+
+Reno, Nevada 89521
+(775) 688-2559
+
+Nevada State Board of Medical Examiners
+9600 Gateway Drive
+
+kw Nw
+
+on
+
+i
+13.
+
+6. That the Board take such other and further action as may be just and proper in these
+
+premises.
+
+. que
+DATED this day of April, 2024.
+
+INVESTIGATIVE COMMITTEE OF THE
+NEVADA STATE BOARD OF MEDICAL EXAMINERS
+
+wy (buds, Ibing —
+
+ALEXANDER J. HINMAN
+Deputy General Counsel
+
+9600 Gateway Drive
+
+Reno, NV 89521
+
+Tel: (775) 688-2559
+
+Email: ahinman@medboard.nv.gov
+
+Attorney for the Investigative Committee
+
+
+9600 Gateway Drive
+Reno, Nevada 89521
+(775) 688-2559
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+
+VERIFICATION
+
+STATE OF NEVADA )
+COUNTY OF CLARK )
+
+Aury Nagy, M.D., having been duly sworn, hereby deposes and states under penalty of
+perjury that he is the Chairman of the Investigative Committee of the Nevada State Board of
+Medical Examiners that authorized the Complaint against the Respondent herein; that he has read
+the foregoing Complaint; and that based upon information discovered in the course of the
+investigation into a complaint against Respondent, he believes that the allegations and charges in
+the foregoing Complaint against Respondent are true, accurate and correct.
+
+DATED this 2nd day of April, 2024.
+
+INVESTIGATIVE COMMITTEE OF THE
+NEVADA STATE BOARD OF MEDICAL EXAMINERS
+
+By: a
+AURY NAGY, M.D.
+
+Chairman of the Investigative Committee
+
+

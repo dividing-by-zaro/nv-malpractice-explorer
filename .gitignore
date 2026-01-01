@@ -21,4 +21,5 @@ __pycache__/
 
 # PDFs (too large for git, store separately)
 pdfs/
+pdfs_ocr/
 archive/

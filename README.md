@@ -1,57 +1,205 @@
 # Nevada Medical Malpractice Explorer
 
-Tools to scrape, process, and analyze public medical malpractice filings from the Nevada State Board of Medical Examiners (2008-2025).
+Tools to scrape, process, and analyze public medical malpractice filings from the Nevada State Board of Medical Examiners (2008-2025). Features LLM-powered data extraction and an interactive web app for exploring cases.
 
-## Setup
+## Current Stats
+
+- **1,593 filings** scraped (2008-2025)
+- **674 complaints** processed with LLM extraction (86.3%)
+- **463 settlements** processed with LLM extraction (59.3%)
+- **436 cases** with both complaint and settlement extracted
+- **$1,049,700** in total fines collected
+- **$2,144,887** in investigation costs recovered
+- **2,501 hours** of continuing education ordered
+
+## Quick Start
 
 ```bash
+# Install dependencies
 uv sync
-brew install ocrmypdf poppler  # OCR and PDF text extraction
+brew install ocrmypdf poppler  # OCR tools (macOS)
+
+# Configure environment
+cp .env.example .env
+# Add OPENAI_API_KEY and MONGODB_URI
+
+# Run the web app
+uv run uvicorn app:app --reload --port 8000
+# Open http://localhost:8000
 ```
+
+## Web App Features
+
+- **Cases Tab**: Browse complaints with filters (category, specialty, year, drug, patient sex, settlement status)
+- **Case Details**: Click any case to view extracted data + embedded PDF viewer (tabs for complaint/settlement)
+- **Statistics Tab**: Aggregate analytics dashboard
+  - Totals: Fines collected, investigation costs, CME hours, probation time
+  - Charts: Cases by year, category breakdown, top specialties, license actions
+  - Histograms: Fine/cost distributions (capped at 90th percentile for readability)
 
 ## Data Pipeline
 
+### Processing New Filings (Complete Pipeline)
+
+When new filings are published on the Nevada Board website, run these steps in order:
+
 ```bash
-# 1. Scrape filings metadata and PDFs
+# Step 1: Scrape - Download new filings metadata and PDFs
 uv run python scripts/scraper.py
+# Output: pdfs/{year}/*.pdf, data/filings.json
 
-# 2. Normalize data (fix formatting issues, expand multi-case entries)
+# Step 2: Normalize - Clean and standardize the data
 uv run python scripts/normalize_filings.py
+# Output: data/filings_normalized.json
 
-# 3. Validate data quality
+# Step 3: Validate - Check data quality
 uv run python scripts/validate_filings.py
+# Reports any issues with the data
 
-# 4. Aggregate into cases (group related documents)
-uv run python scripts/aggregate_cases.py
-
-# 5. OCR PDFs to extract text
+# Step 4: OCR - Extract text from scanned PDFs
 uv run python scripts/ocr_pdfs.py
+# Output: pdfs_ocr/{year}/*.pdf (searchable), text/{year}/*.txt
+# Note: Uses 5-min timeout per file. Large files may need manual processing.
+
+# Step 5: Clean Text - Remove OCR artifacts
+uv run python scripts/clean_text.py --text-dir text/ --apply
+# Removes line numbers, page markers, margin gibberish
+
+# Step 6: LLM Extract Complaints - Process through GPT-4o
+uv run python scripts/process_complaints.py
+# Extracts: summary, specialty, drugs, category, patient info
+# Stores in MongoDB: complaints collection
+
+# Step 7: LLM Extract Settlements - Process through GPT-4o
+uv run python scripts/process_settlements.py
+# Extracts: license action, fines, probation, CME, violations
+# Stores in MongoDB: settlements collection
+
+# Step 8: Update Status - Rebuild cases summary
+uv run python scripts/build_cases_summary.py
+# Updates MongoDB: cases_summary collection
+
+# Step 9: View Results - Start web app
+uv run uvicorn app:app --reload --port 8000
+```
+
+### Pipeline Diagram
+
+```
+Nevada Board Website
+        ↓
+   scraper.py ──────→ pdfs/{year}/*.pdf + data/filings.json
+        ↓
+normalize_filings.py → data/filings_normalized.json
+        ↓
+   ocr_pdfs.py ─────→ pdfs_ocr/{year}/*.pdf + text/{year}/*.txt
+        ↓
+  clean_text.py ────→ text/{year}/*.txt (cleaned)
+        ↓
+process_complaints.py ──┬──→ MongoDB: complaints
+process_settlements.py ─┘    MongoDB: settlements
+        ↓
+build_cases_summary.py → MongoDB: cases_summary
+        ↓
+     app.py ────────→ Web UI (http://localhost:8000)
+```
+
+### Troubleshooting
+
+**OCR Timeout on Large Files**
+
+Some PDFs (especially tilted scans >10MB) may timeout. Process manually:
+
+```bash
+# Find failed files (1 line or less = failed)
+find text -name "*.txt" -exec sh -c 'lines=$(wc -l < "$1"); [ "$lines" -le 1 ] && echo "$1"' _ {} \;
+
+# Manual OCR with no timeout
+ocrmypdf --sidecar text/2019/19-8552-1_Complaint.txt \
+    --rotate-pages --deskew --clean --force-ocr -l eng --jobs 2 \
+    pdfs/2019/19-8552-1_Complaint.pdf \
+    pdfs_ocr/2019/19-8552-1_Complaint.pdf
+
+# Then clean and reprocess
+uv run python scripts/clean_text.py --text-dir text/ --apply
+uv run python scripts/process_complaints.py
+```
+
+**LLM Rate Limits**
+
+OpenAI has 30k tokens/minute limit. If you hit 429 errors:
+- Run complaints and settlements sequentially (not at the same time)
+- Use `--limit N` to process in smaller batches
+
+**Check Processing Status**
+
+```bash
+uv run python scripts/build_cases_summary.py
+# Shows: total cases, OCR success/fail, LLM extraction status
 ```
 
 ## Directory Structure
 
 ```
+app.py                        # FastAPI web app
 scripts/
-├── scraper.py            # Fetch filings metadata and PDFs
-├── normalize_filings.py  # Clean and normalize data
-├── validate_filings.py   # Validate data quality
-├── aggregate_cases.py    # Group related documents
-├── ocr_pdfs.py           # OCR processing
+├── scraper.py                # Download filings from Nevada Board
+├── normalize_filings.py      # Clean/standardize metadata
+├── validate_filings.py       # Data quality checks
+├── ocr_pdfs.py               # OCR with parallel workers
+├── clean_text.py             # Remove OCR artifacts
+├── process_complaints.py     # LLM extraction for complaints
+├── process_settlements.py    # LLM extraction for settlements
+├── build_cases_summary.py    # Update status tracking
+└── prompts/
+    ├── complaint_extraction.md   # GPT-4o prompt for complaints
+    └── settlement_extraction.md  # GPT-4o prompt for settlements
 data/
 ├── filings.json              # Raw scraped metadata
-├── filings_normalized.json   # Cleaned metadata (1,594 filings)
-├── cases.json                # Grouped by case
-pdfs/{year}/                  # Original scanned PDFs (local only)
+├── filings_normalized.json   # Cleaned metadata
+└── ocr_results.json          # OCR processing log
+pdfs/{year}/                  # Original scanned PDFs
 pdfs_ocr/{year}/              # Searchable PDFs (after OCR)
 text/{year}/                  # Extracted plain text
 ```
 
 ## Data Schema
 
-Each filing contains:
-- `case_number`: e.g., "25-8654-1" (year-case-document)
+### Filings Metadata
+- `case_number`: e.g., "25-8654-1"
 - `type`: Complaint, Settlement Agreement and Order, etc.
 - `respondent`: Provider name and credentials
 - `date`: Filing date
 - `year`: Filing year
 - `pdf_url`: Source URL
+
+### Complaint Extraction (LLM)
+- `summary`: One-sentence description
+- `specialty`: ABMS-recognized specialty (Internal Medicine, Dermatology, etc.)
+- `num_complainants`: Number of patients involved
+- `complainants[]`: Array of {age, sex}
+- `procedure`: Medical procedure if applicable
+- `drugs[]`: Medications mentioned
+- `category`: Standard of Care, Controlled Substances, Sexual Misconduct, etc.
+
+### Settlement Extraction (LLM)
+- `license_action`: revoked, suspended, surrendered, probation, reprimand, none
+- `probation_months`: Duration of probation
+- `fine_amount`: Dollar amount of fine
+- `investigation_costs`: Costs recovered from respondent
+- `cme_hours`, `cme_topic`: Continuing education requirements
+- `public_reprimand`, `npdb_report`: Boolean flags
+- `violations_admitted[]`: NRS codes and descriptions admitted
+- `violations_dismissed[]`: NRS codes and descriptions dismissed
+
+## Environment Variables
+
+Create `.env` file:
+```
+OPENAI_API_KEY=sk-...      # For LLM processing (GPT-4o)
+MONGODB_URI=mongodb://...   # MongoDB connection string
+```
+
+## License
+
+This project processes publicly available government records from the Nevada State Board of Medical Examiners.

@@ -1,0 +1,727 @@
+OFFICE OF THE GENERAL COUNSEL
+
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+
+
+BEFORE THE BOARD OF MEDICAL EXAMINERS
+OF THE STATE OF NEVADA
+
+Kk EK SK
+
+In the Matter of Charges and Case No. 18-8756-1
+
+Complaint Against - I LE DB)
+
+H, M.D.
+IVAN LEE GOLDSMITH, M.D., OCT 17 2018
+
+Respondent. NEVADA STATE BOARD OF
+MEDTOAL EXAMINERS
+SA a “led Png Pa
+
+COMPLAINT
+
+The Investigative Committee! (IC) of the Nevada State Board of Medical Examiners (Board)
+hereby issues this formal Complaint (Complaint) against [van Lee Goldsmith, M.D. (Respondent), a
+physician licensed in Nevada. After investigating this matter, the IC has a reasonable basis to
+believe that Respondent has violated provisions of Nevada Revised Statutes (NRS) Chapter 630 and
+Nevada Administrative Code (NAC) Chapter 630 (collectively, the Medical Practice Act). The IC
+
+alleges the following facts:
+
+A. Respondent’s Violations of Nevada Prescribing Laws, and the Nevada State Board of
+Pharmacy’s Disciplinary Action.
+
+1. Respondent is a physician licensed to practice medicine in the State of Nevada
+(License No. 6116). He has been continuously licensed by the Board since August 25, 1990.
+
+2. Respondent held both a Controlled Substance Registration, Certificate
+No. CS20816, and a Practitioner Dispensing Registration, Certificate No. PD00413, issued by the
+Nevada State Board of Pharmacy (Pharmacy Board) at the time of the events set forth herein in
+this Section A.
+
+3, On Wednesday, September 5, 2018, in Reno, Nevada, the Pharmacy Board held a
+formal disciplinary hearing in Pharmacy Board Case No. 17-101-CS-S, pertaining to allegations
+
+by the Pharmacy Board against Respondent. Pursuant to the final disciplinary order of the
+
+' The Investigative Committee (IC) of the Nevada State Board of Medical Examiners (Board), at the time this formal
+Complaint was authorized for filing, was composed of Board members Wayne Hardwick, M.D., Chairman, Mr. M.
+Neil Duxbury, and Aury Nagy, M.D.
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+
+
+
+Pharmacy Board, dated September 13, 2018 (Pharmacy Board Order), the Pharmacy Board made
+
+formal findings of fact, inter alia, as follows:
+
+a.
+
+On December 9, 2013, the Pharmacy Board granted Respondent an account for
+Internet access to the Nevada Prescription Monitoring Program (PMP) for purposes
+authorized under federal and state law.
+
+Before receiving access, Respondent signed a Practitioner Certification Statement
+on December 6, 2013, stating that he understood and agreed under penalty of
+perjury that he was responsible for all patient information transmitted from his
+account, that he would treat PMP information as confidential, that he would protect
+any PMP information in his possession or contro! in accordance with federal and
+state laws governing health care information, and that he would safeguard his
+password and not share his login credentials with any other person.
+
+Stephen Paddock (Paddock) was the perpetrator of the October 1, 2017, Las Vegas
+mass shooting, and committed suicide immediately after the incident, sometime
+before midnight.
+
+On or about October 2, 2017, Respondent verified through his office electronic
+medical records system (EMR) that Paddock was never his patient.
+
+From October 2, 2017, at 9:25 a.m., to October 3, 2017, at 2:20 p.m., Respondent’s
+PMP account was used to query the PMP database five separate times using
+different search parameters for each query, to access Paddock’s confidential patient
+information, and to obtain patient utilization reports detailing Paddock’s
+prescription-controlled substance utilization history.
+
+The fourth search, conducted on October 3, 2017, at 10:18 a.m., yielded specific
+prescription information regarding two prescriptions for Paddock filled at
+Evergreen Drugs in Henderson, Nevada in 2016, and at a Walgreens pharmacy in
+Reno, Nevada, in 2017.
+
+On October 3, 2017 at 9:00 p.m., the Las Vegas Review-Journal published an
+
+article written by reporter Paul Harasim. That article purported to include
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+4.
+
+Paddock’s confidential patient information, including information about the two
+prescriptions, which the reporter attributed to and obtained from the PMP.
+
+The Las Vegas Review-Journal updated the article on October 4, 2017, at 10:00
+a.m., to reference specific prescription data and prescriber information related to
+Paddock from June 7, 2016, and June 21, 2017.
+
+Respondent’s PMP account is the only possible source for the details in the Las
+Vegas Review-Journal article that are attributed to the PMP, because only the
+fourth search from his PMP account corresponds to the dates and time frames
+specified in the article.
+
+On or about November 8, 2017, Respondent, through his counsel, Jacob L. Hafter,
+Esq., filed an Amended Declaration with the Eighth Judicial District Court of Clark
+County, Nevada, in Case No. A-17-762877-W, in which Respondent admits to
+directing his office staff to use his PMP account to query Paddock’s confidential
+patient information and to obtain patient utilization reports on October 2, 2017, and
+again on October 3, 2017.
+
+In his Amended Declaration, Respondent also admits to routinely allowing his staff
+to use his PMP account to query the PMP on his behalf.
+
+Pursuant to the Pharmacy Board Order, the Pharmacy Board made conclusions of
+
+law, inter alia, as follows:
+
+a.
+
+By accessing or directing his staff to access Paddock’s confidential data in the PMP
+database, when Paddock was deceased and never his patient, and by obtaining
+Paddock’s patient utilization report, Respondent performed his duties as the holder
+of a Nevada Controlled Substance Registration in an incompetent, unskillful or
+negligent manner and engaged in unprofessional conduct or conduct contrary to the
+public interest pursuant to NAC 639.945(1)(i). Respondent’s Controlled Substance
+Registration, Certificate of Registration No. CS20816, and Practitioner Dispensing
+Registration, Certificate No. PD00413, are therefore subject to discipline pursuant
+to NRS 639.210(4) and NRS 639.255.
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+
+
+
+b. By accessing or directing his staff to access Paddock’s confidential data in the PMP
+
+database, when Paddock was deceased and never his patient, and by obtaining
+Paddock’s patient utilization report, Respondent violated the HIPAA Privacy Rule.
+His Controlled Substance Registration, Certificate of Registration No. CS20816,
+and Practitioner Dispensing Registration, Certificate No. PD00413, are therefore
+subject to discipline pursuant to NRS 639.210(11) and NRS 639.255.
+
+By accessing or directing his staff to access Paddock’s confidential data in the PMP
+database, when Paddock was deceased and never his patient, and by obtaining
+Paddock’s patient utilization report, Respondent violated, attempted to violate,
+assisted or abetted in the violation of, or conspired to violate NRS 453.164(7)
+and/or the HIPAA Privacy Rule. His Controlled Substance Registration, Certificate
+of Registration No. CS20816, and Practitioner Dispensing Registration, Certificate
+No. PD00413, are therefore subject to discipline pursuant to NRS 639.210(12) and
+NRS 639.255.
+
+. By disclosing, or allowing to be disclosed, to the Las Vegas Review-Journal and/or
+
+writer Paul Harasim Paddock’s confidential PMP data and patient utilization report,
+which were accessed only by Respondent’s PMP account on October 2 and
+October 3, 2017, Respondent violated state and federal law, including the HIPAA
+Privacy Rule and NRS 639.164(7). His Controlled Substance Registration,
+Certificate of Registration No. CS20816, and Practitioner Dispensing Registration,
+Certificate No. PD00413, are therefore subject to discipline pursuant to NRS
+639.210(4), (11) and (12) as well as NRS 639.255.
+
+By accessing or directing his staff to access Paddock’s confidential data in the PMP
+database, when Paddock was deceased and never his patient, and by obtaining
+Paddock’s patient utilization report, Respondent committed an act that would
+render his Nevada Controlled Substance Registration inconsistent with the public
+interest pursuant to NRS 453.231, and is subject to discipline pursuant to NRS
+453.236(1)(d) and NRS 453.241(1).
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+5. Based on the foregoing, pursuant to the Pharmacy Board Order, the Pharmacy
+Board ordered, infer alia, that Respondent’s Certificates of Registration Nos. CS20816 and
+PD00413, be revoked, with the revocation stayed, and Respondent’s Certificates of Registration
+Nos. CS20816 and PD00413 were placed on probation for one (1) year subject to the following
+conditions. Respondent shall:
+
+a. Implement and provide to Board Staff internal controls and procedures within
+thirty (30) days of the effective date of this Order to ensure that his staff does not
+use his PMP account to query the PMP on his behalf except as authorized by law;
+
+b. Pay a fine of Two Thousand Dollars ($2,000.00) for each of the five (5) violations
+of law, for a total of Ten Thousand Dollars ($10,000.00). Payment shall be made
+by cashier’s check or certified check or money order made payable to “State of
+Nevada, Office of the Treasurer’ to be received by the Board’s Reno office located
+at 431 W. Plumb Lane, Reno, NV 89509, within thirty (30) days of the effective
+date of this Order; and
+
+c. Pay Sixteen Thousand Dollars ($16,000.00) to partially retmburse the Board for
+reasonable attorney’s fees and costs incurred in investigating and prosecuting this
+matter. Payment shall be made by cashier’s check, certified check or money order
+made payable to the “Nevada State Board of Pharmacy” to be received by the
+Board’s Reno office located at 431 W. Plumb Lane, Reno, NV 89509, within thirty
+(30) days of the effective date of this Order.
+
+COUNT I
+NRS 630.306(1)(b)(3) (Engaging in Conduct That Violated Pharmacy Board Regulations)
+6. All of the allegations in the above paragraphs are hereby incorporated as if fully set
+forth herein.
+7. Pursuant to NRS 630.346(4), in any disciplinary hearing, a certified copy of the
+record of a licensing agency showing a conviction or plea of nolo contendere or the suspension,
+revocation, limitation, modification, denial or surrender of a license to practice medicine is
+
+conclusive evidence of its occurrence.
+
+
+OFFICE OF THE GENERAL COUNSEL
+
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+
+
+8. NRS 630.306(1)(b)(3) provides that engaging in conduct that violates a regulation
+adopted by the Pharmacy Board is grounds for initiating disciplinary action.
+
+9. By the misconduct set forth in the Pharmacy Board Order, which order is
+conclusive evidence of its occurrence, Respondent engaged in conduct that violates regulations
+adopted by the Pharmacy Board, specifically including but not limited to NAC 639.945(1)(4).
+
+10. By reason of the foregoing, Respondent is subject to discipline by the Nevada State
+Board of Medical Examiners as provided in NRS 630.352.
+
+COUNT U
+NRS 630.301(9) (Disreputable Conduct)
+
+11. All of the allegations in the above paragraphs are hereby incorporated by reference
+as though fully set forth herein.
+
+12. Pursuant to NRS 630.346(4), in any disciplinary hearing, a certified copy of the
+record of a licensing agency showing a conviction or plea of nolo contendere or the suspension,
+revocation, limitation, modification, denial or surrender of a license to practice medicine is
+conclusive evidence of its occurrence.
+
+13. Conduct that brings the medical profession into disrepute is grounds for discipline
+pursuant to NRS 630.301(9), including, without limitation, conduct that violates any provision of
+a code of ethics adopted by the Board by regulation based on a national code of ethics.
+
+14. By the misconduct set forth in the Pharmacy Board Order, which order is
+conclusive evidence of its occurrence, Respondent engaged in conduct that brings the medical
+profession into disrepute.
+
+15. By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+COUNT UT
+NRS 630.306(1)(r) (Failure to Adequately Supervise a Medical Assistant)
+
+16. All of the allegations in the above paragraphs are hereby incorporated as if fully set
+
+forth herein.
+
+17. NRS 630.306(1)(r) provides that a failure to adequately supervise a medical
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+
+al
+
+a7
+
+assistant pursuant to the regulations of the Board is an act that constitutes grounds for initiating
+disciplinary action.
+
+18. Pursuant to NAC 630.830, a delegating practitioner retains responsibility for the
+safety and performance of each task which is delegated to a medical assistant.
+
+19. By the misconduct set forth in the Pharmacy Board Order, which order is
+conclusive evidence of its occurrence, Respondent failed to adequately supervise his medical
+assistants in their performance of medical tasks.
+
+20. By reason of the foregoing, Respondent is subject to discipline by the Nevada State
+Board of Medical Examiners as provided in NRS 630.352.
+
+B. Respondent’s Dispensing of Controlled Substances to Himself.
+
+21. Pursuant to NRS 453.256(7), an individual practitioner may not dispense a
+substance included in schedule II, IN or IV for the practitioner’s own personal use except in a
+medical emergency.
+
+22. Pursuant to NAC 453.010(2), a medical “emergency” within the meaning of
+NRS 453.256 and Nevada State Board of Pharmacy regulations means a situation in which a
+
+prescribing practitioner determines that:
+
+(a) Immediate administration of the controlled substance is
+necessary for the proper treatment of the patient;
+
+(b) No appropriate alternative treatment is available, including
+administration of a drug which is not a controlled substance under
+schedule II of the Uniform Controlled Substances Act; and
+
+(c) It is not reasonably possible for the prescribing practitioner to
+provide a written prescription to be presented to the person
+dispensing the substance before he or she dispenses it.
+
+23. Respondent prescribed and dispensed Phentermine 37.5 mg tablets to himself for
+his own personal, non-emergency use on December 1, 2014, March 27, 2015, July 27, 2015, and
+October 19, 2015.
+
+24. Phentermine is a Schedule IV controlled substance pursuant to NAC 453.540(5).
+
+25. Respondent prescribed and dispensed Phendimetrazine 35 mg tablets to himself for
+
+his own personal, non-emergency use on on June 29, 2015.
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(778) 688-2559
+
+
+
+26. Phendimetrazine is a Schedule III controlled substance pursuant to
+
+NAC 453.530(2)(e).
+COUNT IV
+NRS 630.306(1)(b)(3) (Engaging in Conduct That Violated Pharmacy Board Regulations)
+
+27. All of the allegations in the above paragraphs are hereby incorporated as if fully set
+forth herein.
+
+28. NRS 630.306(1)(b)(3) provides that engaging in conduct that violates a regulation
+adopted by the Pharmacy Board is grounds for initiating disciplinary action.
+
+29. By the conduct described in this Section B, Respondent engaged in conduct that
+violates regulations adopted by the Pharmacy Board, specifically including but not limited to
+NAC 453.010(2).
+
+30. By reason of the foregoing, Respondent is subject to discipline by the Nevada State
+Board of Medical Examiners as provided in NRS 630.352.
+
+COUNT V
+NRS 630.306(1)(b)(2) (Violation of Standards of Practice)
+
+31. All of the allegations in the above paragraphs are hereby incorporated by reference
+as though fully set forth herein.
+
+32. Violation of a standard of practice adopted by the Board is grounds for disciplinary
+action pursuant to NRS 630.306(1)(b)(2).
+
+33. | The Board adopted by reference the Dietary Guidelines for Americans, 2010, 7th
+edition, published jointly by the United States Department of Health and Human Services and the
+Department of Agriculture pursuant to 7 U.S.C. § 5341 (Dietary Guidelines).
+
+34. NAC 630.205 sets forth the professional standards for the prescription of appetite
+suppressants, which specifially incorporates the Dietary Guidelines.
+
+35. Respondent prescribed appetite suppresants to himself in a manner that violated the
+professional standards for the prescription of appetite suppressants, and the Dietary Guidelines.
+
+36. By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+
+Nevada State Board of Medical Examiners
+9600 Gateway Drive
+Reno, Nevada 89521
+(775) 688-2559
+
+OFFICE OF THE GENERAL COUNSEL
+
+
+
+
+Count VI
+NRS 630.3062(1)(a) (Failure to Maintain Complete Medical Records)
+
+37. All of the allegations contained in the above paragraphs are hereby incorporated by
+reference as though fully set forth herein.
+
+38. NRS 630.3062(1)(a) provides that the failure to maintain timely, legible, accurate
+and complete medical records relating to the diagnosis, treatment and care of a patient is grounds
+for initiating discipline against a licensee.
+
+39. Respondent failed to maintain complete medical records relating to the diagnosis,
+treatment and care of himself.
+
+40. By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+COUNT VII
+NRS 630.306(1)(p) (Unsafe or Unprofessional Conduct)
+
+41. All of the allegations in the above paragraphs are hereby incorporated as if fully set
+forth herein.
+
+42. Engaging in any act that is unsafe or unprofessional conduct in accordance with
+regulations adopted by the Board is grounds for disciplinary action against a licensee pursuant to
+NRS 630.306(1)(p).
+
+43, As demonstrated by, but not limited to, the above-outlined facts, Respondent wrote
+prescriptions and dispensed appetite suppressants to himself in a manner that violated the
+professional standards for the prescription of appetite suppressants, and the Dietary Guidelines.
+
+44, —_ Respondent’s conduct was unsafe and unprofessional.
+
+45. By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+C. Respondent’s Violation of, and Failure to Ensure Compliance With,
+Nevada Pharmacy Laws.
+
+46. Respondent’s physician assistants, Lindsay Hoffman, PA-C, and Adam Luckette,
+PA-C, dispensed controlled substances and dangerous drugs to patients of Respondent, from
+Respondent’s store of medications, while he was out of the country.
+
+47.  Respondent’s physician assistants, Lindsay Hoffman, PA-C, and Adam Luckette,
+PA-C, prescribed medication to patients of Respondent, without a bona fide therapeutic
+relationship with said patients.
+
+48, No person may prescribe and dispense controlled substances in Nevada except as
+authorized by law. NRS 453.226; NRS 453.375(1); NRS 453.377; NRS 639.235(1);
+NAC 639.742(1), (3) and (4); 21 CFR § 1301.11; 21 CFR § 1306.03.
+
+49. NAC 639.742 states in relevant part:
+
+1. A practitioner who wishes to dispense controlled substances or
+dangerous drugs must apply to the Board on an application provided
+by the Board for a certificate of registration to dispense controlled
+substances or dangerous drugs.
+
+3. Except as otherwise provided in NRS 639.23277 and
+NAC 639.395, the dispensing practitioner and, if applicable, the
+owner or owners of the facility, shall ensure that:
+(a) All drugs are ordered by the dispensing practitioner;
+(b) All drugs are received and accounted for by the
+dispensing practitioner;
+(c) All drugs are stored in a secure, locked room or cabinet
+to which the dispensing practitioner has the only key or lock
+combination;
+(d) All drugs are dispensed in accordance with
+NAC 639.745;
+(e) No prescription is dispensed to a patient unless the
+dispensing practitioner is on-site at the facility;
+(f) All drugs are dispensed only to the patient personally at
+the facility;
+
+4, With regard to the filling and dispensing of a prescription at a
+facility, only the dispensing practitioner or a dispensing technician
+may:
+
+(a) Enter the room or cabinet in which drugs are stored;
+
+(b) Remove drugs from stock;
+
+(c) Count, pour or reconstitute drugs;
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+
+
+(d) Place drugs into containers;
+
+(e) Produce and affix appropriate labels to containers that
+contain or will contain drugs;
+
+(f) Fill containers for later use in dispensing drugs; or
+
+(g) Package or repackage drugs.
+
+50. NAC 639.945(1) provides, in pertinent part, that the following acts or practices by
+a holder of any license, certificate or registration issued by the Pharmacy Board or any employee
+of any business holding any such license, certificate or registration are declared to be, specifically
+but not by way of limitation, unprofessional conduct and conduct contrary to the public interest:
+
+(i) Performing any of his or her duties as the holder of a license, certificate or
+registration issued by the Board, or as the owner of a business or an entity licensed
+by the Board, in an incompetent, unskillful or negligent manner.
+
+(n) Dispensing a drug as a dispensing practitioner to a patient with whom the
+dispensing practitioner does not have a bona fide therapeutic relationship.
+
+(o) Prescribing a drug as a prescribing practitioner to a patient with whom the
+prescribing practitioner does not have a bona fide therapeutic relationship.
+
+51. NAC 639.945(2) provides that the owner of any business or facility licensed,
+certified or registered by the Pharmacy Board is responsible for the acts of all personnel in his or
+her employ.
+
+52. NAC 639.945(3) provides that, for purposes of applying Pharmacy Board
+regulations, a bona fide therapeutic relationship between the patient and practitioner shall be
+deemed to exist if the patient was examined in person, electronically or telephonically by the
+practitioner within the 6 months immediately preceding the date the practitioner dispenses or
+prescribes a drug to the patient and, as a result of the examination, the practitioner diagnosed a
+condition for which a given drug therapy is prescribed.
+
+53. Pursuant to NAC 630.370(1)(d)(1)-(2), a supervising physician is responsible for
+all the medical activities of his or her physician assistant and shall ensure strict compliance with
+the provisions of the certificate of registration issued to his or her physician assistant by the
+Pharmacy Board, and Pharmacy Board regulations regarding controlled substances and dangerous
+
+drugs.
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+
+Count VHT
+NRS 630.306(1)(c) (Unauthorized Dispensing)
+
+54. All of the allegations contained in the above paragraphs are hereby incorporated by
+reference as though fully set forth herein.
+
+55. Pursuant to NRS 630.306(1)(c), dispensing any controlled substance, or any
+dangerous drug as defined in chapter 454 of NRS, to others except as authorized by law is grounds
+for discipline.
+
+56. By allowing his physician assistants to dispense controlled substances and
+dangerous drugs to patients when he was not on-site at his medical facility, Respondent violated
+NAC 639.742 and NAC 639.945.
+
+57. By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+Count Ix
+NRS 630.306(1)(c) (Unauthorized Prescribing)
+
+58. All of the allegations contained in the above paragraphs are hereby incorporated by
+reference as though fully set forth herein.
+
+59. Pursuant to NRS 630.306(1)(c), dispensing any controlled substance, or any
+dangerous drug as defined in chapter 454 of NRS, to others except as authorized by law is grounds
+for discipline.
+
+60. By allowing his physician assistants to prescribe medication to patients of
+Respondent, without a bona fide therapeutic relationship with said patients, Respondent, pursuant
+to NAC 630.370(1)(d)(1)-(2), violated NAC 639.945.
+
+61. By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+Count X
+NRS 630.3062(1)(a) (Failure to Maintain Complete Medical Records)
+62. All of the allegations contained in the above paragraphs are hereby incorporated by
+
+reference as though fully set forth herein.
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+
+63. NRS 630.3062(1)(a) provides that the failure to maintain timely, legible, accurate
+and complete medical records relating to the diagnosis, treatment and care of a patient is grounds
+for initiating discipline against a licensee.
+
+64. Respondent failed to maintain complete and accurate medical records relating to
+the diagnosis, treatment and care of the patients to whom Respondent and Respondent’s staff
+dispensed and prescribed controlled substances and dangerous drugs as described in this
+Section C.
+
+65. By reason of the foregoing, Respondent is subject to discipline by the Board as
+provided in NRS 630.352.
+
+WHEREFORE, the Investigative Committee prays:
+
+1. That the Board give Respondent notice of the charges herein against him and give
+him notice that he may file an answer to the Complaint herein as set forth in NRS 630.339(2)
+within twenty (20) days of service of the Complaint;
+
+2. That the Board set a time and place for a formal hearing after holding an Early
+Case Conference pursuant to NRS 630.339(3);
+
+3. That the Board determine what sanctions to impose if it determines there has been
+a violation or violations of the Medical Practice Act committed by Respondent;
+
+4, That the Board make, issue and serve on Respondent its findings of fact,
+conclusions of law and order, in writing, that includes the sanctions imposed; and
+
+5. That the Board take such other and further action as may be just and proper in these
+premises.
+
+DATED this [7 day of October, 2018.
+
+INVESTIGATIVE COMMITTEE OF THE
+NEVADA STATE BOARD OF MEDICAL EXAMINERS
+
+By: ES= _
+
+Aaron Bart Fricke, Esq., Deputy General Counsel
+Attorney for the Investigative Committee
+
+
+OFFICE OF THE GENERAL COUNSEL
+Nevada State Board of Medical Examiners
+
+9600 Gateway Drive
+
+Reno, Nevada 89521
+
+(775) 688-2559
+
+Ol
+
+
+
+
+VERIFICATION
+
+STATE OF NEVADA )
+COUNTY OF WASHOE )
+
+Wayne Hardwick, M.D., having been duly sworn, hereby deposes and states under penalty
+of perjury that he is the Chairman of the Investigative Committee of the Nevada State Board of
+Medical Examiners that authorized the Complaint against the Respondent herein; that he has read
+the foregoing Complaint; and that based upon information discovered in the course of the
+investigation into a complaint against Respondent, he believes that the allegations and charges in
+the foregoing Complaint against Respondent are true, accurate and correct.
+
+DATED this _/7#2day of October, 2018.
+
+INVESTIGATIVE COMMITTEE OF THE
+NEVADA STATE BOARD OF MEDICAL EXAMINERS
+
+Mn, Posdbureh.
+
+Wayne Harétvick, M.D., Chairman
+
+

@@ -27,7 +27,7 @@ OCR_PDF_DIR = PROJECT_ROOT / "pdfs_ocr"
 TEXT_DIR = PROJECT_ROOT / "text"
 DATA_DIR = PROJECT_ROOT / "data"
 
-NUM_WORKERS = 4  # Reduced from 10 to avoid CPU overload
+NUM_WORKERS = 10
 
 
 @dataclass
@@ -79,7 +79,7 @@ def ocr_single_pdf(input_path: Path) -> OCRResult:
             "--rotate-pages",                # Auto-rotate pages
             "--deskew",                      # Fix skewed scans
             "--clean",                       # Clean up scanned pages
-            "--skip-text",                   # Skip pages that already have text
+            "--force-ocr",                   # Force OCR even if text exists
             "-l", "eng",                     # English language
             "--jobs", "2",                   # Use 2 threads per PDF
             str(input_path),
