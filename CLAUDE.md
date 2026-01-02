@@ -141,6 +141,11 @@ app.py → Web UI at http://localhost:8000
   - Unique index is on `pdf_url`, not `case_number`
 - `cases_summary`: Status tracking for each case (OCR status, extraction status)
 
+### MongoDB Indexes
+Run `uv run python scripts/create_indexes.py` to create performance indexes:
+- `complaints`: `case_number` (unique), `llm_extracted` (sparse), `category+specialty+year` (compound), `year`, `respondent`
+- `settlements`: `pdf_url` (unique), `case_numbers`, `llm_extracted` (sparse), `year`
+
 ### Web App Features (app.py)
 - **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, settlement status)
   - Filters auto-search on change, support multi-selection with Select All/Clear buttons
@@ -173,6 +178,7 @@ app.py → Web UI at http://localhost:8000
   - Automatic chunking for documents >70k chars to handle TPM limits
   - Handles `-1` vs `-01` case number suffix variations in file matching
 - `scripts/reprocess_amended_complaints.py`: Migration script for adding amendment data to existing complaints
+- `scripts/create_indexes.py`: Creates MongoDB indexes for query performance
 - `scripts/prompts/complaint_extraction.md`: LLM prompt for complaints
 - `scripts/prompts/settlement_extraction.md`: LLM prompt for settlements
 - `scripts/prompts/amendment_comparison.md`: LLM prompt for comparing original vs amended complaints
@@ -230,6 +236,11 @@ app.py → Web UI at http://localhost:8000
 - `settlement_summary`: license_action, fine_amount, investigation_costs, cme_hours, probation_months, date
 - `case_index`: Position of this case in the series (from case_number suffix, e.g., -1, -2)
 - `total_cases`: Total cases with same prefix (e.g., "19-28023-*")
+
+**API Performance Optimizations** (in `get_complaints`):
+- Settlement lookup fetches only settlements for case numbers in current page (not all 604)
+- `has_settlement` filter uses single aggregation with `$unwind` + `$addToSet` instead of Python loop
+- Case prefix counting uses single regex query matching all prefixes at once
 
 ### FastAPI Architecture
 - **Lifespan**: Uses `@asynccontextmanager` lifespan for startup/shutdown (not deprecated `@app.on_event`)

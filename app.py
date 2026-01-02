@@ -7,6 +7,7 @@ Usage:
 """
 
 import os
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Optional
@@ -391,17 +392,20 @@ def get_complaints(
         else:
             query["llm_extracted.complainants.sex"] = {"$in": sexes}
 
-    # Filter by settlement existence
+    # Filter by settlement existence - use aggregation to get all case numbers in one query
     if has_settlement:
-        settlement_case_numbers = set()
-        for doc in settlements.find({}, {"case_numbers": 1}):
-            case_nums = doc.get("case_numbers", [])
-            settlement_case_numbers.update(case_nums)
+        # Single aggregation to unwind and collect all case numbers with settlements
+        settlement_case_numbers_pipeline = [
+            {"$unwind": "$case_numbers"},
+            {"$group": {"_id": None, "case_nums": {"$addToSet": "$case_numbers"}}}
+        ]
+        result = list(settlements.aggregate(settlement_case_numbers_pipeline))
+        settlement_case_numbers = result[0]["case_nums"] if result else []
 
         if has_settlement == "yes":
-            query["case_number"] = {"$in": list(settlement_case_numbers)}
+            query["case_number"] = {"$in": settlement_case_numbers}
         elif has_settlement == "no":
-            query["case_number"] = {"$nin": list(settlement_case_numbers)}
+            query["case_number"] = {"$nin": settlement_case_numbers}
 
     # Sorting - need aggregation pipeline for date sorting since dates are stored as M/D/YYYY strings
     total = complaints.count_documents(query)
@@ -453,28 +457,9 @@ def get_complaints(
     pipeline.append({"$skip": skip})
     pipeline.append({"$limit": limit})
 
-    cursor = complaints.aggregate(pipeline)
+    results_list = list(complaints.aggregate(pipeline))
 
-    # Build a lookup of settlement data by case number
-    settlement_lookup = {}
-    for doc in settlements.find({"llm_extracted": {"$exists": True}}):
-        ext = doc.get("llm_extracted", {})
-        summary = {
-            "license_action": ext.get("license_action"),
-            "fine_amount": ext.get("fine_amount"),
-            "investigation_costs": ext.get("investigation_costs"),
-            "cme_hours": ext.get("cme_hours"),
-            "probation_months": ext.get("probation_months"),
-            "date": doc.get("date"),
-        }
-        for cn in doc.get("case_numbers", []):
-            settlement_lookup[cn] = summary
-
-    # Build lookup of case counts by case number prefix (e.g., "19-28023")
-    # Case numbers are formatted as "YY-XXXXX-N" where N is the case index
-    results_list = list(cursor)
-
-    # Extract unique prefixes from results
+    # Helper functions for case number parsing
     def get_case_prefix(case_num: str) -> str:
         """Extract prefix from case number (e.g., '19-28023' from '19-28023-1')"""
         parts = case_num.rsplit("-", 1)
@@ -488,23 +473,59 @@ def get_complaints(
         except ValueError:
             return 1
 
-    prefixes_in_results = set(get_case_prefix(doc.get("case_number", "")) for doc in results_list)
+    # Get case numbers from results for targeted settlement lookup
+    case_numbers_in_results = [doc.get("case_number", "") for doc in results_list]
 
-    # Count total cases for each prefix
+    # Fetch ONLY settlements for case numbers in current page (not all settlements)
+    settlement_lookup = {}
+    if case_numbers_in_results:
+        settlement_query = {
+            "case_numbers": {"$in": case_numbers_in_results},
+            "llm_extracted": {"$exists": True}
+        }
+        for doc in settlements.find(settlement_query):
+            ext = doc.get("llm_extracted", {})
+            summary = {
+                "license_action": ext.get("license_action"),
+                "fine_amount": ext.get("fine_amount"),
+                "investigation_costs": ext.get("investigation_costs"),
+                "cme_hours": ext.get("cme_hours"),
+                "probation_months": ext.get("probation_months"),
+                "date": doc.get("date"),
+            }
+            for cn in doc.get("case_numbers", []):
+                if cn in case_numbers_in_results:
+                    settlement_lookup[cn] = summary
+
+    # Get unique prefixes and count cases in a single aggregation query
+    prefixes_in_results = list(set(
+        get_case_prefix(doc.get("case_number", ""))
+        for doc in results_list
+        if doc.get("case_number")
+    ))
+
     prefix_counts = {}
-    for prefix in prefixes_in_results:
-        if prefix:
-            count = complaints.count_documents({
-                "case_number": {"$regex": f"^{prefix}-"},
+    if prefixes_in_results:
+        # Build regex pattern to match all prefixes at once, then group in Python
+        prefix_regex = "^(" + "|".join(re.escape(p) for p in prefixes_in_results) + ")-"
+        matching_cases = complaints.find(
+            {
+                "case_number": {"$regex": prefix_regex},
                 "llm_extracted": {"$exists": True}
-            })
-            prefix_counts[prefix] = count
+            },
+            {"case_number": 1}
+        )
+        # Count by prefix in Python (simpler than complex aggregation)
+        for doc in matching_cases:
+            prefix = get_case_prefix(doc.get("case_number", ""))
+            if prefix:
+                prefix_counts[prefix] = prefix_counts.get(prefix, 0) + 1
 
     results = []
     for doc in results_list:
         doc["_id"] = str(doc["_id"])
-        # Attach settlement summary if available
         case_num = doc.get("case_number", "")
+        # Attach settlement summary if available
         if case_num in settlement_lookup:
             doc["settlement_summary"] = settlement_lookup[case_num]
         # Attach case index and total based on case number prefix

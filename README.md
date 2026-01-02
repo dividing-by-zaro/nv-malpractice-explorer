@@ -71,6 +71,7 @@ uv run uvicorn app:app --reload --port 8000
   - Charts: Cases by year, category breakdown, top specialties, license actions
   - Histograms: Fine/cost distributions (capped at 90th percentile for readability)
 - **API Documentation**: Interactive OpenAPI docs at `/docs` with typed response schemas
+- **Optimized API**: Targeted settlement lookups, batched prefix counting, indexed queries (~180ms response time)
 
 ### Design System
 
@@ -202,6 +203,7 @@ scripts/
 ├── build_cases_summary.py    # Update status tracking
 ├── migrate_settlements.py    # Migrate to deduplicated schema
 ├── reprocess_amended_complaints.py  # Add amendment data to existing complaints
+├── create_indexes.py         # Create MongoDB indexes for performance
 └── prompts/
     ├── complaint_extraction.md   # GPT-4o prompt for complaints
     ├── settlement_extraction.md  # GPT-4o prompt for settlements
