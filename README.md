@@ -85,48 +85,50 @@ The frontend uses an "Archival Brutalism" aesthetic with sharp corners, border-b
 
 ## Data Pipeline
 
-### Processing New Filings (Complete Pipeline)
+### Automated Processing (Recommended)
 
-When new filings are published on the Nevada Board website, run these steps in order:
+For automated daily processing of new filings:
 
 ```bash
-# Step 1: Scrape - Download new filings metadata and PDFs
-uv run python scripts/scraper.py
-# Output: pdfs/{year}/*.pdf, data/filings.json
+# Process any new filings (checks current + previous year)
+uv run python scripts/process_new_filings.py
 
-# Step 2: Normalize - Clean and standardize the data
-uv run python scripts/normalize_filings.py
-# Output: data/filings_normalized.json
+# Preview what would be processed
+uv run python scripts/process_new_filings.py --dry-run
 
-# Step 3: Validate - Check data quality
-uv run python scripts/validate_filings.py
-# Reports any issues with the data
+# Check all years for backfill
+uv run python scripts/process_new_filings.py --all-years
+```
 
-# Step 4: OCR - Extract text from scanned PDFs
-uv run python scripts/ocr_pdfs.py
-# Output: pdfs_ocr/{year}/*.pdf (searchable), text/{year}/*.txt
-# Note: Uses 5-min timeout per file. Large files may need manual processing.
+This unified script:
+1. Scrapes Nevada Medical Board for new filings
+2. Compares against MongoDB to find new documents
+3. Downloads PDFs to temp directory
+4. OCRs with page-based timeout (30s/page, 2-30 min range)
+5. Cleans text and extracts data via LLM
+6. Stores in MongoDB with proper linking
+7. Cleans up temp files (no persistence needed)
 
-# Step 5: Clean Text - Remove OCR artifacts
-uv run python scripts/clean_text.py --text-dir text/ --apply
-# Removes line numbers, page markers, margin gibberish
+### Single File Processing
 
-# Step 6: LLM Extract Complaints - Process through GPT-4o
-uv run python scripts/process_complaints.py
-# Extracts: summary, specialty, drugs, category, patient info
-# Stores in MongoDB: complaints collection
+```bash
+# Process one PDF through the entire pipeline
+uv run python scripts/process_single_file.py path/to/file.pdf
 
-# Step 7: LLM Extract Settlements - Process through GPT-4o
-uv run python scripts/process_settlements.py
-# Extracts: license action, fines, probation, CME, violations
-# Stores in MongoDB: settlements collection
+# Dry run (preview without storing)
+uv run python scripts/process_single_file.py path/to/file.pdf --dry-run
+```
 
-# Step 8: Update Status - Rebuild cases summary
-uv run python scripts/build_cases_summary.py
-# Updates MongoDB: cases_summary collection
+### Batch Processing (Legacy)
 
-# Step 9: View Results - Start web app
-uv run uvicorn app:app --reload --port 8000
+For bulk reprocessing, use the scripts in `scripts/batch/`:
+
+```bash
+uv run python scripts/batch/ocr_pdfs.py
+uv run python scripts/batch/clean_text.py --text-dir text/ --apply
+uv run python scripts/batch/process_complaints.py
+uv run python scripts/batch/process_settlements.py
+uv run python scripts/utils/build_cases_summary.py
 ```
 
 ### Pipeline Diagram
@@ -190,28 +192,18 @@ uv run python scripts/build_cases_summary.py
 app.py                        # FastAPI API (~580 lines, Pydantic models + DI)
 static/
 ├── index.html                # Frontend HTML + JavaScript
-└── css/
-    └── styles.css            # Frontend styles
+└── css/styles.css            # Frontend styles
 scripts/
+├── process_new_filings.py    # Cron job: scrape + process new filings
+├── process_single_file.py    # Core pipeline: single PDF → MongoDB
 ├── scraper.py                # Download filings from Nevada Board
-├── normalize_filings.py      # Clean/standardize metadata
-├── validate_filings.py       # Data quality checks
-├── ocr_pdfs.py               # OCR with parallel workers
-├── clean_text.py             # Remove OCR artifacts
-├── process_complaints.py     # LLM extraction for complaints
-├── process_settlements.py    # LLM extraction for settlements
-├── build_cases_summary.py    # Update status tracking
-├── migrate_settlements.py    # Migrate to deduplicated schema
-├── reprocess_amended_complaints.py  # Add amendment data to existing complaints
-├── create_indexes.py         # Create MongoDB indexes for performance
-└── prompts/
-    ├── complaint_extraction.md   # GPT-4o prompt for complaints
-    ├── settlement_extraction.md  # GPT-4o prompt for settlements
-    └── amendment_comparison.md   # GPT-4o prompt for comparing original vs amended
+├── prompts/                  # LLM prompts (complaint, settlement, amendment)
+├── batch/                    # Batch processing (legacy)
+│   ├── ocr_pdfs.py, clean_text.py, process_complaints.py, etc.
+└── utils/                    # Utilities (build_cases_summary, create_indexes, etc.)
 data/
 ├── filings.json              # Raw scraped metadata
-├── filings_normalized.json   # Cleaned metadata
-└── ocr_results.json          # OCR processing log
+└── filings_normalized.json   # Cleaned metadata
 pdfs/{year}/                  # Original scanned PDFs
 pdfs_ocr/{year}/              # Searchable PDFs (after OCR)
 text/{year}/                  # Extracted plain text

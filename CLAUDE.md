@@ -10,9 +10,57 @@ Nevada Medical Malpractice Explorer - Tools to scrape, process, and analyze publ
 
 - **Never commit unless explicitly told** - Do not stage or commit changes automatically. Wait for explicit user instruction to commit.
 
-## Data Pipeline (New PDFs → Website)
+## Data Pipeline
 
-When new filings are published, run these steps in order:
+### Automated Processing (Cron Job)
+
+For automated daily processing of new filings (designed for Railway or similar):
+
+```bash
+# Check current + previous year, process any new filings
+uv run python scripts/process_new_filings.py
+
+# Preview without processing
+uv run python scripts/process_new_filings.py --dry-run
+
+# Check all years (for backfill detection)
+uv run python scripts/process_new_filings.py --all-years
+```
+
+The cron job:
+1. Scrapes Nevada Medical Board for filings (current + previous year by default)
+2. Compares against MongoDB by `pdf_url` to find new filings
+3. Downloads new PDFs to temp directory (ephemeral, no persistence needed)
+4. Processes each through the full pipeline (OCR → clean → LLM → MongoDB)
+5. Cleans up temp files automatically
+
+### Single File Processing
+
+For processing individual PDFs end-to-end (OCR → clean → LLM → MongoDB):
+
+```bash
+# Process a single PDF through the entire pipeline
+uv run python scripts/process_single_file.py path/to/file.pdf
+
+# Preview without storing in MongoDB
+uv run python scripts/process_single_file.py path/to/file.pdf --dry-run
+
+# Skip OCR if text already exists
+uv run python scripts/process_single_file.py path/to/file.pdf --skip-ocr
+```
+
+The script automatically:
+- Detects document type (complaint, settlement, or ignored)
+- Calculates OCR timeout based on page count (30s/page, 2-30 min range)
+- Cleans OCR artifacts
+- Extracts data via LLM
+- Links settlements to complaints
+- Handles amended complaints (generates amendment summary)
+- Accepts external metadata via `filing_metadata` param (used by cron job for date, respondent, pdf_url)
+
+### Batch Processing (Legacy)
+
+For bulk processing, use the scripts in `scripts/batch/`:
 
 ```bash
 # Step 1: Scrape new filings metadata and download PDFs
@@ -21,37 +69,36 @@ uv run python scripts/scraper.py
 # Creates: data/filings.json
 
 # Step 2: Normalize the scraped data
-uv run python scripts/normalize_filings.py
+uv run python scripts/batch/normalize_filings.py
 # Cleans formatting, expands multi-case entries
 # Creates: data/filings_normalized.json
 
 # Step 3: Validate data quality
-uv run python scripts/validate_filings.py
+uv run python scripts/utils/validate_filings.py
 # Checks for missing fields, invalid dates, etc.
 
 # Step 4: OCR the PDFs to extract text
-uv run python scripts/ocr_pdfs.py
+uv run python scripts/batch/ocr_pdfs.py
 # Creates: pdfs_ocr/{year}/*.pdf (searchable PDFs)
 # Creates: text/{year}/*.txt (plain text)
-# Note: Default 5-min timeout. Large files may need manual OCR with longer timeout.
 
 # Step 5: Clean OCR artifacts from text files
-uv run python scripts/clean_text.py --text-dir text/ --apply
+uv run python scripts/batch/clean_text.py --text-dir text/ --apply
 # Removes line numbers, page markers, gibberish from margins
 
 # Step 6: Process complaints through LLM
-uv run python scripts/process_complaints.py
+uv run python scripts/batch/process_complaints.py
 # Extracts: summary, specialty, drugs, category, patient demographics
 # Stores in MongoDB: complaints collection
 
 # Step 7: Process settlements through LLM
-uv run python scripts/process_settlements.py
+uv run python scripts/batch/process_settlements.py
 # Extracts: license_action, fines, probation, CME, violations
 # Stores in MongoDB: settlements collection
 # Links to complaints via complaint_id
 
 # Step 8: Update cases summary table
-uv run python scripts/build_cases_summary.py
+uv run python scripts/utils/build_cases_summary.py
 # Rebuilds cases_summary collection with processing status
 
 # Step 9: Restart web app to see new data
@@ -92,10 +139,10 @@ If you have existing settlement data with `case_number` (singular) instead of `c
 
 ```bash
 # Preview what will change (dry run)
-uv run python scripts/migrate_settlements.py
+uv run python scripts/utils/migrate_settlements.py
 
 # Apply the migration
-uv run python scripts/migrate_settlements.py --apply
+uv run python scripts/utils/migrate_settlements.py --apply
 ```
 
 This consolidates duplicate settlements (same PDF, multiple case numbers) into single documents.
@@ -106,15 +153,18 @@ This consolidates duplicate settlements (same PDF, multiple case numbers) into s
 # Run the web app
 uv run uvicorn app:app --reload --port 8000
 
+# Process new filings (cron job)
+uv run python scripts/process_new_filings.py
+
+# Process a single file end-to-end
+uv run python scripts/process_single_file.py path/to/file.pdf
+
 # Check processing status
-uv run python scripts/build_cases_summary.py
+uv run python scripts/utils/build_cases_summary.py
 
-# Process specific number of documents
-uv run python scripts/process_complaints.py --limit 10
-uv run python scripts/process_settlements.py --limit 10
-
-# Dry run (preview without changes)
-uv run python scripts/process_complaints.py --dry-run
+# Batch process (legacy)
+uv run python scripts/batch/process_complaints.py --limit 10
+uv run python scripts/batch/process_settlements.py --limit 10
 ```
 
 ## Architecture
@@ -146,7 +196,7 @@ app.py → Web UI at http://localhost:8000
 - `cases_summary`: Status tracking for each case (OCR status, extraction status)
 
 ### MongoDB Indexes
-Run `uv run python scripts/create_indexes.py` to create performance indexes:
+Run `uv run python scripts/utils/create_indexes.py` to create performance indexes:
 - `complaints`: `case_number` (unique), `llm_extracted` (sparse), `category+specialty+year` (compound), `year`, `respondent`
 - `settlements`: `pdf_url` (unique), `case_numbers`, `llm_extracted` (sparse), `year`
 
@@ -173,22 +223,43 @@ Run `uv run python scripts/create_indexes.py` to create performance indexes:
   - Charts: Cases by year, category breakdown, top specialties, license actions
   - Histograms: Fine/cost distributions (capped at 90th percentile)
 
+### Scripts Organization
+```
+scripts/
+├── process_new_filings.py   # Cron job: scrape + process new filings (Railway-ready)
+├── process_single_file.py   # Core pipeline: single PDF → MongoDB
+├── scraper.py               # Download PDFs from Nevada Medical Board
+├── prompts/                 # LLM prompts
+│   ├── complaint_extraction.md
+│   ├── settlement_extraction.md
+│   └── amendment_comparison.md
+├── batch/                   # Batch processing (legacy)
+│   ├── ocr_pdfs.py
+│   ├── clean_text.py
+│   ├── process_complaints.py
+│   ├── process_settlements.py
+│   ├── normalize_filings.py
+│   └── reprocess_amended_complaints.py
+└── utils/                   # Utilities & one-time scripts
+    ├── build_cases_summary.py
+    ├── create_indexes.py
+    ├── migrate_settlements.py
+    ├── validate_filings.py
+    └── aggregate_cases.py
+```
+
 ### Key Files
 - `app.py`: FastAPI app (~580 lines) with Pydantic models and dependency injection
 - `static/index.html`: Frontend HTML + JavaScript
 - `static/css/styles.css`: Frontend styles with design system
-- `scripts/process_complaints.py`: LLM extraction for complaints (GPT-4o), handles amended complaint pairs
-- `scripts/process_settlements.py`: LLM extraction for settlements (GPT-4o)
-  - Supports 21 settlement types including:
-    - Settlement Agreement and Order, Waiver and Consent, amendments, modifications
-    - Findings of Fact, Conclusions of Law and Order (contested cases that went to hearing)
+- `scripts/process_single_file.py`: Unified pipeline for single-file processing
+  - Supports 21 settlement types and complaint types
+  - Automatic page-based OCR timeout (30s/page, 2-30 min range)
+  - Handles amended complaints with amendment summary generation
+- `scripts/batch/process_complaints.py`: Batch LLM extraction for complaints (GPT-4o)
+- `scripts/batch/process_settlements.py`: Batch LLM extraction for settlements (GPT-4o)
   - Automatic chunking for documents >70k chars to handle TPM limits
-  - Handles `-1` vs `-01` case number suffix variations in file matching
-- `scripts/reprocess_amended_complaints.py`: Migration script for adding amendment data to existing complaints
-- `scripts/create_indexes.py`: Creates MongoDB indexes for query performance
-- `scripts/prompts/complaint_extraction.md`: LLM prompt for complaints
-- `scripts/prompts/settlement_extraction.md`: LLM prompt for settlements
-- `scripts/prompts/amendment_comparison.md`: LLM prompt for comparing original vs amended complaints
+- `scripts/utils/create_indexes.py`: Creates MongoDB indexes for query performance
 
 ### Frontend Design System
 
