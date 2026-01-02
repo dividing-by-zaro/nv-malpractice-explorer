@@ -250,6 +250,10 @@ OPENAI_API_KEY=sk-...      # For LLM processing (GPT-4o)
 MONGODB_URI=mongodb://...   # MongoDB connection string
 ```
 
+## Roadmap
+
+- [ ] Add Cloudflare R2 storage for OCR'd PDFs (persistent storage, no egress fees)
+
 ## License
 
 This project processes publicly available government records from the Nevada State Board of Medical Examiners.
