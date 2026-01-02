@@ -14,7 +14,7 @@ load_dotenv()
 
 
 def create_indexes():
-    """Create indexes for complaints and settlements collections."""
+    """Create indexes for complaints, settlements, and license_only_filings collections."""
     mongo_uri = os.environ.get("MONGODB_URI")
     if not mongo_uri:
         raise ValueError("MONGODB_URI environment variable is required")
@@ -23,6 +23,7 @@ def create_indexes():
     db = client["malpractice"]
     complaints = db["complaints"]
     settlements = db["settlements"]
+    license_only_filings = db["license_only_filings"]
 
     print("Creating indexes for complaints collection...")
 
@@ -76,6 +77,44 @@ def create_indexes():
     )
     print("  - year")
 
+    print("\nCreating indexes for license_only_filings collection...")
+
+    # Unique index on pdf_url
+    license_only_filings.create_index(
+        "pdf_url",
+        unique=True,
+        name="pdf_url_unique"
+    )
+    print("  - pdf_url (unique)")
+
+    # Index for license_number lookups
+    license_only_filings.create_index(
+        "license_number",
+        name="license_number_idx"
+    )
+    print("  - license_number")
+
+    # Index for document type filtering
+    license_only_filings.create_index(
+        "type",
+        name="type_idx"
+    )
+    print("  - type")
+
+    # Index for year filtering
+    license_only_filings.create_index(
+        "year",
+        name="year_idx"
+    )
+    print("  - year")
+
+    # Index for respondent lookups
+    license_only_filings.create_index(
+        "respondent",
+        name="respondent_idx"
+    )
+    print("  - respondent")
+
     print("\nListing all indexes:")
     print("\ncomplaints:")
     for idx in complaints.list_indexes():
@@ -83,6 +122,10 @@ def create_indexes():
 
     print("\nsettlements:")
     for idx in settlements.list_indexes():
+        print(f"  - {idx['name']}: {idx['key']}")
+
+    print("\nlicense_only_filings:")
+    for idx in license_only_filings.list_indexes():
         print(f"  - {idx['name']}: {idx['key']}")
 
     client.close()

@@ -53,8 +53,10 @@ uv run uvicorn app:app --reload --port 8000
 
 - **Cases Tab**: Browse complaints with custom multi-select filters
   - Filters: Category, specialty, settlement status, license action (with Select All/Clear buttons)
+  - "Missing" option in specialty filter to find cases without specialty data
   - Sort by: Date (Newest/Oldest), Respondent A-Z/Z-A
   - Auto-search on filter change, no manual submit needed
+  - Clearing all options in a filter shows "no cases matched" message
   - Narrower layout (900px max-width) for improved readability
   - Case cards show:
     - Row 1: Doctor name + license action tag (yellow→red severity) + category tag (blue/purple)

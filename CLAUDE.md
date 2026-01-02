@@ -193,12 +193,18 @@ app.py → Web UI at http://localhost:8000
 - `settlements`: Extracted settlement data with `llm_extracted` field, linked via `complaint_ids[]` array
   - **Important**: Settlements use `case_numbers[]` array (not singular `case_number`) because one settlement can resolve multiple complaints
   - Unique index is on `pdf_url`, not `case_number`
+- `license_only_filings`: Administrative actions tied to a license number (not a case number)
+  - Examples: Order of Summary Suspension, Order Accepting Voluntary Surrender, probation releases
+  - Identified by `LICENSE-{number}` pattern (e.g., LICENSE-401)
+  - Contains OCR text and metadata, no LLM processing
+  - Fields: `license_number`, `type`, `year`, `date`, `respondent`, `pdf_url`, `text_content`
 - `cases_summary`: Status tracking for each case (OCR status, extraction status)
 
 ### MongoDB Indexes
 Run `uv run python scripts/utils/create_indexes.py` to create performance indexes:
 - `complaints`: `case_number` (unique), `llm_extracted` (sparse), `category+specialty+year` (compound), `year`, `respondent`
 - `settlements`: `pdf_url` (unique), `case_numbers`, `llm_extracted` (sparse), `year`
+- `license_only_filings`: `pdf_url` (unique), `license_number`, `type`, `year`, `respondent`
 
 ### Web App Features (app.py)
 - **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, settlement status, license action)
@@ -307,13 +313,15 @@ scripts/
 - Single-select with radio style (sort, settlement status)
 - Select All / Clear buttons
 - Auto-search on selection change
+- **None selected behavior**: Returns `null` (not empty array), triggers "no cases matched" message
+- **"Missing" filter option**: Specialty filter includes "Missing" to find cases without specialty data (queries null/empty/non-existent)
 
 **Date Sorting**: Uses MongoDB aggregation pipeline with `$dateFromString` to parse M/D/YYYY date strings for correct chronological sorting.
 
 **API Enhancement**: `/api/complaints` accepts comma-separated values for multi-select filters and includes:
 - `settlement_summary`: license_action, fine_amount, investigation_costs, cme_hours, probation_months, date
 - `case_index`: Position of this case in the series (from case_number suffix, e.g., -1, -2)
-- `total_cases`: Total cases with same prefix (e.g., "19-28023-*")
+- `total_cases`: `max(suffix, actual_count)` - handles cases where earlier numbers are missing (e.g., only "-2" exists → shows "Case 2 of 2")
 
 **API Performance Optimizations** (in `get_complaints`):
 - Settlement lookup fetches only settlements for case numbers in current page (not all 604)

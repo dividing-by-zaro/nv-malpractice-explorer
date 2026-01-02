@@ -47,6 +47,9 @@ load_dotenv()
 PROJECT_ROOT = Path(__file__).parent.parent
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
+# License-only case number pattern (e.g., LICENSE-401, LICENSE-3298)
+LICENSE_ONLY_PATTERN = re.compile(r"^LICENSE-\d+$", re.IGNORECASE)
+
 # Document type classification
 COMPLAINT_TYPES = {
     "Complaint": 1,
@@ -104,16 +107,31 @@ CLEANING_PATTERNS = {
 # Document Type Detection
 # -----------------------------------------------------------------------------
 
-def classify_document_type(doc_type: str) -> str:
+def is_license_only_case(case_number: str) -> bool:
     """
-    Classify a document as 'complaint', 'settlement', or 'ignored'.
+    Check if a case number is a license-only identifier.
+
+    License-only documents are administrative actions tied to a license number
+    rather than a formal complaint case number (e.g., LICENSE-401, LICENSE-3298).
+    """
+    return bool(LICENSE_ONLY_PATTERN.match(case_number or ""))
+
+
+def classify_document_type(doc_type: str, case_number: str = "") -> str:
+    """
+    Classify a document as 'complaint', 'settlement', 'license_only', or 'ignored'.
 
     Args:
         doc_type: The document type string from the filename or metadata
+        case_number: The case number (used to detect license-only documents)
 
     Returns:
-        'complaint', 'settlement', or 'ignored'
+        'complaint', 'settlement', 'license_only', or 'ignored'
     """
+    # Check if it's a license-only document (tied to license number, not case)
+    if is_license_only_case(case_number):
+        return "license_only"
+
     # Check if it's a complaint type
     if doc_type in COMPLAINT_TYPES:
         return "complaint"
@@ -808,6 +826,71 @@ def process_settlement(
 
 
 # -----------------------------------------------------------------------------
+# License-Only Filing Processing
+# -----------------------------------------------------------------------------
+
+def process_license_only_filing(
+    metadata: dict,
+    text_content: str,
+    db,
+    dry_run: bool = False,
+) -> dict:
+    """
+    Process a license-only filing document and store in MongoDB.
+
+    License-only filings are administrative actions tied to a license number
+    (e.g., LICENSE-401) rather than a formal complaint case. These include
+    summary suspensions, voluntary surrenders, probation releases, etc.
+
+    No LLM processing is performed - just stores metadata and OCR text.
+    """
+    license_number = metadata["case_number"]  # e.g., "LICENSE-401"
+    doc_type = metadata["type"]
+    pdf_url = metadata.get("pdf_url", f"local://{metadata.get('pdf_path', license_number)}")
+
+    collection = db["license_only_filings"]
+
+    # Check for OCR failure
+    line_count = len([l for l in text_content.strip().split('\n') if l.strip()])
+    ocr_failed = line_count <= 1
+
+    result = {
+        "license_number": license_number,
+        "type": doc_type,
+        "ocr_failed": ocr_failed,
+    }
+
+    if dry_run:
+        result["dry_run"] = True
+        return result
+
+    # Build document for MongoDB
+    document = {
+        "license_number": license_number,
+        "year": metadata.get("year"),
+        "date": metadata.get("date"),
+        "title": metadata.get("title", doc_type),
+        "type": doc_type,
+        "respondent": metadata.get("respondent", ""),
+        "pdf_url": pdf_url,
+        "text_content": text_content,
+        "text_file": metadata.get("text_file"),
+        "ocr_failed": ocr_failed,
+        "processed_at": datetime.now(timezone.utc),
+    }
+
+    # Upsert to MongoDB by pdf_url (unique identifier)
+    collection.update_one(
+        {"pdf_url": pdf_url},
+        {"$set": document},
+        upsert=True
+    )
+    print("  Stored in MongoDB (license_only_filings collection)")
+
+    return result
+
+
+# -----------------------------------------------------------------------------
 # Main Pipeline
 # -----------------------------------------------------------------------------
 
@@ -853,7 +936,7 @@ def process_single_file(
     print(f"  Year: {metadata['year']}")
 
     # Classify document type
-    doc_class = classify_document_type(metadata["type"])
+    doc_class = classify_document_type(metadata["type"], metadata["case_number"])
     print(f"  Classification: {doc_class.upper()}")
 
     if doc_class == "ignored":
@@ -913,11 +996,15 @@ def process_single_file(
     # Read cleaned text
     text_content = text_path.read_text(encoding="utf-8", errors="replace")
 
-    # Step 3: LLM Processing
-    print(f"\n  Step 3: LLM Processing")
+    # Step 3: Store in MongoDB (with LLM processing for complaints/settlements)
+    if doc_class == "license_only":
+        print(f"\n  Step 3: Store in MongoDB (no LLM processing)")
+    else:
+        print(f"\n  Step 3: LLM Processing")
 
     if dry_run:
-        print("  [DRY RUN] Would process with LLM and store in MongoDB")
+        msg = "Would store in MongoDB" if doc_class == "license_only" else "Would process with LLM and store in MongoDB"
+        print(f"  [DRY RUN] {msg}")
         return {
             "status": "dry_run",
             "case_number": metadata["case_number"],
@@ -929,12 +1016,15 @@ def process_single_file(
     # Connect to services
     mongo_client = get_mongo_client()
     db = mongo_client["malpractice"]
-    openai_client = get_openai_client()
 
     # Process based on document type
-    if doc_class == "complaint":
+    if doc_class == "license_only":
+        result = process_license_only_filing(metadata, text_content, db, dry_run)
+    elif doc_class == "complaint":
+        openai_client = get_openai_client()
         result = process_complaint(metadata, text_content, openai_client, db, dry_run, model)
     else:  # settlement
+        openai_client = get_openai_client()
         result = process_settlement(metadata, text_content, openai_client, db, dry_run, model)
 
     result["status"] = "success"

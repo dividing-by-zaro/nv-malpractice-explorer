@@ -317,6 +317,7 @@ def get_filters(db: DB):
 
     specialties = complaints.distinct("llm_extracted.specialty")
     specialties = sorted([s for s in specialties if s])
+    specialties.append("Missing")  # Add option to filter for cases without specialty
 
     years = complaints.distinct("year")
     years = sorted([y for y in years if y], reverse=True)
@@ -373,10 +374,28 @@ def get_complaints(
 
     if specialty:
         specialties = [s.strip() for s in specialty.split(",")]
-        if len(specialties) == 1:
-            query["llm_extracted.specialty"] = specialties[0]
+        has_missing = "Missing" in specialties
+        real_specialties = [s for s in specialties if s != "Missing"]
+
+        if has_missing and not real_specialties:
+            # Only "Missing" selected - match null, empty, or non-existent
+            query["$or"] = [
+                {"llm_extracted.specialty": {"$exists": False}},
+                {"llm_extracted.specialty": None},
+                {"llm_extracted.specialty": ""}
+            ]
+        elif has_missing and real_specialties:
+            # "Missing" + real specialties - use $or
+            query["$or"] = [
+                {"llm_extracted.specialty": {"$in": real_specialties}},
+                {"llm_extracted.specialty": {"$exists": False}},
+                {"llm_extracted.specialty": None},
+                {"llm_extracted.specialty": ""}
+            ]
+        elif len(real_specialties) == 1:
+            query["llm_extracted.specialty"] = real_specialties[0]
         else:
-            query["llm_extracted.specialty"] = {"$in": specialties}
+            query["llm_extracted.specialty"] = {"$in": real_specialties}
 
     if year:
         years = [int(y.strip()) for y in year.split(",")]
@@ -564,9 +583,11 @@ def get_complaints(
         if case_num in settlement_lookup:
             doc["settlement_summary"] = settlement_lookup[case_num]
         # Attach case index and total based on case number prefix
+        # Use max of suffix and actual count to handle cases where earlier numbers are missing
         prefix = get_case_prefix(case_num)
-        doc["case_index"] = get_case_suffix(case_num)
-        doc["total_cases"] = prefix_counts.get(prefix, 1)
+        case_suffix = get_case_suffix(case_num)
+        doc["case_index"] = case_suffix
+        doc["total_cases"] = max(case_suffix, prefix_counts.get(prefix, 1))
         results.append(doc)
 
     return ComplaintsResponse(complaints=results, total=total)

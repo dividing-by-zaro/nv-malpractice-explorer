@@ -937,11 +937,9 @@ button.secondary:hover {
 .no-results, .loading {
   padding: 60px 40px;
   text-align: center;
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
   color: var(--gray);
-  text-transform: uppercase;
-  letter-spacing: 1px;
   background: white;
   border: var(--border-weight) solid rgba(52, 49, 45, 0.12);
   box-shadow: var(--shadow-sm);

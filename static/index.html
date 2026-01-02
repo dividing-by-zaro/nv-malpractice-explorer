@@ -404,9 +404,12 @@
             }
 
             getValue() {
-                // For multi-select: return array if not all selected, empty if all selected
+                // For multi-select: return array if not all selected, empty if all selected, null if none selected
                 // For single-select: return the single value
                 if (this.isMulti) {
+                    if (this.selected.size === 0) {
+                        return null; // None selected = no matches
+                    }
                     if (this.selected.size === this.options.length) {
                         return []; // All selected = no filter
                     }
@@ -879,16 +882,23 @@
             const params = new URLSearchParams();
 
             // Get values from custom selects
-            const category = customSelects['category']?.getValue() || [];
-            const specialty = customSelects['specialty']?.getValue() || [];
+            const category = customSelects['category']?.getValue();
+            const specialty = customSelects['specialty']?.getValue();
             const sort = customSelects['sort']?.getValue() || 'date_desc';
             const hasSettlement = customSelects['has_settlement']?.getValue() || '';
-            const licenseAction = customSelects['license_action']?.getValue() || [];
+            const licenseAction = customSelects['license_action']?.getValue();
 
-            // Multi-select filters: send as comma-separated
-            if (category.length > 0) params.set('category', category.join(','));
-            if (specialty.length > 0) params.set('specialty', specialty.join(','));
-            if (licenseAction.length > 0) params.set('license_action', licenseAction.join(','));
+            // If any multi-select filter has nothing selected (null), show no results
+            if (category === null || specialty === null || licenseAction === null) {
+                document.getElementById('results').innerHTML = '<div class="no-results">No complaints found matching your criteria. Select at least one option in each filter.</div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            // Multi-select filters: send as comma-separated (empty array = all selected = no filter)
+            if (category && category.length > 0) params.set('category', category.join(','));
+            if (specialty && specialty.length > 0) params.set('specialty', specialty.join(','));
+            if (licenseAction && licenseAction.length > 0) params.set('license_action', licenseAction.join(','));
             if (sort) params.set('sort', sort);
             if (hasSettlement) params.set('has_settlement', hasSettlement);
             params.set('skip', page * pageSize);

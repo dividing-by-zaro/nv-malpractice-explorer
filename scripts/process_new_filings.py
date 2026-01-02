@@ -19,6 +19,7 @@ Usage:
 
 import argparse
 import os
+import re
 import sys
 import tempfile
 import time
@@ -67,6 +68,29 @@ def get_filings_page(year: int, client: httpx.Client) -> str | None:
         raise
 
 
+def normalize_case_number(case_info: str) -> str:
+    """
+    Normalize case number, converting License No format to LICENSE-XXXX.
+
+    Examples:
+        "Case No 24-12345-1" -> "24-12345-1"
+        "License No 10534" -> "LICENSE-10534"
+        "License No RC36" -> "LICENSE-RC36"
+    """
+    case_info = case_info.strip()
+
+    # Handle "Case No" prefix
+    if case_info.lower().startswith("case no "):
+        return case_info[8:].strip()
+
+    # Handle "License No" format - convert to LICENSE-XXXX
+    license_match = re.match(r'License No\.?\s*([A-Za-z]*\d+)', case_info, re.IGNORECASE)
+    if license_match:
+        return f"LICENSE-{license_match.group(1)}"
+
+    return case_info
+
+
 def parse_title(title_text: str) -> dict:
     """Parse title into type, respondent, and case number."""
     parts = title_text.split(" - ")
@@ -74,9 +98,7 @@ def parse_title(title_text: str) -> dict:
     if len(parts) >= 3:
         doc_type = parts[0].strip()
         respondent = parts[1].strip()
-        case_number = parts[2].strip()
-        if case_number.lower().startswith("case no "):
-            case_number = case_number[8:].strip()
+        case_number = normalize_case_number(parts[2].strip())
     elif len(parts) == 2:
         doc_type = parts[0].strip()
         respondent = parts[1].strip()
@@ -180,6 +202,11 @@ def get_existing_pdf_urls(db) -> set[str]:
         if doc.get("pdf_url"):
             existing.add(doc["pdf_url"])
 
+    # Get from license_only_filings collection
+    for doc in db["license_only_filings"].find({}, {"pdf_url": 1}):
+        if doc.get("pdf_url"):
+            existing.add(doc["pdf_url"])
+
     return existing
 
 
@@ -263,7 +290,7 @@ def process_new_filings(
     processable_filings = []
     ignored_filings = []
     for filing in new_filings:
-        doc_class = classify_document_type(filing["type"])
+        doc_class = classify_document_type(filing["type"], filing.get("case_number", ""))
         if doc_class == "ignored":
             ignored_filings.append(filing)
         else:
@@ -272,8 +299,8 @@ def process_new_filings(
 
     print(f"\nStep 3: Filtering...")
     print(f"  New filings: {len(new_filings)}")
-    print(f"  Processable (complaint/settlement): {len(processable_filings)}")
-    print(f"  Ignored (orders, etc.): {len(ignored_filings)}")
+    print(f"  Processable (complaint/settlement/license_only): {len(processable_filings)}")
+    print(f"  Ignored (other orders, etc.): {len(ignored_filings)}")
 
     if not processable_filings:
         print("\nNo new processable filings. Exiting.")
