@@ -151,9 +151,10 @@ Run `uv run python scripts/create_indexes.py` to create performance indexes:
 - `settlements`: `pdf_url` (unique), `case_numbers`, `llm_extracted` (sparse), `year`
 
 ### Web App Features (app.py)
-- **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, settlement status)
+- **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, settlement status, license action)
   - Filters auto-search on change, support multi-selection with Select All/Clear buttons
   - API accepts comma-separated values for multi-select filters
+  - License action filter queries settlements collection and returns matching complaints
   - Sort options: Date (Newest/Oldest), Respondent A-Z/Z-A
   - Content wrapper has max-width 900px, centered
 - **Case Cards**: Display all fields with "—" for missing data
@@ -231,7 +232,7 @@ Run `uv run python scripts/create_indexes.py` to create performance indexes:
 **Component Naming**: BEM convention for case cards (`.case-card`, `.case-card__header`, `.case-card__body`, etc.)
 
 **Custom Multi-Select Dropdowns**: JavaScript `CustomSelect` class manages filter dropdowns with:
-- Multi-select with checkboxes (category, specialty)
+- Multi-select with checkboxes (category, specialty, license action)
 - Single-select with radio style (sort, settlement status)
 - Select All / Clear buttons
 - Auto-search on selection change

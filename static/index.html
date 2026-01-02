@@ -69,6 +69,22 @@
                             </div>
                         </div>
                     </div>
+                    <div class="filter-group">
+                        <label>License Action</label>
+                        <div class="custom-select" id="license-action-select" data-multi="true" data-filter="license_action">
+                            <div class="custom-select__trigger">
+                                <span class="custom-select__value">All Actions</span>
+                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
+                            </div>
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__options"></div>
+                                <div class="custom-select__actions">
+                                    <button type="button" class="custom-select__btn custom-select__btn--select">Select All</button>
+                                    <button type="button" class="custom-select__btn custom-select__btn--clear">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="filter-spacer"></div>
                     <div class="filter-group">
                         <label>Sort By</label>
@@ -235,7 +251,8 @@
                     'drug': 'All Drugs',
                     'sex': 'Any',
                     'sort': 'Date (Newest)',
-                    'has_settlement': 'All'
+                    'has_settlement': 'All',
+                    'license_action': 'All Actions'
                 };
                 return labels[this.filterName] || 'Select...';
             }
@@ -433,6 +450,10 @@
                 { value: 'yes', label: 'Has Settlement' },
                 { value: 'no', label: 'No Settlement' }
             ]);
+
+            // Initialize License Action dropdown (multi-select)
+            customSelects['license_action'] = new CustomSelect(document.getElementById('license-action-select'));
+            customSelects['license_action'].setOptions(data.license_actions.map(a => ({ value: a, label: a })));
 
             // Re-render Lucide icons for dropdown arrows
             lucide.createIcons();
@@ -862,10 +883,12 @@
             const specialty = customSelects['specialty']?.getValue() || [];
             const sort = customSelects['sort']?.getValue() || 'date_desc';
             const hasSettlement = customSelects['has_settlement']?.getValue() || '';
+            const licenseAction = customSelects['license_action']?.getValue() || [];
 
             // Multi-select filters: send as comma-separated
             if (category.length > 0) params.set('category', category.join(','));
             if (specialty.length > 0) params.set('specialty', specialty.join(','));
+            if (licenseAction.length > 0) params.set('license_action', licenseAction.join(','));
             if (sort) params.set('sort', sort);
             if (hasSettlement) params.set('has_settlement', hasSettlement);
             params.set('skip', page * pageSize);
@@ -913,7 +936,7 @@
 
         function resetFilters() {
             // Reset all multi-select filters to "all selected"
-            ['category', 'specialty'].forEach(key => {
+            ['category', 'specialty', 'license_action'].forEach(key => {
                 if (customSelects[key]) {
                     customSelects[key].selectAll();
                 }

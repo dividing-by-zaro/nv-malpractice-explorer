@@ -52,7 +52,7 @@ uv run uvicorn app:app --reload --port 8000
 ## Web App Features
 
 - **Cases Tab**: Browse complaints with custom multi-select filters
-  - Filters: Category, specialty, settlement status (with Select All/Clear buttons)
+  - Filters: Category, specialty, settlement status, license action (with Select All/Clear buttons)
   - Sort by: Date (Newest/Oldest), Respondent A-Z/Z-A
   - Auto-search on filter change, no manual submit needed
   - Narrower layout (900px max-width) for improved readability

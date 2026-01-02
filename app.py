@@ -42,6 +42,7 @@ class FiltersResponse(BaseModel):
     specialties: list[str]
     years: list[int]
     drugs: list[str]
+    license_actions: list[str]
 
 
 class Complainant(BaseModel):
@@ -309,6 +310,7 @@ def get_stats(db: DB):
 def get_filters(db: DB):
     """Get available filter options."""
     complaints = db["complaints"]
+    settlements = db["settlements"]
 
     categories = complaints.distinct("llm_extracted.category")
     categories = sorted([c for c in categories if c])
@@ -328,11 +330,16 @@ def get_filters(db: DB):
     drugs_result = list(complaints.aggregate(drugs_pipeline))
     drugs = [d["_id"] for d in drugs_result]
 
+    # Get distinct license actions from settlements
+    license_actions = settlements.distinct("llm_extracted.license_action")
+    license_actions = sorted([a for a in license_actions if a])
+
     return FiltersResponse(
         categories=categories,
         specialties=specialties,
         years=years,
-        drugs=drugs
+        drugs=drugs,
+        license_actions=license_actions
     )
 
 
@@ -345,6 +352,7 @@ def get_complaints(
     drug: Optional[str] = None,
     sex: Optional[str] = None,
     has_settlement: Optional[str] = None,
+    license_action: Optional[str] = None,
     sort: str = "date_desc",
     skip: int = 0,
     limit: int = Query(default=20, le=100)
@@ -406,6 +414,33 @@ def get_complaints(
             query["case_number"] = {"$in": settlement_case_numbers}
         elif has_settlement == "no":
             query["case_number"] = {"$nin": settlement_case_numbers}
+
+    # Filter by license action - get case numbers from settlements with matching action
+    if license_action:
+        actions = [a.strip() for a in license_action.split(",")]
+        if len(actions) == 1:
+            action_match = {"llm_extracted.license_action": actions[0]}
+        else:
+            action_match = {"llm_extracted.license_action": {"$in": actions}}
+
+        action_case_numbers_pipeline = [
+            {"$match": action_match},
+            {"$unwind": "$case_numbers"},
+            {"$group": {"_id": None, "case_nums": {"$addToSet": "$case_numbers"}}}
+        ]
+        result = list(settlements.aggregate(action_case_numbers_pipeline))
+        action_case_numbers = result[0]["case_nums"] if result else []
+
+        # Combine with existing case_number filter if present
+        if "case_number" in query:
+            # Intersect with existing filter
+            existing = query["case_number"]
+            if "$in" in existing:
+                query["case_number"] = {"$in": list(set(existing["$in"]) & set(action_case_numbers))}
+            elif "$nin" in existing:
+                query["case_number"] = {"$in": [cn for cn in action_case_numbers if cn not in existing["$nin"]]}
+        else:
+            query["case_number"] = {"$in": action_case_numbers}
 
     # Sorting - need aggregation pipeline for date sorting since dates are stored as M/D/YYYY strings
     total = complaints.count_documents(query)
