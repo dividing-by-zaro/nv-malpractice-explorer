@@ -64,10 +64,27 @@ def filter_settlements(filings: list[dict]) -> list[dict]:
     share the same PDF. We consolidate them into a single entry with all case_numbers.
     """
     settlement_types = [
+        # Primary settlement types
         "Settlement Agreement and Order",
         "Settlement, Waiver and Consent Agreement",
+        "Settlement, Waiver and Consent Agreement and Order",  # +112 documents
         "Settlement Agreement",
+        # Amended settlements
         "Amended Settlement Agreement and Order",
+        "First Amended Settlement Agreement and Order",
+        "Settlement Agreement and Order Lifting Suspension",
+        # Combined stipulation + settlement
+        "Stipulation and Settlement, Waiver and Consent Agreement and Order",
+        # Consent agreements (functionally settlements)
+        "Consent Agreement for Revocation of License",
+        # Modification orders (update existing settlements)
+        "Order Modifying Previously Approved Settlement Agreement",
+        "Order Modifying Terms of Previously Approved Settlement Agreement",
+        "Order Modifying Conditions of Settlement Agreement",
+        "Order Amending Settlement Agreement",
+        "Stipulation and Order Amending Terms of Settlement Agreement",
+        "Addendum to Previously Adopted Settlement",
+        "Order Vacating Remaining Term of Previously Adopted Settlement, Waiver and Consent Agreement",
     ]
 
     # Filter to only settlements
@@ -132,6 +149,20 @@ def get_text_file_path(filing: dict, text_dir: Path) -> Path | None:
             if "settlement" in fname_lower:
                 return txt_file
 
+    # Second fallback: handle -1 vs -01 suffix variations
+    # e.g., case_number "05-9441-1" should match file "05-9441-01_..."
+    for case_number in case_numbers:
+        # Extract base (e.g., "05-9441") and try with padded suffix
+        parts = case_number.rsplit("-", 1)
+        if len(parts) == 2:
+            base, suffix = parts
+            padded_suffix = suffix.zfill(2)  # "1" -> "01"
+            alt_case_number = f"{base}-{padded_suffix}"
+            for txt_file in year_dir.glob(f"{alt_case_number}_*.txt"):
+                fname_lower = txt_file.name.lower()
+                if "settlement" in fname_lower:
+                    return txt_file
+
     return None
 
 
@@ -157,27 +188,130 @@ def call_openai(client: OpenAI, system_prompt: str, user_content: str, model: st
     return json.loads(content)
 
 
+def chunk_text(text: str, max_chars: int = 70000, overlap: int = 500) -> list[str]:
+    """Split text into chunks that fit within token limits, with overlap for context."""
+    if len(text) <= max_chars:
+        return [text]
+
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + max_chars
+        if end < len(text):
+            # Try to break at a paragraph or sentence boundary
+            for sep in ["\n\n", "\n", ". ", " "]:
+                boundary = text.rfind(sep, start + max_chars - 5000, end)
+                if boundary > start:
+                    end = boundary + len(sep)
+                    break
+        chunks.append(text[start:end])
+        start = end - overlap if end < len(text) else end
+    return chunks
+
+
+def merge_extraction_results(results: list[dict]) -> dict:
+    """Merge multiple extraction results from chunked processing."""
+    if len(results) == 1:
+        return results[0]
+
+    merged = {
+        "summary": results[0].get("summary", ""),
+        "license_action": None,
+        "probation_months": None,
+        "ineligible_to_reapply_months": None,
+        "fine_amount": None,
+        "investigation_costs": None,
+        "costs_payment_deadline_days": None,
+        "costs_stayed": False,
+        "cme_hours": None,
+        "cme_topic": None,
+        "cme_deadline_months": None,
+        "public_reprimand": False,
+        "npdb_report": False,
+        "practice_restrictions": [],
+        "monitoring_requirements": [],
+        "violations_admitted": [],
+        "violations_dismissed": [],
+        "_chunked": True,
+        "_chunk_count": len(results),
+    }
+
+    # Merge by taking first non-null value for scalars, union for arrays
+    for r in results:
+        if not merged["license_action"] and r.get("license_action"):
+            merged["license_action"] = r["license_action"]
+        if not merged["probation_months"] and r.get("probation_months"):
+            merged["probation_months"] = r["probation_months"]
+        if not merged["ineligible_to_reapply_months"] and r.get("ineligible_to_reapply_months"):
+            merged["ineligible_to_reapply_months"] = r["ineligible_to_reapply_months"]
+        if not merged["fine_amount"] and r.get("fine_amount"):
+            merged["fine_amount"] = r["fine_amount"]
+        if not merged["investigation_costs"] and r.get("investigation_costs"):
+            merged["investigation_costs"] = r["investigation_costs"]
+        if not merged["costs_payment_deadline_days"] and r.get("costs_payment_deadline_days"):
+            merged["costs_payment_deadline_days"] = r["costs_payment_deadline_days"]
+        if r.get("costs_stayed"):
+            merged["costs_stayed"] = True
+        if not merged["cme_hours"] and r.get("cme_hours"):
+            merged["cme_hours"] = r["cme_hours"]
+        if not merged["cme_topic"] and r.get("cme_topic"):
+            merged["cme_topic"] = r["cme_topic"]
+        if not merged["cme_deadline_months"] and r.get("cme_deadline_months"):
+            merged["cme_deadline_months"] = r["cme_deadline_months"]
+        if r.get("public_reprimand"):
+            merged["public_reprimand"] = True
+        if r.get("npdb_report"):
+            merged["npdb_report"] = True
+
+        # Merge arrays (deduplicate by converting to string for comparison)
+        for restriction in r.get("practice_restrictions", []):
+            if restriction not in merged["practice_restrictions"]:
+                merged["practice_restrictions"].append(restriction)
+        for req in r.get("monitoring_requirements", []):
+            if req not in merged["monitoring_requirements"]:
+                merged["monitoring_requirements"].append(req)
+        for v in r.get("violations_admitted", []):
+            # Dedupe by nrs_code
+            if not any(existing.get("nrs_code") == v.get("nrs_code") for existing in merged["violations_admitted"]):
+                merged["violations_admitted"].append(v)
+        for v in r.get("violations_dismissed", []):
+            if not any(existing.get("nrs_code") == v.get("nrs_code") for existing in merged["violations_dismissed"]):
+                merged["violations_dismissed"].append(v)
+
+    return merged
+
+
 def process_single_settlement(
     filing: dict,
     text_content: str,
     openai_client: OpenAI,
     system_prompt: str
 ) -> dict:
-    """Process a single settlement through the LLM."""
-    user_content = f"""## Metadata
+    """Process a single settlement through the LLM, chunking if necessary."""
+    MAX_CHARS = 70000  # ~17.5k tokens, leaving room for prompt and response
+
+    chunks = chunk_text(text_content, max_chars=MAX_CHARS)
+
+    results = []
+    for i, chunk in enumerate(chunks):
+        chunk_note = f"\n\n[This is part {i+1} of {len(chunks)} of the document]" if len(chunks) > 1 else ""
+
+        user_content = f"""## Metadata
 
 - **Title:** {filing.get('title', 'Unknown')}
 - **Respondent:** {filing.get('respondent', 'Unknown')}
 - **Case Number:** {filing.get('case_number', 'Unknown')}
 - **Date:** {filing.get('date', 'Unknown')}
-- **Type:** {filing.get('type', 'Unknown')}
+- **Type:** {filing.get('type', 'Unknown')}{chunk_note}
 
 ## Document Text
 
-{text_content}
+{chunk}
 """
+        result = call_openai(openai_client, system_prompt, user_content)
+        results.append(result)
 
-    return call_openai(openai_client, system_prompt, user_content)
+    return merge_extraction_results(results)
 
 
 def main():

@@ -4,12 +4,34 @@ Tools to scrape, process, and analyze public medical malpractice filings from th
 
 ## Current Stats
 
-- **1,593 filings** scraped (2008-2025)
-- **674 complaints** processed with LLM extraction (86.3%)
-- **442 unique settlements** processed (21 resolve multiple complaints)
-- **$1,049,700** in total fines collected
-- **$2,144,887** in investigation costs recovered
-- **2,501 hours** of continuing education ordered
+- **1,594 filings** scraped (2008-2025)
+- **679 complaints** in MongoDB (674 with LLM extraction)
+- **604 settlements** in MongoDB (all with LLM extraction)
+- **86.9% coverage** - 590 complaints have matched settlements
+- **89 truly unsettled** - pending at state level (mostly 2023-2025)
+
+### Pipeline Status
+
+| Stage | Complaints | Settlements |
+|-------|------------|-------------|
+| 1. Source filings | 770 | 645 |
+| 2. PDFs downloaded | 770 | 762 |
+| 3. OCR'd text files | 763 | 762 |
+| 4. MongoDB (LLM extracted) | 679 (674) | 604 (604) |
+| 5. Linked (settlement → complaint) | — | 568 (94%) |
+
+### Known Gaps (TODO)
+
+**Complaints needing processing** (have text, not in MongoDB):
+- `08-12069-1` - Complaint type not recognized by filter
+- `13-10054-1` - Has both Complaint and First Amended Complaint
+- `21-12891-1`, `21-12891-3` - "Complaint and Errata" type
+
+**Complaints needing OCR** (PDF exists, no text):
+- `14-38887-1`, `21-41427-1`, `21-12423-1`
+
+**Complaints needing PDF download**:
+- `24-43198-1`, `18-19369-1`, `18-9800-1`, `19-38390-1`
 
 ## Quick Start
 

@@ -798,6 +798,11 @@
         }
 
         function buildSettlementPdfPath(s) {
+            // Use text_file path if available (most reliable)
+            if (s.text_file) {
+                return '/' + s.text_file.replace('text/', 'pdfs/').replace('.txt', '.pdf');
+            }
+            // Fallback to constructing path
             const typeSlug = s.type.replace(/[,]/g, '').replace(/\s+/g, '_').substring(0, 30);
             return `/pdfs/${s.year}/${s.case_number}_${typeSlug}.pdf`;
         }

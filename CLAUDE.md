@@ -169,6 +169,9 @@ app.py → Web UI at http://localhost:8000
 - `static/css/styles.css`: Frontend styles with design system
 - `scripts/process_complaints.py`: LLM extraction for complaints (GPT-4o), handles amended complaint pairs
 - `scripts/process_settlements.py`: LLM extraction for settlements (GPT-4o)
+  - Supports 17 settlement types (Settlement Agreement and Order, Waiver and Consent, amendments, modifications, etc.)
+  - Automatic chunking for documents >70k chars to handle TPM limits
+  - Handles `-1` vs `-01` case number suffix variations in file matching
 - `scripts/reprocess_amended_complaints.py`: Migration script for adding amendment data to existing complaints
 - `scripts/prompts/complaint_extraction.md`: LLM prompt for complaints
 - `scripts/prompts/settlement_extraction.md`: LLM prompt for settlements
@@ -270,8 +273,7 @@ MONGODB_URI=mongodb://...
 
 ## Current Stats
 
-- 674 complaints with LLM extraction (86.3%)
-- 463 settlements with LLM extraction (59.3%)
-- 436 cases with both complaint and settlement extracted (55.8%)
-- $1,049,700 in total fines collected
-- $2,144,887 in investigation costs recovered
+- 679 complaints in MongoDB, 674 with LLM extraction (99.3%)
+- 604 settlements in MongoDB, all with LLM extraction (100%)
+- 590 cases with both complaint and settlement (86.9% coverage)
+- 89 complaints truly unsettled (pending at state level, mostly 2023-2025)
