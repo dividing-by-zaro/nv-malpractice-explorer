@@ -85,10 +85,25 @@ def filter_settlements(filings: list[dict]) -> list[dict]:
         "Stipulation and Order Amending Terms of Settlement Agreement",
         "Addendum to Previously Adopted Settlement",
         "Order Vacating Remaining Term of Previously Adopted Settlement, Waiver and Consent Agreement",
+        # Findings of Fact (contested cases that went to hearing)
+        "Findings of Fact, Conclusions of Law and Order",
+        "Findings of Fact, Conclusions of Law, and Order",  # Variant with comma
+        "Amended Findings of Fact, Conclusions of Law and Order",
+        "Findings of Fact, Conclustions of Law and Order",  # Typo in source data
     ]
 
+    # Also match types that have extra text appended (e.g., doctor name in type field)
+    def matches_settlement_type(filing_type: str) -> bool:
+        if filing_type in settlement_types:
+            return True
+        # Handle malformed types like "Findings of Fact, Conclusions of Law and Order Elliott Schmerler, MD"
+        for st in settlement_types:
+            if filing_type.startswith(st):
+                return True
+        return False
+
     # Filter to only settlements
-    all_settlements = [f for f in filings if f.get("type") in settlement_types]
+    all_settlements = [f for f in filings if matches_settlement_type(f.get("type", ""))]
 
     # Deduplicate by pdf_url, collecting all case_numbers for each unique PDF
     by_pdf_url: dict[str, dict] = {}
@@ -146,7 +161,7 @@ def get_text_file_path(filing: dict, text_dir: Path) -> Path | None:
     for case_number in case_numbers:
         for txt_file in year_dir.glob(f"{case_number}_*.txt"):
             fname_lower = txt_file.name.lower()
-            if "settlement" in fname_lower:
+            if "settlement" in fname_lower or "findings" in fname_lower:
                 return txt_file
 
     # Second fallback: handle -1 vs -01 suffix variations
@@ -160,7 +175,7 @@ def get_text_file_path(filing: dict, text_dir: Path) -> Path | None:
             alt_case_number = f"{base}-{padded_suffix}"
             for txt_file in year_dir.glob(f"{alt_case_number}_*.txt"):
                 fname_lower = txt_file.name.lower()
-                if "settlement" in fname_lower:
+                if "settlement" in fname_lower or "findings" in fname_lower:
                     return txt_file
 
     return None
@@ -221,6 +236,7 @@ def merge_extraction_results(results: list[dict]) -> dict:
         "ineligible_to_reapply_months": None,
         "fine_amount": None,
         "investigation_costs": None,
+        "charity_donation": None,
         "costs_payment_deadline_days": None,
         "costs_stayed": False,
         "cme_hours": None,
@@ -248,6 +264,8 @@ def merge_extraction_results(results: list[dict]) -> dict:
             merged["fine_amount"] = r["fine_amount"]
         if not merged["investigation_costs"] and r.get("investigation_costs"):
             merged["investigation_costs"] = r["investigation_costs"]
+        if not merged["charity_donation"] and r.get("charity_donation"):
+            merged["charity_donation"] = r["charity_donation"]
         if not merged["costs_payment_deadline_days"] and r.get("costs_payment_deadline_days"):
             merged["costs_payment_deadline_days"] = r["costs_payment_deadline_days"]
         if r.get("costs_stayed"):

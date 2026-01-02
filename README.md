@@ -6,9 +6,9 @@ Tools to scrape, process, and analyze public medical malpractice filings from th
 
 - **1,594 filings** scraped (2008-2025)
 - **679 complaints** in MongoDB (674 with LLM extraction)
-- **604 settlements** in MongoDB (all with LLM extraction)
-- **86.9% coverage** - 590 complaints have matched settlements
-- **89 truly unsettled** - pending at state level (mostly 2023-2025)
+- **660 settlements** in MongoDB (all with LLM extraction)
+  - Includes 56 "Findings of Fact" documents (contested cases that went to hearing)
+- **615 cases** with both complaint and settlement linked
 
 ### Pipeline Status
 
@@ -245,6 +245,7 @@ text/{year}/                  # Extracted plain text
 - `probation_months`: Duration of probation
 - `fine_amount`: Dollar amount of fine
 - `investigation_costs`: Costs recovered from respondent
+- `charity_donation`: Required charitable donation (rare)
 - `cme_hours`, `cme_topic`: Continuing education requirements
 - `public_reprimand`, `npdb_report`: Boolean flags
 - `violations_admitted[]`: NRS codes and descriptions admitted

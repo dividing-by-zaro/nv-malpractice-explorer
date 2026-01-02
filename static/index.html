@@ -759,6 +759,11 @@
                 html += `<div class="penalty-item"><span class="penalty-label">Investigation Costs</span><span class="penalty-value">$${ext.investigation_costs.toLocaleString()}</span></div>`;
             }
 
+            // Charity donation
+            if (ext.charity_donation) {
+                html += `<div class="penalty-item"><span class="penalty-label">Charity Donation</span><span class="penalty-value">$${ext.charity_donation.toLocaleString()}</span></div>`;
+            }
+
             // CME
             if (ext.cme_hours) {
                 let cme = `${ext.cme_hours} hours`;

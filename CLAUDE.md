@@ -174,7 +174,9 @@ Run `uv run python scripts/create_indexes.py` to create performance indexes:
 - `static/css/styles.css`: Frontend styles with design system
 - `scripts/process_complaints.py`: LLM extraction for complaints (GPT-4o), handles amended complaint pairs
 - `scripts/process_settlements.py`: LLM extraction for settlements (GPT-4o)
-  - Supports 17 settlement types (Settlement Agreement and Order, Waiver and Consent, amendments, modifications, etc.)
+  - Supports 21 settlement types including:
+    - Settlement Agreement and Order, Waiver and Consent, amendments, modifications
+    - Findings of Fact, Conclusions of Law and Order (contested cases that went to hearing)
   - Automatic chunking for documents >70k chars to handle TPM limits
   - Handles `-1` vs `-01` case number suffix variations in file matching
 - `scripts/reprocess_amended_complaints.py`: Migration script for adding amendment data to existing complaints
@@ -279,12 +281,13 @@ MONGODB_URI=mongodb://...
   - `probation_months`: Duration of probation
   - `fine_amount`: Dollar amount
   - `investigation_costs`: Costs recovered
+  - `charity_donation`: Required charitable donation (rare, ~5 cases)
   - `cme_hours`, `cme_topic`: Continuing education requirements
   - `violations_admitted[]`, `violations_dismissed[]`: NRS codes and descriptions
 
 ## Current Stats
 
 - 679 complaints in MongoDB, 674 with LLM extraction (99.3%)
-- 604 settlements in MongoDB, all with LLM extraction (100%)
-- 590 cases with both complaint and settlement (86.9% coverage)
-- 89 complaints truly unsettled (pending at state level, mostly 2023-2025)
+- 660 settlements in MongoDB, all with LLM extraction (100%)
+- 615 cases with both complaint and settlement
+- Includes 56 "Findings of Fact" documents (contested cases that went to hearing)

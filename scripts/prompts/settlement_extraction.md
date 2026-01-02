@@ -18,6 +18,7 @@ Return ONLY a valid JSON object with the following structure (no markdown, no ex
   "ineligible_to_reapply_months": "integer or null",
   "fine_amount": "number or null",
   "investigation_costs": "number or null",
+  "charity_donation": "number or null",
   "costs_payment_deadline_days": "integer or null",
   "costs_stayed": "boolean",
   "cme_hours": "integer or null",
@@ -76,6 +77,9 @@ Total monetary fine/penalty amount in dollars. Do NOT include investigation cost
 
 ### investigation_costs (number or null)
 Total investigation and prosecution costs in dollars. Set to null if not mentioned.
+
+### charity_donation (number or null)
+Amount of charitable donation required as part of the settlement in dollars. Set to null if no charity donation required.
 
 ### costs_payment_deadline_days (integer or null)
 Number of days to pay fines and costs. Set to null if not specified or if stayed.
@@ -149,6 +153,7 @@ Array of violations/counts that were dismissed as part of the settlement. Each o
   "ineligible_to_reapply_months": null,
   "fine_amount": 500,
   "investigation_costs": 6753.24,
+  "charity_donation": null,
   "costs_payment_deadline_days": 60,
   "costs_stayed": false,
   "cme_hours": 6,
