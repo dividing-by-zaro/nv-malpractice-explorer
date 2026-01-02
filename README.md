@@ -31,7 +31,7 @@ Tools to scrape, process, and analyze public medical malpractice filings from th
 - `14-38887-1`, `21-41427-1`, `21-12423-1`
 
 **Complaints needing PDF download**:
-- `24-43198-1`, `18-19369-1`, `18-9800-1`, `19-38390-1`
+- `24-43198-1`
 
 ## Quick Start
 
@@ -81,7 +81,7 @@ The frontend uses an "Archival Brutalism" aesthetic with sharp corners, border-b
 
 - **Color Palette**: Near-black (#14110F), charcoal (#34312D), gray (#7E7F83), tan (#D9C5B2), off-white (#F3F3F4)
 - **Category Colors**: Blue/purple palette (treatment, diagnosis, medication, surgical, controlled substances, etc.)
-- **License Action Colors**: Yellow→red severity gradient (reprimand, probation, suspended, surrendered, revoked)
+- **License Action Colors**: Gray for "no action", yellow→red severity gradient (reprimand, probation, suspended, surrendered, revoked)
 - **Typography**: Libre Baskerville (headers), IBM Plex Mono (data), Source Sans 3 (body)
 - **Icons**: Lucide Icons library
 

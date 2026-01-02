@@ -712,13 +712,13 @@ button.secondary:hover {
 }
 .case-card__action-tag.action-revoked {
   border-left-color: #dc2626;
-  background: #fecaca;
-  color: #991b1b;
+  background: #dc2626;
+  color: white;
 }
 .case-card__action-tag.action-none {
   border-left-color: var(--gray);
-  background: var(--off-white);
-  color: var(--gray);
+  background: #e5e5e5;
+  color: #555;
 }
 
 /* Body - main content */

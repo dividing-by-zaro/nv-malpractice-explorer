@@ -50,6 +50,9 @@ PROMPTS_DIR = Path(__file__).parent / "prompts"
 # License-only case number pattern (e.g., LICENSE-401, LICENSE-3298)
 LICENSE_ONLY_PATTERN = re.compile(r"^LICENSE-\d+$", re.IGNORECASE)
 
+# Case number normalization pattern (strips leading zeros from suffix)
+LEADING_ZERO_PATTERN = re.compile(r"^(\d+-\d+)-0+(\d+)$")
+
 # Document type classification
 COMPLAINT_TYPES = {
     "Complaint": 1,
@@ -117,6 +120,28 @@ def is_license_only_case(case_number: str) -> bool:
     return bool(LICENSE_ONLY_PATTERN.match(case_number or ""))
 
 
+def fix_case_number_format(case_number: str) -> str:
+    """
+    Normalize case number format for consistent matching.
+
+    Fixes:
+    - Strip leading zeros from doc suffix: 19-32539-01 -> 19-32539-1
+    - Remove stuck 'pdf' suffix: 08-12069-1pdf -> 08-12069-1
+
+    This ensures complaint and settlement case numbers match during linking.
+    """
+    if not case_number:
+        return case_number
+
+    # Remove stuck 'pdf' suffix
+    case_number = re.sub(r"pdf$", "", case_number, flags=re.IGNORECASE)
+
+    # Strip leading zeros from doc number: XX-XXXXX-01 -> XX-XXXXX-1
+    case_number = LEADING_ZERO_PATTERN.sub(r"\1-\2", case_number)
+
+    return case_number
+
+
 def classify_document_type(doc_type: str, case_number: str = "") -> str:
     """
     Classify a document as 'complaint', 'settlement', 'license_only', or 'ignored'.
@@ -160,12 +185,12 @@ def parse_filename(filepath: Path) -> dict:
     parts = stem.split("_", 1)
     if len(parts) < 2:
         return {
-            "case_number": stem,
+            "case_number": fix_case_number_format(stem),
             "type": "Unknown",
             "year": None,
         }
 
-    case_number = parts[0]
+    case_number = fix_case_number_format(parts[0])
     doc_type = parts[1].replace("_", " ")
 
     # Extract year from case number (format: YY-XXXXX-N)

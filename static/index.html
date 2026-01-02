@@ -543,14 +543,15 @@
         function getActionClass(action) {
             // Severity from least to most: none < reprimand < probation < suspended < surrendered < revoked
             // Use case-insensitive partial matching to handle variations like "SUSPENSION (STAYED)"
-            if (!action) return '';
+            if (!action) return 'action-none';
             const lowerAction = action.toLowerCase();
-            if (lowerAction.includes('revok')) return 'action-revoked';
+            if (lowerAction.includes('revoc') || lowerAction.includes('revok')) return 'action-revoked';
             if (lowerAction.includes('surrender')) return 'action-surrendered';
             if (lowerAction.includes('suspen')) return 'action-suspended';
             if (lowerAction.includes('probation')) return 'action-probation';
             if (lowerAction.includes('reprimand')) return 'action-reprimand';
-            return '';
+            if (lowerAction.includes('no action') || lowerAction === 'none') return 'action-none';
+            return 'action-none';
         }
 
         function renderComplaint(c) {

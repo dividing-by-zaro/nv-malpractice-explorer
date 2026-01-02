@@ -262,6 +262,7 @@ scripts/
   - Supports 21 settlement types and complaint types
   - Automatic page-based OCR timeout (30s/page, 2-30 min range)
   - Handles amended complaints with amendment summary generation
+  - **Case number normalization**: `fix_case_number_format()` strips leading zeros from suffix (e.g., `19-32539-01` → `19-32539-1`) to ensure consistent matching between complaints and settlements
 - `scripts/batch/process_complaints.py`: Batch LLM extraction for complaints (GPT-4o)
 - `scripts/batch/process_settlements.py`: Batch LLM extraction for settlements (GPT-4o)
   - Automatic chunking for documents >70k chars to handle TPM limits
@@ -292,11 +293,12 @@ scripts/
 - Other: #8b5cf6 (medium purple)
 
 **License Action Severity Colors** (yellow to red gradient, uses partial matching for variations like "SUSPENSION (STAYED)"):
+- No Action: #e5e5e5 (gray background)
 - Reprimand: #eab308 (yellow)
 - Probation: #f59e0b (amber)
 - Suspended: #f97316 (orange)
 - Surrendered: #ef4444 (red-orange)
-- Revoked: #dc2626 (red)
+- Revoked: #dc2626 (solid red background with white text)
 
 **Typography**:
 - Display: Libre Baskerville (serif, headers)
