@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nevada Medical Malpractice Explorer - Tools to scrape, process, and analyze public medical malpractice filings from the Nevada State Board of Medical Examiners (2008-2025). Includes LLM-powered data extraction and a FastAPI web app for exploring complaints, settlements, and aggregate statistics.
 
+## Workflow Rules
+
+- **Never commit unless explicitly told** - Do not stage or commit changes automatically. Wait for explicit user instruction to commit.
+
 ## Data Pipeline (New PDFs → Website)
 
 When new filings are published, run these steps in order:
@@ -283,7 +287,7 @@ MONGODB_URI=mongodb://...
   - `investigation_costs`: Costs recovered
   - `charity_donation`: Required charitable donation (rare, ~5 cases)
   - `cme_hours`, `cme_topic`: Continuing education requirements
-  - `violations_admitted[]`, `violations_dismissed[]`: NRS codes and descriptions
+  - `violations_admitted[]`: NRS codes and descriptions
 
 ## Current Stats
 

@@ -247,7 +247,6 @@ def merge_extraction_results(results: list[dict]) -> dict:
         "practice_restrictions": [],
         "monitoring_requirements": [],
         "violations_admitted": [],
-        "violations_dismissed": [],
         "_chunked": True,
         "_chunk_count": len(results),
     }
@@ -292,9 +291,6 @@ def merge_extraction_results(results: list[dict]) -> dict:
             # Dedupe by nrs_code
             if not any(existing.get("nrs_code") == v.get("nrs_code") for existing in merged["violations_admitted"]):
                 merged["violations_admitted"].append(v)
-        for v in r.get("violations_dismissed", []):
-            if not any(existing.get("nrs_code") == v.get("nrs_code") for existing in merged["violations_dismissed"]):
-                merged["violations_dismissed"].append(v)
 
     return merged
 

@@ -790,15 +790,6 @@
                 html += '</div>';
             }
 
-            // Violations dismissed
-            if (ext.violations_dismissed && ext.violations_dismissed.length > 0) {
-                html += '<div class="info-section"><h3>Violations Dismissed</h3>';
-                ext.violations_dismissed.forEach(v => {
-                    html += `<div class="violation-item dismissed"><span class="violation-code">${v.nrs_code || v.count}</span><br>${v.description}</div>`;
-                });
-                html += '</div>';
-            }
-
             return html;
         }
 

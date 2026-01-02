@@ -34,13 +34,6 @@ Return ONLY a valid JSON object with the following structure (no markdown, no ex
       "nrs_code": "string",
       "description": "string"
     }
-  ],
-  "violations_dismissed": [
-    {
-      "count": "string",
-      "nrs_code": "string or null",
-      "description": "string"
-    }
   ]
 }
 ```
@@ -127,12 +120,6 @@ Array of violations the respondent admitted to. Each object should have:
 - **nrs_code**: The NRS statute cited (e.g., "NRS 630.306(1)(c)")
 - **description**: Brief description (e.g., "Illegal Distribution of Controlled Substances")
 
-### violations_dismissed (array of objects)
-Array of violations/counts that were dismissed as part of the settlement. Each object should have:
-- **count**: The count number (e.g., "Count II", "Counts III and IV")
-- **nrs_code**: The NRS statute if mentioned, or null
-- **description**: Brief description if available
-
 ## Important Rules
 
 1. Return ONLY valid JSON - no markdown code blocks, no explanations
@@ -166,10 +153,6 @@ Array of violations/counts that were dismissed as part of the settlement. Each o
   "violations_admitted": [
     {"count": "Count I and V", "nrs_code": "NRS 630.306(1)(b)(3)", "description": "Violation of Pharmacy Board Regulations"},
     {"count": "Count II and VI", "nrs_code": "NRS 630.3062(1)(a)", "description": "Failure to Maintain Proper Medical Records"}
-  ],
-  "violations_dismissed": [
-    {"count": "Count III", "nrs_code": "NRS 630.302(4)", "description": "Malpractice"},
-    {"count": "Count IV", "nrs_code": "NRS 630.306(1)(b)(2)", "description": "Violation of Standards of Practice"}
   ]
 }
 ```

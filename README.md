@@ -14,11 +14,11 @@ Tools to scrape, process, and analyze public medical malpractice filings from th
 
 | Stage | Complaints | Settlements |
 |-------|------------|-------------|
-| 1. Source filings | 770 | 645 |
+| 1. Source filings | 770 | 664 |
 | 2. PDFs downloaded | 770 | 762 |
 | 3. OCR'd text files | 763 | 762 |
-| 4. MongoDB (LLM extracted) | 679 (674) | 604 (604) |
-| 5. Linked (settlement → complaint) | — | 568 (94%) |
+| 4. MongoDB (LLM extracted) | 679 (674) | 660 (660) |
+| 5. Linked (settlement → complaint) | — | 615 |
 
 ### Known Gaps (TODO)
 
@@ -249,7 +249,6 @@ text/{year}/                  # Extracted plain text
 - `cme_hours`, `cme_topic`: Continuing education requirements
 - `public_reprimand`, `npdb_report`: Boolean flags
 - `violations_admitted[]`: NRS codes and descriptions admitted
-- `violations_dismissed[]`: NRS codes and descriptions dismissed
 
 ## Environment Variables
 
