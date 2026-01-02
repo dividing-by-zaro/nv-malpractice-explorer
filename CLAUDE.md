@@ -190,8 +190,9 @@ app.py → Web UI at http://localhost:8000
 ### MongoDB Collections
 - `complaints`: Extracted complaint data with `llm_extracted` field
   - **Amended complaints**: If `is_amended: true`, includes `original_complaint` (type, date, pdf_url) and `amendment_summary` (LLM-generated description of changes)
-- `settlements`: Extracted settlement data with `llm_extracted` field, linked via `complaint_ids[]` array
-  - **Important**: Settlements use `case_numbers[]` array (not singular `case_number`) because one settlement can resolve multiple complaints
+- `settlements`: Resolution documents (settlements, hearings) with `llm_extracted` field, linked via `complaint_ids[]` array
+  - **Important**: Uses `case_numbers[]` array (not singular `case_number`) because one resolution can resolve multiple complaints
+  - `resolution_outcome`: "Settlement" (negotiated) or "Hearing" (contested case with Findings of Fact)
   - Unique index is on `pdf_url`, not `case_number`
 - `license_only_filings`: Administrative actions tied to a license number (not a case number)
   - Examples: Order of Summary Suspension, Order Accepting Voluntary Surrender, probation releases
@@ -207,7 +208,7 @@ Run `uv run python scripts/utils/create_indexes.py` to create performance indexe
 - `license_only_filings`: `pdf_url` (unique), `license_number`, `type`, `year`, `respondent`
 
 ### Web App Features (app.py)
-- **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, settlement status, license action)
+- **Cases Tab**: Browse complaints with custom multi-select filters (category, specialty, resolution status, license action)
   - Filters auto-search on change, support multi-selection with Select All/Clear buttons
   - API accepts comma-separated values for multi-select filters
   - License action filter queries settlements collection and returns matching complaints
@@ -219,12 +220,12 @@ Run `uv run python scripts/utils/create_indexes.py` to create performance indexe
   - Body: Summary (max-width 82ch for readability)
   - Footer: Procedure, fine, investigative costs (text labels with colored icons)
   - Case numbering derived from case_number suffix (e.g., "19-28023-1" → Case 1, counted by prefix)
-- **Modal View**: Click any case to see details + embedded PDF viewer with tabs for complaint/settlement
-  - **Timeline section** at top: Complaint date, Settlement date, Time to Resolution
+- **Modal View**: Click any case to see details + embedded PDF viewer with tabs for complaint/resolution
+  - **Timeline section** at top: Complaint date, Resolution date, Time to Resolution
   - Amended complaints show "Amended Complaint" tab label and "Original Complaint" tab for viewing both PDFs
   - "Changes from Original" section displays LLM-generated amendment summary
 - **Statistics Tab**: Aggregate analytics with Chart.js
-  - Stats cards: Total complaints, processed, settlements, categories, unique drugs
+  - Stats cards: Total complaints, processed, resolutions, categories, unique drugs
   - Totals cards: Fines collected, investigation costs, CME hours, probation time
   - Charts: Cases by year, category breakdown, top specialties, license actions
   - Histograms: Fine/cost distributions (capped at 90th percentile)
@@ -250,6 +251,7 @@ scripts/
     ├── build_cases_summary.py
     ├── create_indexes.py
     ├── migrate_settlements.py
+    ├── add_resolution_outcome.py  # Backfill resolution_outcome field
     ├── validate_filings.py
     └── aggregate_cases.py
 ```
@@ -358,10 +360,12 @@ MONGODB_URI=mongodb://...
   - `drugs[]`: Medications mentioned
   - `category`: Standard of Care, Controlled Substances, Sexual Misconduct, etc.
 
-### Settlement Document (MongoDB)
-- `case_numbers[]`: Array of case identifiers this settlement resolves (one-to-many relationship)
+### Resolution Document (MongoDB)
+Stored in `settlements` collection. Represents case outcomes (settlements or hearings).
+- `case_numbers[]`: Array of case identifiers this resolution resolves (one-to-many relationship)
 - `complaint_ids[]`: Array of ObjectIds linking to complaints
-- `pdf_url`: Unique identifier for the settlement PDF
+- `resolution_outcome`: "Settlement" (negotiated agreement) or "Hearing" (contested case, Findings of Fact)
+- `pdf_url`: Unique identifier for the resolution PDF
 - `llm_extracted`: LLM-extracted fields:
   - `license_action`: revoked, suspended, surrendered, probation, reprimand, none
   - `probation_months`: Duration of probation

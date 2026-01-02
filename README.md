@@ -6,8 +6,8 @@ Tools to scrape, process, and analyze public medical malpractice filings from th
 
 - **1,594 filings** scraped (2008-2025)
 - **679 complaints** in MongoDB (674 with LLM extraction)
-- **660 settlements** in MongoDB (all with LLM extraction)
-  - Includes 56 "Findings of Fact" documents (contested cases that went to hearing)
+- **663 resolutions** in MongoDB (all with LLM extraction)
+  - 607 negotiated settlements, 56 contested hearings (Findings of Fact)
 - **615 cases** with both complaint and settlement linked
 
 ### Pipeline Status
@@ -52,7 +52,7 @@ uv run uvicorn app:app --reload --port 8000
 ## Web App Features
 
 - **Cases Tab**: Browse complaints with custom multi-select filters
-  - Filters: Category, specialty, settlement status, license action (with Select All/Clear buttons)
+  - Filters: Category, specialty, resolution status, license action (with Select All/Clear buttons)
   - "Missing" option in specialty filter to find cases without specialty data
   - Sort by: Date (Newest/Oldest), Respondent A-Z/Z-A
   - Auto-search on filter change, no manual submit needed
@@ -63,12 +63,12 @@ uv run uvicorn app:app --reload --port 8000
     - Row 2: Specialty + "Case x of y in [year]" (based on case number series)
     - Summary text with comfortable reading width
     - Footer: Procedure, fine, investigative costs (with colored icons)
-- **Case Details**: Click any case to view extracted data + embedded PDF viewer (tabs for complaint/settlement)
-  - Timeline section shows complaint date, settlement date, and time to resolution
+- **Case Details**: Click any case to view extracted data + embedded PDF viewer (tabs for complaint/resolution)
+  - Timeline section shows complaint date, resolution date, and time to resolution
   - Amended complaints display both original and amended PDFs in separate tabs
   - LLM-generated summary explains what changed between versions
 - **Statistics Tab**: Aggregate analytics dashboard
-  - Stats cards: Total complaints, processed count, settlements, categories
+  - Stats cards: Total complaints, processed count, resolutions, categories
   - Totals: Fines collected, investigation costs, CME hours, probation time
   - Charts: Cases by year, category breakdown, top specialties, license actions
   - Histograms: Fine/cost distributions (capped at 90th percentile for readability)
@@ -233,8 +233,9 @@ text/{year}/                  # Extracted plain text
 - `original_complaint`: Original complaint metadata (type, date, pdf_url) - if amended
 - `amendment_summary`: LLM-generated description of changes - if amended
 
-### Settlement Extraction (LLM)
-- `case_numbers[]`: Array of case IDs this settlement resolves (one-to-many)
+### Resolution Extraction (LLM)
+- `case_numbers[]`: Array of case IDs this resolution resolves (one-to-many)
+- `resolution_outcome`: "Settlement" (negotiated) or "Hearing" (contested case, Findings of Fact)
 - `license_action`: revoked, suspended, surrendered, probation, reprimand, none
 - `probation_months`: Duration of probation
 - `fine_amount`: Dollar amount of fine

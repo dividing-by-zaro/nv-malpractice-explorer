@@ -213,6 +213,25 @@ def is_amended_complaint(doc_type: str) -> bool:
     return doc_type in COMPLAINT_TYPES and COMPLAINT_TYPES.get(doc_type, 0) > 1
 
 
+def get_resolution_outcome(doc_type: str) -> str:
+    """
+    Determine resolution_outcome based on document type.
+
+    Returns:
+        "Hearing" for contested cases (Findings of Fact)
+        "Settlement" for negotiated agreements (everything else)
+    """
+    if not doc_type:
+        return "Settlement"
+
+    # Hearing: Findings of Fact documents (contested cases that went to formal hearing)
+    if "findings of fact" in doc_type.lower():
+        return "Hearing"
+
+    # Everything else is a Settlement (negotiated agreement)
+    return "Settlement"
+
+
 # -----------------------------------------------------------------------------
 # OCR Processing
 # -----------------------------------------------------------------------------
@@ -789,6 +808,9 @@ def process_settlement(
     if complaint_ids:
         print(f"  Linked to {len(complaint_ids)} complaint(s)")
 
+    # Determine resolution outcome (Settlement vs Hearing)
+    resolution_outcome = get_resolution_outcome(doc_type)
+
     # Build document for MongoDB
     document = {
         "case_numbers": case_numbers,
@@ -797,6 +819,7 @@ def process_settlement(
         "date": metadata.get("date"),
         "title": metadata.get("title", doc_type),
         "type": doc_type,
+        "resolution_outcome": resolution_outcome,
         "respondent": metadata.get("respondent", ""),
         "pdf_url": pdf_url,
         "text_content": text_content,

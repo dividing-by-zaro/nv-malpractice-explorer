@@ -58,7 +58,7 @@
                         </div>
                     </div>
                     <div class="filter-group">
-                        <label>Settlement Status</label>
+                        <label>Resolution Status</label>
                         <div class="custom-select custom-select--single" id="settlement-select" data-multi="false" data-filter="has_settlement">
                             <div class="custom-select__trigger">
                                 <span class="custom-select__value">All</span>
@@ -200,7 +200,7 @@
                     <div class="tabs" id="pdf-tabs">
                         <button class="tab active" onclick="switchTab('complaint')" id="complaint-tab"><span id="complaint-tab-label">Complaint</span></button>
                         <button class="tab" onclick="switchTab('original')" id="original-tab" style="display:none;">Original Complaint</button>
-                        <button class="tab" onclick="switchTab('settlement')" id="settlement-tab" style="display:none;">Settlement</button>
+                        <button class="tab" onclick="switchTab('settlement')" id="settlement-tab" style="display:none;">Resolution</button>
                     </div>
                     <div class="modal-pdf" id="modal-pdf" style="flex: 1;"></div>
                 </div>
@@ -446,12 +446,12 @@
                 { value: 'respondent_desc', label: 'Respondent Z-A' }
             ]);
 
-            // Initialize Settlement dropdown (single select)
+            // Initialize Resolution Status dropdown (single select)
             customSelects['has_settlement'] = new CustomSelect(document.getElementById('settlement-select'));
             customSelects['has_settlement'].setOptions([
                 { value: '', label: 'All' },
-                { value: 'yes', label: 'Has Settlement' },
-                { value: 'no', label: 'No Settlement' }
+                { value: 'yes', label: 'Has Resolution' },
+                { value: 'no', label: 'Open' }
             ]);
 
             // Initialize License Action dropdown (multi-select)
@@ -476,8 +476,8 @@
                     <div class="stat-label">Processed</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value">${data.settlements}</div>
-                    <div class="stat-label">Settlements</div>
+                    <div class="stat-value">${data.resolutions}</div>
+                    <div class="stat-label">Resolutions</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">${data.categories}</div>
@@ -574,7 +574,7 @@
                         <div class="case-card__row">
                             <h3 class="case-card__name">${c.respondent}</h3>
                             <div class="case-card__tags">
-                                <span class="case-card__action-tag ${settlement.license_action && settlement.license_action !== 'none' ? getActionClass(settlement.license_action) : 'action-none'}">${settlement.license_action && settlement.license_action !== 'none' ? settlement.license_action : 'no settlement'}</span>
+                                <span class="case-card__action-tag ${settlement.license_action && settlement.license_action !== 'none' ? getActionClass(settlement.license_action) : 'action-none'}">${settlement.license_action && settlement.license_action !== 'none' ? settlement.license_action : 'Open'}</span>
                                 <span class="case-card__category ${ext.category ? getCategoryClass(ext.category) : ''}">${ext.category || '—'}</span>
                             </div>
                         </div>
@@ -617,8 +617,8 @@
             // Build complaint info panel
             let infoHtml = '';
 
-            // Timeline section - will be updated after fetching settlement
-            const timelineHtml = (settlementDate) => `
+            // Timeline section - will be updated after fetching resolution
+            const timelineHtml = (resolutionDate) => `
                 <div class="info-section timeline-section">
                     <h3>Timeline</h3>
                     <div class="timeline">
@@ -627,13 +627,13 @@
                             <span class="timeline-value">${formatDate(c.date)}</span>
                         </div>
                         <div class="timeline-item">
-                            <span class="timeline-label">Settlement</span>
-                            <span class="timeline-value">${settlementDate ? formatDate(settlementDate) : '—'}</span>
+                            <span class="timeline-label">Resolution</span>
+                            <span class="timeline-value">${resolutionDate ? formatDate(resolutionDate) : '—'}</span>
                         </div>
-                        ${settlementDate ? `
+                        ${resolutionDate ? `
                         <div class="timeline-item timeline-elapsed">
                             <span class="timeline-label">Time to Resolution</span>
-                            <span class="timeline-value">${formatTimeElapsed(c.date, settlementDate)}</span>
+                            <span class="timeline-value">${formatTimeElapsed(c.date, resolutionDate)}</span>
                         </div>
                         ` : ''}
                     </div>
@@ -712,14 +712,14 @@
                 `;
             }
 
-            // Fetch settlement data
-            let settlementDate = null;
+            // Fetch resolution data
+            let resolutionDate = null;
             try {
                 const res = await fetch(`/api/settlement/${caseNumber}`);
                 const settlement = await res.json();
                 if (settlement && settlement.case_number) {
                     currentSettlement = settlement;
-                    settlementDate = settlement.date;
+                    resolutionDate = settlement.date;
                     infoHtml += renderSettlementInfo(settlement);
                     document.getElementById('settlement-tab').style.display = 'block';
                     settlementPdfPath = buildSettlementPdfPath(settlement);
@@ -732,8 +732,8 @@
                 settlementPdfPath = null;
             }
 
-            // Prepend timeline section with settlement date
-            document.getElementById('modal-info').innerHTML = timelineHtml(settlementDate) + infoHtml;
+            // Prepend timeline section with resolution date
+            document.getElementById('modal-info').innerHTML = timelineHtml(resolutionDate) + infoHtml;
             lucide.createIcons();
 
             // Build PDF paths
@@ -759,7 +759,7 @@
 
         function renderSettlementInfo(s) {
             const ext = s.llm_extracted || {};
-            let html = '<div class="settlement-section"><h3><i data-lucide="scale"></i> Settlement Outcome</h3>';
+            let html = '<div class="settlement-section"><h3><i data-lucide="scale"></i> Resolution Outcome</h3>';
 
             // License action
             if (ext.license_action) {
@@ -1013,12 +1013,12 @@
                 </div>
             `;
 
-            // Render settlement summary
+            // Render resolution summary
             const summary = data.settlement_summary;
             document.getElementById('settlement-summary').innerHTML = `
                 <div class="summary-card">
                     <div class="value">${summary.total}</div>
-                    <div class="label">Total Settlements</div>
+                    <div class="label">Total Resolutions</div>
                 </div>
                 <div class="summary-card">
                     <div class="value">${summary.with_fine}</div>
@@ -1084,7 +1084,7 @@
             createChart('actionsChart', 'bar', {
                 labels: data.license_actions.map(d => d.action),
                 datasets: [{
-                    label: 'Settlements',
+                    label: 'Resolutions',
                     data: data.license_actions.map(d => d.count),
                     backgroundColor: '#D9C5B2',
                     borderColor: '#34312D',

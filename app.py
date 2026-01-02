@@ -31,7 +31,7 @@ class StatsResponse(BaseModel):
     """Overall statistics."""
     total: int
     with_extraction: int
-    settlements: int
+    resolutions: int
     categories: int
     drugs: int
 
@@ -115,7 +115,7 @@ class LLMExtractedSettlement(BaseModel):
 
 
 class Settlement(BaseModel):
-    """Settlement document."""
+    """Settlement/Resolution document."""
     id: Optional[str] = None
     case_number: Optional[str] = None
     case_numbers: list[str] = []
@@ -124,6 +124,7 @@ class Settlement(BaseModel):
     date: str
     year: int
     type: str
+    resolution_outcome: Optional[str] = None  # "Settlement", "Hearing", or null
     pdf_url: Optional[str] = None
     llm_extracted: Optional[LLMExtractedSettlement] = None
 
@@ -300,7 +301,7 @@ def get_stats(db: DB):
     return StatsResponse(
         total=total,
         with_extraction=with_extraction,
-        settlements=settlements_with_extraction,
+        resolutions=settlements_with_extraction,
         categories=len(categories),
         drugs=drugs_count
     )
@@ -546,6 +547,7 @@ def get_complaints(
                 "cme_hours": ext.get("cme_hours"),
                 "probation_months": ext.get("probation_months"),
                 "date": doc.get("date"),
+                "resolution_outcome": doc.get("resolution_outcome"),
             }
             for cn in doc.get("case_numbers", []):
                 if cn in case_numbers_in_results:
@@ -608,7 +610,7 @@ def get_random(db: DB):
     if result:
         doc = result[0]
         doc["_id"] = str(doc["_id"])
-        # Check for settlement
+        # Check for resolution
         case_num = doc.get("case_number")
         settlement = settlements.find_one({"case_numbers": case_num, "llm_extracted": {"$exists": True}})
         if settlement:
@@ -619,6 +621,7 @@ def get_random(db: DB):
                 "investigation_costs": ext.get("investigation_costs"),
                 "cme_hours": ext.get("cme_hours"),
                 "probation_months": ext.get("probation_months"),
+                "resolution_outcome": settlement.get("resolution_outcome"),
             }
         return doc
     return {"error": "No complaints found"}
