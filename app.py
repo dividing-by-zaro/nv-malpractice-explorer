@@ -8,7 +8,9 @@ Usage:
 
 import os
 import re
+import statistics
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -180,12 +182,23 @@ class Totals(BaseModel):
     max_year: Optional[int]
 
 
+class ResolutionTimeStats(BaseModel):
+    """Statistics about case resolution times."""
+    mean_days: float
+    median_days: float
+    min_days: int
+    max_days: int
+    count: int
+
+
 class AnalyticsResponse(BaseModel):
     """Aggregate analytics data."""
     fine_values: list[float]
     cost_values: list[float]
     cme_values: list[int]
     probation_values: list[int]
+    resolution_time_values: list[int]
+    resolution_time_stats: Optional[ResolutionTimeStats]
     license_actions: list[LicenseActionCount]
     specialties: list[SpecialtyCount]
     categories: list[CategoryCount]
@@ -762,6 +775,50 @@ def get_analytics(db: DB):
     ]
     fines_by_year = list(settlements.aggregate(fines_by_year_pipeline))
 
+    # Calculate resolution times (days from complaint to resolution)
+    resolution_times = []
+    # Build a lookup of case_number -> complaint_date
+    complaint_dates = {}
+    for doc in complaints.find({"date": {"$exists": True}}, {"case_number": 1, "date": 1}):
+        try:
+            complaint_date = datetime.strptime(doc["date"], "%m/%d/%Y")
+            complaint_dates[doc["case_number"]] = complaint_date
+        except (ValueError, KeyError):
+            continue
+
+    # For each settlement, find the earliest complaint date and calculate resolution time
+    for settlement in settlements.find({"date": {"$exists": True, "$ne": None}, "case_numbers": {"$exists": True}}):
+        try:
+            date_str = settlement.get("date")
+            if not date_str:
+                continue
+            resolution_date = datetime.strptime(date_str, "%m/%d/%Y")
+            case_numbers = settlement.get("case_numbers", [])
+            # Find earliest complaint date for this settlement
+            earliest_complaint = None
+            for cn in case_numbers:
+                if cn in complaint_dates:
+                    if earliest_complaint is None or complaint_dates[cn] < earliest_complaint:
+                        earliest_complaint = complaint_dates[cn]
+            if earliest_complaint:
+                days = (resolution_date - earliest_complaint).days
+                if days >= 0:  # Only include valid (non-negative) resolution times
+                    resolution_times.append(days)
+        except (ValueError, KeyError, TypeError):
+            continue
+
+    # Calculate resolution time statistics
+    resolution_time_stats = None
+    if resolution_times:
+        sorted_times = sorted(resolution_times)
+        resolution_time_stats = ResolutionTimeStats(
+            mean_days=round(statistics.mean(resolution_times), 1),
+            median_days=float(statistics.median(resolution_times)),
+            min_days=min(resolution_times),
+            max_days=max(resolution_times),
+            count=len(resolution_times)
+        )
+
     # Calculate years span
     years = [r["_id"] for r in year_result if r["_id"]]
     year_span = max(years) - min(years) + 1 if years else 1
@@ -783,6 +840,8 @@ def get_analytics(db: DB):
         cost_values=cost_values,
         cme_values=cme_values,
         probation_values=probation_values,
+        resolution_time_values=resolution_times,
+        resolution_time_stats=resolution_time_stats,
         license_actions=[LicenseActionCount(action=r["_id"], count=r["count"]) for r in actions_result],
         specialties=[SpecialtyCount(specialty=r["_id"], count=r["count"]) for r in specialty_result],
         categories=[CategoryCount(category=r["_id"], count=r["count"]) for r in category_result],
@@ -791,3 +850,295 @@ def get_analytics(db: DB):
         settlement_summary=settlement_summary,
         totals=totals,
     )
+
+
+@app.get("/api/extended-analytics")
+def get_extended_analytics(db: DB):
+    """Get extended analytics for deep-dive statistics."""
+    complaints = db["complaints"]
+    settlements = db["settlements"]
+
+    # Build lookups
+    complaint_data = {}
+    for doc in complaints.find({"date": {"$exists": True}, "llm_extracted": {"$exists": True}}):
+        try:
+            complaint_date = datetime.strptime(doc["date"], "%m/%d/%Y")
+            ext = doc.get("llm_extracted", {})
+            complaint_data[doc["case_number"]] = {
+                "date": complaint_date,
+                "year": doc.get("year"),
+                "category": ext.get("category"),
+                "specialty": ext.get("specialty"),
+            }
+        except (ValueError, KeyError):
+            continue
+
+    # === RESOLUTION TIME BY CATEGORY ===
+    resolution_by_category = {}
+    resolution_by_action = {}
+
+    for s in settlements.find({"date": {"$exists": True, "$ne": None}, "case_numbers": {"$exists": True}}):
+        try:
+            res_date = datetime.strptime(s["date"], "%m/%d/%Y")
+            case_numbers = s.get("case_numbers", [])
+            earliest_cn = None
+            earliest_date = None
+            for cn in case_numbers:
+                if cn in complaint_data:
+                    cd = complaint_data[cn]["date"]
+                    if earliest_date is None or cd < earliest_date:
+                        earliest_date = cd
+                        earliest_cn = cn
+
+            if earliest_cn and earliest_date:
+                days = (res_date - earliest_date).days
+                if days >= 0:
+                    cat = complaint_data[earliest_cn].get("category")
+                    if cat:
+                        if cat not in resolution_by_category:
+                            resolution_by_category[cat] = []
+                        resolution_by_category[cat].append(days)
+
+                    ext = s.get("llm_extracted", {})
+                    action = (ext.get("license_action") or "").lower()
+                    if action:
+                        # Normalize action
+                        if "revok" in action or "revoc" in action:
+                            action_key = "revoked"
+                        elif "surrender" in action:
+                            action_key = "surrendered"
+                        elif "suspen" in action:
+                            action_key = "suspended"
+                        elif "probation" in action:
+                            action_key = "probation"
+                        elif "reprimand" in action:
+                            action_key = "reprimand"
+                        elif "none" in action or "no action" in action:
+                            action_key = "no action"
+                        else:
+                            action_key = None
+
+                        if action_key:
+                            if action_key not in resolution_by_action:
+                                resolution_by_action[action_key] = []
+                            resolution_by_action[action_key].append(days)
+        except (ValueError, KeyError, TypeError):
+            continue
+
+    def calc_stats(values):
+        if not values or len(values) < 3:
+            return None
+        sorted_vals = sorted(values)
+        return {
+            "n": len(values),
+            "median": float(sorted_vals[len(sorted_vals) // 2]),
+            "mean": round(sum(values) / len(values), 1),
+            "min": min(values),
+            "max": max(values),
+        }
+
+    resolution_time_by_category = [
+        {"category": cat, **calc_stats(days)}
+        for cat, days in resolution_by_category.items()
+        if calc_stats(days)
+    ]
+    resolution_time_by_category.sort(key=lambda x: x["median"])
+
+    resolution_time_by_action = [
+        {"action": action, **calc_stats(days)}
+        for action, days in resolution_by_action.items()
+        if calc_stats(days)
+    ]
+
+    # === FINES BY CATEGORY ===
+    fines_by_category = {}
+    fines_by_action = {}
+    fines_by_year = {}
+
+    for s in settlements.find({"llm_extracted.fine_amount": {"$exists": True, "$gt": 0}}):
+        fine = s["llm_extracted"]["fine_amount"]
+        year = s.get("year")
+
+        # By year
+        if year:
+            if year not in fines_by_year:
+                fines_by_year[year] = []
+            fines_by_year[year].append(fine)
+
+        # By category (from linked complaint)
+        case_numbers = s.get("case_numbers", [])
+        for cn in case_numbers:
+            if cn in complaint_data and complaint_data[cn].get("category"):
+                cat = complaint_data[cn]["category"]
+                if cat not in fines_by_category:
+                    fines_by_category[cat] = []
+                fines_by_category[cat].append(fine)
+                break
+
+        # By action
+        ext = s.get("llm_extracted", {})
+        action = (ext.get("license_action") or "").lower()
+        if "revok" in action:
+            action_key = "revoked"
+        elif "surrender" in action:
+            action_key = "surrendered"
+        elif "suspen" in action:
+            action_key = "suspended"
+        elif "probation" in action:
+            action_key = "probation"
+        elif "reprimand" in action:
+            action_key = "reprimand"
+        elif "none" in action or "no action" in action:
+            action_key = "no action"
+        else:
+            action_key = None
+
+        if action_key:
+            if action_key not in fines_by_action:
+                fines_by_action[action_key] = []
+            fines_by_action[action_key].append(fine)
+
+    def calc_fine_stats(values):
+        if not values or len(values) < 3:
+            return None
+        sorted_vals = sorted(values)
+        return {
+            "n": len(values),
+            "median": float(sorted_vals[len(sorted_vals) // 2]),
+            "mean": round(sum(values) / len(values), 0),
+            "total": sum(values),
+            "max": max(values),
+        }
+
+    fines_category_stats = [
+        {"category": cat, **calc_fine_stats(fines)}
+        for cat, fines in fines_by_category.items()
+        if calc_fine_stats(fines)
+    ]
+    fines_category_stats.sort(key=lambda x: -x["median"])
+
+    fines_action_stats = [
+        {"action": action, **calc_fine_stats(fines)}
+        for action, fines in fines_by_action.items()
+        if calc_fine_stats(fines)
+    ]
+
+    fines_year_stats = [
+        {"year": year, **calc_fine_stats(fines)}
+        for year, fines in fines_by_year.items()
+        if calc_fine_stats(fines)
+    ]
+    fines_year_stats.sort(key=lambda x: x["year"])
+
+    # Fine brackets
+    all_fines = []
+    for s in settlements.find({"llm_extracted.fine_amount": {"$exists": True, "$gt": 0}}):
+        all_fines.append(s["llm_extracted"]["fine_amount"])
+
+    fine_brackets = [
+        {"label": "Under $1,000", "count": sum(1 for f in all_fines if f < 1000)},
+        {"label": "$1,000 - $2,500", "count": sum(1 for f in all_fines if 1000 <= f <= 2500)},
+        {"label": "$2,501 - $5,000", "count": sum(1 for f in all_fines if 2501 <= f <= 5000)},
+        {"label": "$5,001 - $10,000", "count": sum(1 for f in all_fines if 5001 <= f <= 10000)},
+        {"label": "Over $10,000", "count": sum(1 for f in all_fines if f > 10000)},
+    ]
+
+    # === CME ANALYSIS ===
+    cme_by_category = {}
+    cme_by_action = {}
+    cme_topics = {}
+
+    for s in settlements.find({"llm_extracted.cme_hours": {"$exists": True, "$gt": 0}}):
+        ext = s.get("llm_extracted", {})
+        hours = ext.get("cme_hours", 0)
+        topic = ext.get("cme_topic", "")
+
+        # Count topics
+        if topic:
+            topic_lower = topic.lower().strip()
+            # Categorize topic
+            if "record" in topic_lower or "documentation" in topic_lower:
+                topic_cat = "Records/Documentation"
+            elif "prescri" in topic_lower or "controlled" in topic_lower or "opioid" in topic_lower:
+                topic_cat = "Prescribing/Opioids"
+            elif "ethic" in topic_lower or "professionalism" in topic_lower:
+                topic_cat = "Ethics"
+            elif "boundar" in topic_lower or "sexual" in topic_lower:
+                topic_cat = "Boundaries"
+            elif "impair" in topic_lower or "substance" in topic_lower:
+                topic_cat = "Impairment"
+            else:
+                topic_cat = "Other"
+
+            cme_topics[topic_cat] = cme_topics.get(topic_cat, 0) + 1
+
+        # By category
+        case_numbers = s.get("case_numbers", [])
+        for cn in case_numbers:
+            if cn in complaint_data and complaint_data[cn].get("category"):
+                cat = complaint_data[cn]["category"]
+                if cat not in cme_by_category:
+                    cme_by_category[cat] = []
+                cme_by_category[cat].append(hours)
+                break
+
+        # By action
+        action = (ext.get("license_action") or "").lower()
+        if "revok" in action:
+            action_key = "revoked"
+        elif "surrender" in action:
+            action_key = "surrendered"
+        elif "suspen" in action:
+            action_key = "suspended"
+        elif "probation" in action:
+            action_key = "probation"
+        elif "reprimand" in action:
+            action_key = "reprimand"
+        else:
+            action_key = None
+
+        if action_key:
+            if action_key not in cme_by_action:
+                cme_by_action[action_key] = []
+            cme_by_action[action_key].append(hours)
+
+    def calc_cme_stats(values):
+        if not values or len(values) < 3:
+            return None
+        sorted_vals = sorted(values)
+        return {
+            "n": len(values),
+            "median": float(sorted_vals[len(sorted_vals) // 2]),
+            "mean": round(sum(values) / len(values), 1),
+        }
+
+    cme_category_stats = [
+        {"category": cat, **calc_cme_stats(hours)}
+        for cat, hours in cme_by_category.items()
+        if calc_cme_stats(hours)
+    ]
+    cme_category_stats.sort(key=lambda x: -x["mean"])
+
+    cme_action_stats = [
+        {"action": action, **calc_cme_stats(hours)}
+        for action, hours in cme_by_action.items()
+        if calc_cme_stats(hours)
+    ]
+
+    cme_topic_breakdown = [
+        {"topic": topic, "count": count}
+        for topic, count in sorted(cme_topics.items(), key=lambda x: -x[1])
+    ]
+
+    return {
+        "resolution_time_by_category": resolution_time_by_category,
+        "resolution_time_by_action": resolution_time_by_action,
+        "fines_by_category": fines_category_stats,
+        "fines_by_action": fines_action_stats,
+        "fines_by_year": fines_year_stats,
+        "fine_brackets": fine_brackets,
+        "total_fines": sum(all_fines),
+        "cme_by_category": cme_category_stats,
+        "cme_by_action": cme_action_stats,
+        "cme_topic_breakdown": cme_topic_breakdown,
+    }

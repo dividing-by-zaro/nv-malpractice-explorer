@@ -181,6 +181,96 @@
                 <div class="histogram-info" id="probation-info"></div>
             </div>
         </div>
+
+        <div class="stats-grid">
+            <div class="chart-card full-width">
+                <h3>Time to Resolution (Days)</h3>
+                <div class="chart-container">
+                    <canvas id="resolutionTimeChart"></canvas>
+                </div>
+                <div class="histogram-info" id="resolution-time-info"></div>
+            </div>
+        </div>
+
+        <!-- Extended Analysis Section -->
+        <div class="analysis-section" id="extended-analysis">
+            <h2 class="section-title">Deep Dive Analysis</h2>
+
+            <!-- Resolution Time Analysis -->
+            <div class="analysis-block">
+                <h3 class="analysis-heading">Resolution Time by Category</h3>
+                <p class="analysis-note">Kruskal-Wallis H=45.07, p&lt;0.0001 *** | Effect size: medium (0.073)</p>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h3>Median Days to Resolution</h3>
+                        <div class="chart-container tall">
+                            <canvas id="resolutionByCategoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>By License Action</h3>
+                        <div class="chart-container tall">
+                            <canvas id="resolutionByActionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-table" id="resolution-time-table"></div>
+            </div>
+
+            <!-- Fines Analysis -->
+            <div class="analysis-block">
+                <h3 class="analysis-heading">Fine Analysis</h3>
+                <p class="analysis-note">Kruskal-Wallis H=36.07, p&lt;0.0001 *** | Effect size: medium (0.100)</p>
+                <div class="highlight-stats" id="fines-highlights"></div>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h3>Fines by Category (Median)</h3>
+                        <div class="chart-container tall">
+                            <canvas id="finesByCategoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Fine Distribution (Brackets)</h3>
+                        <div class="chart-container tall">
+                            <canvas id="fineBracketsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="chart-card full-width">
+                        <h3>Total Fines Collected by Year</h3>
+                        <div class="chart-container">
+                            <canvas id="finesByYearChart"></canvas>
+                        </div>
+                        <div class="histogram-info" id="fines-trend-info"></div>
+                    </div>
+                </div>
+                <div class="data-table" id="fines-table"></div>
+            </div>
+
+            <!-- CME Analysis -->
+            <div class="analysis-block">
+                <h3 class="analysis-heading">CME (Continuing Medical Education) Analysis</h3>
+                <p class="analysis-note">348 settlements (53%) include CME requirements. CME hours correlate with fines (r=0.33, p&lt;0.0001)</p>
+                <div class="highlight-stats" id="cme-highlights"></div>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h3>CME Topics Assigned</h3>
+                        <div class="chart-container">
+                            <canvas id="cmeTopicsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>CME Hours by License Action</h3>
+                        <div class="chart-container">
+                            <canvas id="cmeByActionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-table" id="cme-table"></div>
+            </div>
+
+        </div>
         </div>
     </div>
 
@@ -538,6 +628,20 @@
             if (days > 0 && years === 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
 
             return parts.length > 0 ? parts.join(', ') : '0 days';
+        }
+
+        function formatDaysToReadable(days) {
+            const years = Math.floor(days / 365);
+            const months = Math.floor((days % 365) / 30);
+            const remainingDays = Math.round(days % 30);
+
+            if (years > 0) {
+                return months > 0 ? `${years}y ${months}m` : `${years}y`;
+            } else if (months > 0) {
+                return `${months}m`;
+            } else {
+                return `${remainingDays}d`;
+            }
         }
 
         function getActionClass(action) {
@@ -985,6 +1089,11 @@
                 ? `${probationYears}y ${probationMonths}m`
                 : `${probationMonths} months`;
 
+            // Format resolution time stats
+            const resStats = data.resolution_time_stats;
+            const meanResolution = resStats ? formatDaysToReadable(resStats.mean_days) : '—';
+            const medianResolution = resStats ? formatDaysToReadable(resStats.median_days) : '—';
+
             document.getElementById('totals-grid').innerHTML = `
                 <div class="total-card">
                     <div class="value">$${totals.total_fines.toLocaleString()}</div>
@@ -1010,6 +1119,16 @@
                     <div class="value">${probationStr}</div>
                     <div class="label">Total Probation Time</div>
                     <div class="sublabel">${totals.total_probation_months} months combined</div>
+                </div>
+                <div class="total-card blue">
+                    <div class="value">${medianResolution}</div>
+                    <div class="label">Median Resolution Time</div>
+                    <div class="sublabel">${resStats ? resStats.count.toLocaleString() + ' resolved cases' : 'No data'}</div>
+                </div>
+                <div class="total-card teal">
+                    <div class="value">${meanResolution}</div>
+                    <div class="label">Mean Resolution Time</div>
+                    <div class="sublabel">From complaint to resolution</div>
                 </div>
             `;
 
@@ -1103,6 +1222,307 @@
 
             // Probation duration (histogram)
             createHistogram('probationChart', data.probation_values, 'Probation', '#14110F', 'probation-info', '', ' mo');
+
+            // Resolution time (histogram) - show in days with readable labels
+            createResolutionTimeHistogram('resolutionTimeChart', data.resolution_time_values, data.resolution_time_stats);
+
+            // Load extended analytics
+            loadExtendedAnalytics();
+        }
+
+        async function loadExtendedAnalytics() {
+            const res = await fetch('/api/extended-analytics');
+            const data = await res.json();
+
+            // === RESOLUTION TIME CHARTS ===
+
+            // By Category (horizontal bar)
+            createChart('resolutionByCategoryChart', 'bar', {
+                labels: data.resolution_time_by_category.map(d => d.category.replace('Malpractice - ', '')),
+                datasets: [{
+                    label: 'Median Days',
+                    data: data.resolution_time_by_category.map(d => d.median),
+                    backgroundColor: '#34312D',
+                    borderColor: '#14110F',
+                    borderWidth: 1
+                }]
+            }, { indexAxis: 'y' });
+
+            // By Action (horizontal bar)
+            const actionOrder = ['no action', 'reprimand', 'probation', 'suspended', 'surrendered', 'revoked'];
+            const sortedByAction = data.resolution_time_by_action.sort((a, b) =>
+                actionOrder.indexOf(a.action) - actionOrder.indexOf(b.action)
+            );
+            createChart('resolutionByActionChart', 'bar', {
+                labels: sortedByAction.map(d => d.action.charAt(0).toUpperCase() + d.action.slice(1)),
+                datasets: [{
+                    label: 'Median Days',
+                    data: sortedByAction.map(d => d.median),
+                    backgroundColor: sortedByAction.map(d => getActionColor(d.action)),
+                    borderColor: '#14110F',
+                    borderWidth: 1
+                }]
+            }, { indexAxis: 'y' });
+
+            // Resolution time table
+            document.getElementById('resolution-time-table').innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>n</th>
+                            <th>Median</th>
+                            <th>Mean</th>
+                            <th>Range</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.resolution_time_by_category.map(d => `
+                            <tr>
+                                <td>${d.category}</td>
+                                <td>${d.n}</td>
+                                <td>${formatDaysToReadable(d.median)}</td>
+                                <td>${formatDaysToReadable(d.mean)}</td>
+                                <td>${d.min}–${d.max} days</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            // === FINES CHARTS ===
+
+            // Highlights
+            const maxFineYear = data.fines_by_year.reduce((a, b) => a.total > b.total ? a : b);
+            document.getElementById('fines-highlights').innerHTML = `
+                <div class="highlight-card">
+                    <div class="highlight-value">$${data.total_fines.toLocaleString()}</div>
+                    <div class="highlight-label">Total Fines Collected</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-value">${maxFineYear.year}</div>
+                    <div class="highlight-label">Highest Year ($${maxFineYear.total.toLocaleString()})</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-value">$2,000</div>
+                    <div class="highlight-label">Median Fine</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-value">+200%</div>
+                    <div class="highlight-label">Increase Since 2008 (Spearman r=0.24)</div>
+                </div>
+            `;
+
+            // Fines by Category
+            createChart('finesByCategoryChart', 'bar', {
+                labels: data.fines_by_category.map(d => d.category.replace('Malpractice - ', '')),
+                datasets: [{
+                    label: 'Median Fine',
+                    data: data.fines_by_category.map(d => d.median),
+                    backgroundColor: '#D9C5B2',
+                    borderColor: '#34312D',
+                    borderWidth: 1
+                }]
+            }, { indexAxis: 'y' });
+
+            // Fine Brackets (pie chart)
+            createChart('fineBracketsChart', 'doughnut', {
+                labels: data.fine_brackets.map(d => d.label),
+                datasets: [{
+                    data: data.fine_brackets.map(d => d.count),
+                    backgroundColor: ['#e5e5e5', '#D9C5B2', '#a89985', '#7E7F83', '#34312D']
+                }]
+            }, { plugins: { legend: { position: 'right' } } });
+
+            // Fines by Year (line chart)
+            createChart('finesByYearChart', 'line', {
+                labels: data.fines_by_year.map(d => d.year),
+                datasets: [{
+                    label: 'Total Fines',
+                    data: data.fines_by_year.map(d => d.total),
+                    borderColor: '#34312D',
+                    backgroundColor: 'rgba(217, 197, 178, 0.3)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#34312D',
+                    pointRadius: 4
+                }]
+            });
+
+            document.getElementById('fines-trend-info').innerHTML = `
+                <span>Trend: Fines increasing over time (Spearman r=0.24, p&lt;0.0001)</span>
+                <span>2008 median: $1,000 → 2024-2025 median: $3,000</span>
+            `;
+
+            // Fines table
+            document.getElementById('fines-table').innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>n</th>
+                            <th>Median ($)</th>
+                            <th>Mean ($)</th>
+                            <th>Max ($)</th>
+                            <th>Total ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.fines_by_category.map(d => `
+                            <tr>
+                                <td>${d.category}</td>
+                                <td>${d.n}</td>
+                                <td>${d.median.toLocaleString()}</td>
+                                <td>${d.mean.toLocaleString()}</td>
+                                <td>${d.max.toLocaleString()}</td>
+                                <td>${d.total.toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            // === CME CHARTS ===
+
+            // Highlights
+            const totalCME = data.cme_by_category.reduce((sum, d) => sum + d.n, 0);
+            document.getElementById('cme-highlights').innerHTML = `
+                <div class="highlight-card">
+                    <div class="highlight-value">${totalCME}</div>
+                    <div class="highlight-label">Settlements with CME</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-value">10 hrs</div>
+                    <div class="highlight-label">Median Requirement</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-value">44%</div>
+                    <div class="highlight-label">Topic-Offense Alignment</div>
+                </div>
+            `;
+
+            // CME Topics (doughnut)
+            createChart('cmeTopicsChart', 'doughnut', {
+                labels: data.cme_topic_breakdown.map(d => d.topic),
+                datasets: [{
+                    data: data.cme_topic_breakdown.map(d => d.count),
+                    backgroundColor: ['#34312D', '#7E7F83', '#D9C5B2', '#a89985', '#5c5954', '#c4b8a9']
+                }]
+            }, { plugins: { legend: { position: 'right' } } });
+
+            // CME by Action
+            const cmeActionOrder = ['reprimand', 'probation', 'suspended'];
+            const sortedCMEByAction = data.cme_by_action
+                .filter(d => cmeActionOrder.includes(d.action))
+                .sort((a, b) => cmeActionOrder.indexOf(a.action) - cmeActionOrder.indexOf(b.action));
+
+            createChart('cmeByActionChart', 'bar', {
+                labels: sortedCMEByAction.map(d => d.action.charAt(0).toUpperCase() + d.action.slice(1)),
+                datasets: [{
+                    label: 'Median Hours',
+                    data: sortedCMEByAction.map(d => d.median),
+                    backgroundColor: sortedCMEByAction.map(d => getActionColor(d.action)),
+                    borderColor: '#14110F',
+                    borderWidth: 1
+                }]
+            });
+
+            // CME table
+            document.getElementById('cme-table').innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Complaint Category</th>
+                            <th>n</th>
+                            <th>Median Hours</th>
+                            <th>Mean Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.cme_by_category.map(d => `
+                            <tr>
+                                <td>${d.category}</td>
+                                <td>${d.n}</td>
+                                <td>${d.median}</td>
+                                <td>${d.mean}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function getActionColor(action) {
+            const colors = {
+                'no action': '#e5e5e5',
+                'reprimand': '#eab308',
+                'probation': '#f59e0b',
+                'suspended': '#f97316',
+                'surrendered': '#ef4444',
+                'revoked': '#dc2626'
+            };
+            return colors[action] || '#7E7F83';
+        }
+
+        function createResolutionTimeHistogram(canvasId, values, stats) {
+            if (!values || values.length === 0) {
+                document.getElementById('resolution-time-info').innerHTML = '<span>No data available</span>';
+                return;
+            }
+
+            const sorted = [...values].sort((a, b) => a - b);
+            const min = sorted[0];
+            const max = sorted[sorted.length - 1];
+            const mean = values.reduce((a, b) => a + b, 0) / values.length;
+            const median = sorted[Math.floor(sorted.length / 2)];
+
+            // Create bins in months (30-day increments) up to 90th percentile
+            const capIndex = Math.floor(sorted.length * 0.9);
+            const capValue = sorted[capIndex];
+            const aboveCapCount = sorted.length - capIndex - 1;
+
+            // Use 6-month bins for cleaner display
+            const binSizeDays = 180; // 6 months
+            const numBins = Math.ceil(capValue / binSizeDays);
+            const bins = Array(numBins + (aboveCapCount > 0 ? 1 : 0)).fill(0);
+            const binLabels = [];
+
+            for (let i = 0; i < numBins; i++) {
+                const monthStart = i * 6;
+                binLabels.push(`${monthStart}–${monthStart + 6}m`);
+            }
+
+            if (aboveCapCount > 0) {
+                binLabels.push(`>${Math.round(capValue / 30)}m`);
+            }
+
+            values.forEach(v => {
+                if (v > capValue) {
+                    bins[bins.length - 1]++;
+                } else {
+                    const binIndex = Math.min(Math.floor(v / binSizeDays), numBins - 1);
+                    bins[binIndex]++;
+                }
+            });
+
+            createChart(canvasId, 'bar', {
+                labels: binLabels,
+                datasets: [{
+                    label: 'Cases',
+                    data: bins,
+                    backgroundColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? '#7E7F83' : '#34312D'),
+                    borderColor: '#14110F',
+                    borderWidth: 1
+                }]
+            });
+
+            document.getElementById('resolution-time-info').innerHTML = `
+                <span>Min: ${formatDaysToReadable(min)} (${min} days)</span>
+                <span>Median: ${formatDaysToReadable(median)} (${Math.round(median)} days)</span>
+                <span>Mean: ${formatDaysToReadable(mean)} (${Math.round(mean)} days)</span>
+                <span>Max: ${formatDaysToReadable(max)} (${max} days)</span>
+            `;
         }
 
         function createChart(canvasId, type, data, extraOptions = {}) {

@@ -226,9 +226,15 @@ Run `uv run python scripts/utils/create_indexes.py` to create performance indexe
   - "Changes from Original" section displays LLM-generated amendment summary
 - **Statistics Tab**: Aggregate analytics with Chart.js
   - Stats cards: Total complaints, processed, resolutions, categories, unique drugs
-  - Totals cards: Fines collected, investigation costs, CME hours, probation time
+  - Totals cards: Fines collected, investigation costs, CME hours, probation time, median/mean resolution time
   - Charts: Cases by year, category breakdown, top specialties, license actions
-  - Histograms: Fine/cost distributions (capped at 90th percentile)
+  - Histograms: Fine/cost distributions, resolution time distribution (capped at 90th percentile)
+  - **Deep Dive Analysis** section with extended analytics:
+    - Resolution time by category and license action (bar charts + data tables)
+    - Fines analysis: by category, brackets distribution, yearly trend line chart
+    - CME analysis: topic breakdown, hours by license action, by complaint category
+    - Highlight cards for key metrics (total fines, highest year, alignment rates)
+    - Statistical notes showing Kruskal-Wallis test results and effect sizes
 
 ### Scripts Organization
 ```
@@ -257,7 +263,9 @@ scripts/
 ```
 
 ### Key Files
-- `app.py`: FastAPI app (~580 lines) with Pydantic models and dependency injection
+- `app.py`: FastAPI app (~1100 lines) with Pydantic models and dependency injection
+  - `/api/analytics`: Core analytics (distributions, totals, resolution time stats)
+  - `/api/extended-analytics`: Deep dive data (breakdowns by category/action/year for resolution time, fines, CME)
 - `static/index.html`: Frontend HTML + JavaScript
 - `static/css/styles.css`: Frontend styles with design system
 - `scripts/process_single_file.py`: Unified pipeline for single-file processing

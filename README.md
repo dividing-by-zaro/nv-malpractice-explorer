@@ -69,9 +69,14 @@ uv run uvicorn app:app --reload --port 8000
   - LLM-generated summary explains what changed between versions
 - **Statistics Tab**: Aggregate analytics dashboard
   - Stats cards: Total complaints, processed count, resolutions, categories
-  - Totals: Fines collected, investigation costs, CME hours, probation time
+  - Totals: Fines collected, investigation costs, CME hours, probation time, median/mean resolution time
   - Charts: Cases by year, category breakdown, top specialties, license actions
-  - Histograms: Fine/cost distributions (capped at 90th percentile for readability)
+  - Histograms: Fine/cost distributions, resolution time (capped at 90th percentile)
+  - **Deep Dive Analysis**: Extended analytics with statistical significance tests
+    - Resolution time breakdowns by category and license action
+    - Fines analysis: by category, bracket distribution, yearly trends ($1.35M total)
+    - CME analysis: topic breakdown (44% alignment rate), hours by severity
+    - Data tables with full statistics (n, median, mean, range)
 - **API Documentation**: Interactive OpenAPI docs at `/docs` with typed response schemas
 - **Optimized API**: Targeted settlement lookups, batched prefix counting, indexed queries (~180ms response time)
 

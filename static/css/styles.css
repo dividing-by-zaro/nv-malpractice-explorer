@@ -1340,6 +1340,8 @@ button.secondary:hover {
 
 .chart-container.tall { height: 380px; }
 
+.chart-card.full-width { grid-column: 1 / -1; }
+
 /* ═══════════════════════════════════════════════════════════════════════════
    SUMMARY CARDS (Settlement overview)
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -1419,6 +1421,8 @@ button.secondary:hover {
 .total-card.amber::after { background: #f59e0b; }
 .total-card.purple::after { background: #8b5cf6; }
 .total-card.cyan::after { background: #06b6d4; }
+.total-card.blue::after { background: #3b82f6; }
+.total-card.teal::after { background: #14b8a6; }
 
 .total-card .value {
   font-family: var(--font-mono);
@@ -1455,6 +1459,150 @@ button.secondary:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   EXTENDED ANALYSIS SECTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.analysis-section {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 3px solid var(--charcoal);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.analysis-block {
+  margin-bottom: 48px;
+}
+
+.analysis-heading {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--tan);
+}
+
+.analysis-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray);
+  margin-bottom: 20px;
+}
+
+.highlight-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0;
+  margin-bottom: 24px;
+  border: var(--border-weight) solid var(--charcoal);
+  background: var(--charcoal);
+}
+
+.highlight-card {
+  background: var(--charcoal);
+  color: var(--off-white);
+  padding: 20px 24px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.highlight-card:last-child {
+  border-right: none;
+}
+
+.highlight-value {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--tan);
+}
+
+.highlight-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray);
+  line-height: 1.4;
+}
+
+.data-table {
+  margin-top: 24px;
+  overflow-x: auto;
+  border: var(--border-weight) solid var(--charcoal);
+}
+
+.data-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: white;
+}
+
+.data-table th {
+  background: var(--charcoal);
+  color: var(--off-white);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-table th:last-child {
+  border-right: none;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(52, 49, 45, 0.12);
+  border-right: 1px solid rgba(52, 49, 45, 0.08);
+}
+
+.data-table td:last-child {
+  border-right: none;
+}
+
+.data-table td:first-child {
+  font-weight: 500;
+  color: var(--charcoal);
+}
+
+.data-table td:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(217, 197, 178, 0.25);
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: rgba(243, 243, 244, 0.6);
+}
+
+.data-table tbody tr:nth-child(even):hover {
+  background: rgba(217, 197, 178, 0.3);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    RESPONSIVE ADJUSTMENTS
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -1480,6 +1628,18 @@ button.secondary:hover {
     max-height: 40vh;
     border-right: none;
     border-bottom: var(--border-weight) solid var(--charcoal);
+  }
+
+  .highlight-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .highlight-card {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .highlight-card:nth-child(2n) {
+    border-right: none;
   }
 }
 
