@@ -17,6 +17,7 @@
     <nav class="main-tabs">
         <button class="main-tab active" onclick="switchView('cases')">Cases</button>
         <button class="main-tab" onclick="switchView('statistics')">Statistics</button>
+        <button class="main-tab" onclick="switchView('debug')">Debug</button>
     </nav>
 
     <!-- Cases View -->
@@ -274,6 +275,19 @@
         </div>
     </div>
 
+    <!-- Debug View -->
+    <div id="debug-view" class="view">
+        <div class="content-wrapper">
+            <div class="debug-header">
+                <h2>Data Schema &amp; Field Statistics</h2>
+                <p class="debug-subtitle">Like pandas <code>df.describe()</code> for each MongoDB collection</p>
+            </div>
+            <div id="debug-content" class="debug-content">
+                <div class="loading">Loading schema data...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal -->
     <div class="modal-overlay" id="modal" onclick="closeModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
@@ -302,6 +316,7 @@
         let currentPage = 0;
         const pageSize = 20;
         let chartsLoaded = false;
+        let debugLoaded = false;
         let charts = {};
 
         function switchView(view) {
@@ -312,6 +327,9 @@
 
             if (view === 'statistics' && !chartsLoaded) {
                 loadAnalytics();
+            }
+            if (view === 'debug' && !debugLoaded) {
+                loadDebugData();
             }
         }
 
@@ -1641,6 +1659,124 @@
                 });
             }
         });
+
+        // Debug view
+        async function loadDebugData() {
+            try {
+                const res = await fetch('/api/debug');
+                const data = await res.json();
+                debugLoaded = true;
+                renderDebugData(data);
+            } catch (e) {
+                document.getElementById('debug-content').innerHTML = `<div class="error">Failed to load debug data: ${e.message}</div>`;
+            }
+        }
+
+        function renderDebugData(data) {
+            const container = document.getElementById('debug-content');
+            let html = '';
+
+            for (const collection of data.collections) {
+                html += `
+                    <div class="debug-collection">
+                        <div class="debug-collection-header">
+                            <h3>${collection.name}</h3>
+                            <span class="debug-doc-count">${collection.total_documents.toLocaleString()} docs</span>
+                        </div>
+                        <table class="debug-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-field">Field</th>
+                                    <th class="col-type">Type</th>
+                                    <th class="col-coverage">Coverage</th>
+                                    <th class="col-stats">Statistics</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${collection.fields.map(f => renderFieldRow(f)).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderFieldRow(field) {
+            const stats = field.stats || {};
+            const nullPct = stats.null_pct !== undefined ? stats.null_pct : 0;
+            const coveragePct = (100 - nullPct).toFixed(1);
+
+            // Coverage bar color
+            let barColor = '#059669';
+            if (nullPct > 50) barColor = '#dc2626';
+            else if (nullPct > 20) barColor = '#d97706';
+
+            // Build stats HTML
+            let statsHtml = '';
+            if (stats.min !== undefined) {
+                statsHtml = `
+                    <div class="stats-numeric">
+                        <div class="stat-row"><span class="stat-label">min</span><span class="stat-value">${formatStatValue(stats.min)}</span></div>
+                        <div class="stat-row"><span class="stat-label">max</span><span class="stat-value">${formatStatValue(stats.max)}</span></div>
+                        <div class="stat-row"><span class="stat-label">mean</span><span class="stat-value">${formatStatValue(stats.mean)}</span></div>
+                        <div class="stat-row"><span class="stat-label">sum</span><span class="stat-value">${formatStatValue(stats.sum)}</span></div>
+                    </div>
+                `;
+            } else if (stats.unique !== undefined) {
+                const topVals = (stats.top_values || []).slice(0, 3);
+                statsHtml = `
+                    <div class="stats-categorical">
+                        <div class="unique-count">${stats.unique.toLocaleString()} unique</div>
+                        ${topVals.length > 0 ? `
+                            <div class="top-values">
+                                ${topVals.map(v => `<div class="top-val"><span class="val-text">${truncateValue(v.value, 20)}</span><span class="val-count">${v.count}</span></div>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            return `
+                <tr>
+                    <td class="col-field">
+                        <code class="field-name">${field.field}</code>
+                        ${field.description ? `<div class="field-desc">${field.description}</div>` : ''}
+                    </td>
+                    <td class="col-type">
+                        <span class="type-badge type-${field.type.replace(/[<>]/g, '')}">${field.type}</span>
+                    </td>
+                    <td class="col-coverage">
+                        <div class="coverage-bar-container">
+                            <div class="coverage-bar-bg">
+                                <div class="coverage-bar-fill" style="width: ${coveragePct}%; background: ${barColor};"></div>
+                            </div>
+                            <div class="coverage-text">
+                                <span class="coverage-pct">${coveragePct}%</span>
+                                <span class="coverage-count">${(stats.count || 0).toLocaleString()} vals</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="col-stats">${statsHtml}</td>
+                </tr>
+            `;
+        }
+
+        function formatStatValue(value) {
+            if (value === null || value === undefined) return '—';
+            if (typeof value === 'number') {
+                if (Number.isInteger(value)) return value.toLocaleString();
+                return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            }
+            return String(value);
+        }
+
+        function truncateValue(value, maxLen = 25) {
+            if (value === null || value === undefined) return 'null';
+            const str = String(value);
+            return str.length > maxLen ? str.substring(0, maxLen - 3) + '...' : str;
+        }
 
         // Initialize
         async function init() {
