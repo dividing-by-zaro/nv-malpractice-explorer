@@ -1189,6 +1189,30 @@ button.secondary:hover {
 
 .info-list li:last-child { border-bottom: none; }
 
+.related-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.related-links li {
+  padding: 8px 0;
+  border-bottom: var(--border-weight) dashed rgba(52, 49, 45, 0.15);
+}
+
+.related-links li:last-child { border-bottom: none; }
+
+.related-links a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.related-links a:hover {
+  text-decoration: underline;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    TABS (PDF switcher)
    ═══════════════════════════════════════════════════════════════════════════ */

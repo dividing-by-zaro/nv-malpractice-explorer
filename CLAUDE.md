@@ -5,7 +5,7 @@ Nevada Medical Malpractice Explorer - Scrape, process, and analyze public medica
 ## Workflow Rules
 
 - **Never commit unless explicitly told**
-- **Always use TrackedDB for database updates** - Never use direct `db.collection.update_one()`. Use `TrackedDB` from `analysis/scripts/tracked_db.py` to log all changes. See `analysis/CLAUDE.md` for examples.
+- **Always use TrackedDB for database updates** - Never use direct `db.collection.update_one()`. Use `TrackedDB` from `lib/tracked_db.py` to log all changes. See `analysis/CLAUDE.md` for examples.
 
 ## Quick Commands
 
@@ -13,6 +13,11 @@ Nevada Medical Malpractice Explorer - Scrape, process, and analyze public medica
 uv run uvicorn app:app --reload --port 8000    # Run web app
 uv run python scripts/process_new_filings.py   # Process new filings (cron job)
 uv run python scripts/process_single_file.py path/to/file.pdf  # Process one PDF
+
+# Manage related links on cases
+uv run python scripts/add_link.py 19-28023-1 "https://..." --title "Title"  # Add link
+uv run python scripts/add_link.py 19-28023-1 --list                          # List links
+uv run python scripts/add_link.py 19-28023-1 --remove "https://..."          # Remove link
 ```
 
 ## MongoDB Collections
@@ -21,6 +26,7 @@ uv run python scripts/process_single_file.py path/to/file.pdf  # Process one PDF
 - `case_number`: Unique identifier (e.g., "19-28023-1")
 - `respondent`, `date`, `year`, `type`, `pdf_url`
 - `is_amended`, `original_complaint`, `amendment_summary` (for amended complaints)
+- `related_links[]`: Array of `{url, title}` for external links (news articles, etc.)
 - `llm_extracted`:
   - `summary`: One-sentence description
   - `specialty`: NPDB-normalized (24 categories: Internal Medicine, Neurosurgery, Orthopedics, etc.)
@@ -51,17 +57,20 @@ app.py                      # FastAPI app with Pydantic models
 static/index.html           # Frontend (vanilla JS, Chart.js)
 static/css/styles.css       # Archival Brutalism design system
 
+lib/                        # Shared utilities
+├── tracked_db.py           # ALWAYS use for DB updates
+└── change_logger.py        # Change tracking utilities
+
 scripts/
 ├── process_new_filings.py  # Cron job: scrape + process new filings
 ├── process_single_file.py  # Core pipeline: PDF → OCR → LLM → MongoDB
+├── add_link.py             # CLI to add/remove related links on cases
 ├── prompts/                # LLM extraction prompts
 └── utils/                  # Migrations, indexes, normalization scripts
 
 analysis/                   # See analysis/CLAUDE.md
 ├── scripts/
 │   ├── load_data.py        # MongoDB → pandas DataFrames
-│   ├── tracked_db.py       # ALWAYS use for DB updates
-│   ├── change_logger.py    # Change tracking utilities
 │   └── specialty_comparison.py  # Nevada vs national claims by specialty
 ├── datasets/               # External datasets (NPDB claims data)
 └── output/                 # Generated charts (gitignored)

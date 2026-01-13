@@ -53,6 +53,12 @@ class Complainant(BaseModel):
     sex: Optional[str] = None
 
 
+class RelatedLink(BaseModel):
+    """External link related to a case."""
+    url: str
+    title: Optional[str] = None
+
+
 class OriginalComplaint(BaseModel):
     """Original complaint data for amended cases."""
     type: str
@@ -84,6 +90,7 @@ class Complaint(BaseModel):
     is_amended: Optional[bool] = False
     original_complaint: Optional[OriginalComplaint] = None
     amendment_summary: Optional[str] = None
+    related_links: list[RelatedLink] = []
 
     class Config:
         extra = "allow"  # Allow extra fields from MongoDB
@@ -877,6 +884,7 @@ def get_debug_data(db: DB):
             "llm_extracted.num_complainants": "Number of patients",
             "llm_extracted.complainants": "Array of {age, sex} for each patient",
             "llm_extracted.drugs": "Medications mentioned in complaint",
+            "related_links": "Array of external links related to the case",
         },
         "settlements": {
             "_id": "MongoDB document ID",
@@ -1111,6 +1119,7 @@ def get_debug_collection(collection_name: str, db: DB):
             "llm_extracted.num_complainants": "Number of patients",
             "llm_extracted.complainants": "Array of {age, sex} for each patient",
             "llm_extracted.drugs": "Medications mentioned in complaint",
+            "related_links": "Array of external links related to the case",
         },
         "settlements": {
             "_id": "MongoDB document ID",

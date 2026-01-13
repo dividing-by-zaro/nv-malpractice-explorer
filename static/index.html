@@ -894,6 +894,20 @@
                 `;
             }
 
+            // Add related links if available
+            if (c.related_links && c.related_links.length > 0) {
+                infoHtml += `
+                    <div class="info-section">
+                        <h3>Related Links</h3>
+                        <ul class="related-links">
+                            ${c.related_links.map(link => `
+                                <li><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.title || link.url}</a></li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
             // Fetch resolution data
             let resolutionDate = null;
             try {

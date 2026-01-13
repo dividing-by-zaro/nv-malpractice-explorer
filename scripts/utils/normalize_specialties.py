@@ -25,7 +25,7 @@ from pymongo import MongoClient
 # Add project root to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from analysis.scripts.change_logger import ChangeLogger
+from lib import ChangeLogger
 
 load_dotenv()
 

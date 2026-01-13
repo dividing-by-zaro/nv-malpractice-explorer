@@ -11,7 +11,7 @@ The **Analysis tab** in the frontend provides in-depth explorations of this data
 **ALWAYS use `TrackedDB` for any database modifications.** Never use direct `db.collection.update_one()` calls. This ensures all changes are logged to the `change_log` collection for audit purposes.
 
 ```python
-from analysis.scripts import TrackedDB
+from lib import TrackedDB
 from analysis.scripts.load_data import get_db
 
 db = get_db()
@@ -47,7 +47,7 @@ tracked.update_many(
 ### Querying Change History
 
 ```python
-from analysis.scripts import get_document_history, get_changes_by_script
+from lib import get_document_history, get_changes_by_script
 
 # Get all changes to a specific document
 history = get_document_history(db, "complaints", doc_id)
@@ -74,9 +74,12 @@ analysis/
 ├── datasets/       # External datasets (CSV, JSON) for enriching analysis
 ├── output/         # Generated outputs (gitignored)
 └── scripts/        # Python analysis modules
-    ├── load_data.py      # MongoDB → pandas loader
-    ├── tracked_db.py     # Tracked database operations (ALWAYS USE THIS)
-    └── change_logger.py  # Change log utilities
+    └── load_data.py      # MongoDB → pandas loader
+
+# Tracking utilities are in lib/ at project root:
+lib/
+├── tracked_db.py     # Tracked database operations (ALWAYS USE THIS)
+└── change_logger.py  # Change log utilities
 ```
 
 ## Data Loading

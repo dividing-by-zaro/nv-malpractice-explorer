@@ -67,6 +67,7 @@ uv run uvicorn app:app --reload --port 8000
   - Timeline section shows complaint date, resolution date, and time to resolution
   - Amended complaints display both original and amended PDFs in separate tabs
   - LLM-generated summary explains what changed between versions
+  - Related links section for external sources (news articles, court opinions, press releases)
 - **Statistics Tab**: Aggregate analytics dashboard
   - Stats cards: Total complaints, processed count, resolutions, categories
   - Totals: Fines collected, investigation costs, CME hours, probation time, median/mean resolution time
@@ -208,12 +209,16 @@ static/
 scripts/
 ├── process_new_filings.py    # Cron job: scrape + process new filings
 ├── process_single_file.py    # Core pipeline: single PDF → MongoDB
+├── add_link.py               # CLI to add/remove related links on cases
 ├── scraper.py                # Download filings from Nevada Board
 ├── prompts/                  # LLM prompts (complaint, settlement, amendment)
 ├── batch/                    # Batch processing (legacy)
 └── utils/                    # Utilities (normalize_specialties, create_indexes, etc.)
+lib/                          # Shared utilities
+├── tracked_db.py             # TrackedDB for audited database updates
+└── change_logger.py          # Change logging utilities
 analysis/                     # Analysis module
-├── scripts/                  # Data loading, change tracking, analysis scripts
+├── scripts/                  # Data loading, analysis scripts
 │   └── specialty_comparison.py  # Nevada vs national claims distribution
 ├── datasets/                 # External datasets (NPDB claims data 1992-2014)
 └── output/                   # Generated charts (gitignored)

@@ -2,7 +2,7 @@
 Change logging utility for tracking field-level modifications to MongoDB documents.
 
 Usage:
-    from analysis.scripts.change_logger import ChangeLogger
+    from lib import ChangeLogger
 
     logger = ChangeLogger(db, script="normalize_specialties.py")
 

@@ -5,7 +5,7 @@ IMPORTANT: Always use these functions instead of direct MongoDB updates to ensur
 all changes are logged to the change_log collection.
 
 Usage:
-    from analysis.scripts.tracked_db import TrackedDB
+    from lib import TrackedDB
 
     db = get_db()
     tracked = TrackedDB(db, script="my_script.py")
@@ -297,6 +297,18 @@ class TrackedDB:
         if "$inc" in update:
             for field_path, inc_value in update["$inc"].items():
                 old_value = _get_nested(old_doc, field_path) if old_doc else 0
+                new_value = _get_nested(new_doc, field_path)
+                if old_value != new_value:
+                    changes.append({
+                        "field": field_path,
+                        "old_value": old_value,
+                        "new_value": new_value,
+                    })
+
+        # Handle $pull operations (remove from array)
+        if "$pull" in update:
+            for field_path, pull_condition in update["$pull"].items():
+                old_value = _get_nested(old_doc, field_path) if old_doc else None
                 new_value = _get_nested(new_doc, field_path)
                 if old_value != new_value:
                     changes.append({
