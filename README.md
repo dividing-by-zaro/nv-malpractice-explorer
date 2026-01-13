@@ -213,9 +213,10 @@ scripts/
 ├── batch/                    # Batch processing (legacy)
 └── utils/                    # Utilities (normalize_specialties, create_indexes, etc.)
 analysis/                     # Analysis module
-├── scripts/                  # Data loading, change tracking utilities
-├── datasets/                 # External datasets (NPDB claims data, etc.)
-└── output/                   # Generated outputs (gitignored)
+├── scripts/                  # Data loading, change tracking, analysis scripts
+│   └── specialty_comparison.py  # Nevada vs national claims distribution
+├── datasets/                 # External datasets (NPDB claims data 1992-2014)
+└── output/                   # Generated charts (gitignored)
 data/
 ├── filings.json              # Raw scraped metadata
 └── filings_normalized.json   # Cleaned metadata
