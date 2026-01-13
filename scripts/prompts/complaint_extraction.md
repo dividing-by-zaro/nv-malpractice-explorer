@@ -38,40 +38,37 @@ Examples:
 - "Respondent billed for 45-minute patient visits while seeing up to 67 patients in 6.5 hours."
 
 ### specialty (string or null)
-The board-certified medical specialty of the respondent physician ONLY if explicitly stated or clearly inferable from the document. Use one of the standardized specialty names below.
+The board-certified medical specialty of the respondent physician ONLY if explicitly stated or clearly inferable from the document. Use ONLY one of the standardized NPDB specialty names below.
 
-**Use one of these existing specialties when applicable:**
+**Allowed specialties (NPDB standard):**
 - "Anesthesiology"
 - "Cardiology"
-- "Cardiothoracic Surgery"
+- "Colon and Rectal Surgery"
 - "Dermatology"
-- "Dermatopathology"
 - "Emergency Medicine"
 - "Family Medicine"
 - "Gastroenterology"
+- "General Practice"
 - "General Surgery"
-- "Infectious Disease"
-- "Internal Medicine"
-- "Interventional Radiology"
-- "Nephrology"
-- "Neurological Surgery" (use this for neurosurgery)
+- "Internal Medicine" (also use for: nephrology, infectious disease, rheumatology, and other internal medicine subspecialties)
 - "Neurology"
+- "Neurosurgery" (use this for neurological surgery)
 - "Obstetrics and Gynecology" (use this for OB/GYN, gynecology)
 - "Ophthalmology"
-- "Orthopedic Surgery" (use American spelling, not "Orthopaedic")
+- "Orthopedics" (use American spelling, not "Orthopaedic"; use this for orthopedic surgery)
 - "Otolaryngology"
-- "Pediatric Cardiology"
-- "Pediatric Critical Care Medicine"
-- "Pediatric Emergency Medicine"
-- "Pediatrics"
+- "Pathology" (also use for: dermatopathology)
+- "Pediatrics" (also use for: pediatric cardiology, pediatric emergency medicine, pediatric critical care, and other pediatric subspecialties)
 - "Plastic Surgery"
 - "Psychiatry"
-- "Radiation Oncology"
-- "Radiology" (use this for diagnostic radiology)
-- "Rheumatology"
+- "Pulmonology"
+- "Radiology" (also use for: interventional radiology, radiation oncology, diagnostic radiology)
+- "Thoracic Surgery" (use this for cardiothoracic surgery)
 - "Urology"
 
-**If the specialty is not in the list above**, you may create a new ABMS-recognized specialty name. Do NOT use practice areas like "Wound Care", "Pain Management", or "Urgent Care" - these are not board-certified specialties.
+**Do NOT use subspecialty names.** Map subspecialties to their parent specialty as noted above.
+
+**Do NOT use** practice areas like "Wound Care", "Pain Management", or "Urgent Care" - these are not board-certified specialties.
 
 If the specialty cannot be determined, set to null.
 

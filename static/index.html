@@ -17,6 +17,7 @@
     <nav class="main-tabs">
         <button class="main-tab active" onclick="switchView('cases')">Cases</button>
         <button class="main-tab" onclick="switchView('statistics')">Statistics</button>
+        <button class="main-tab" onclick="switchView('analysis')">Analysis</button>
         <button class="main-tab" onclick="switchView('debug')">Data Schema</button>
     </nav>
 
@@ -275,6 +276,61 @@
         </div>
     </div>
 
+    <!-- Analysis View -->
+    <div id="analysis-view" class="view">
+        <div class="content-wrapper analysis-wrapper">
+            <div class="analysis-header">
+                <h2>Analysis</h2>
+                <p class="analysis-subtitle">In-depth exploration of Nevada medical malpractice data</p>
+            </div>
+
+            <div class="analysis-intro">
+                <p>Over 30% of physicians have been sued at some point in their careers. Yet, of claims that have been filed, 65% are ultimately dropped, and contested claims (those which go to trial) go for the defendant 89% of the time. The claims published by the state of Nevada represent only those which are found to be substantiated. By examining these claims, we can better understand the landscape of healthcare in the state, and how to be both better doctors and better patients.</p>
+            </div>
+
+            <!-- Analysis: Cases by Specialty -->
+            <article class="analysis-article" id="analysis-specialty">
+                <header class="analysis-article__header">
+                    <h3 class="analysis-article__title">Cases by Specialty</h3>
+                    <p class="analysis-article__lead">Which medical specialties face the most malpractice complaints in Nevada?</p>
+                </header>
+
+                <div class="analysis-article__content">
+                    <div class="analysis-article__commentary">
+                        <p>The distribution of malpractice cases across medical specialties reveals patterns in healthcare risk. Specialties with higher patient volumes, more complex procedures, or greater diagnostic uncertainty tend to see more complaints.</p>
+                    </div>
+
+                    <div class="analysis-article__chart">
+                        <div class="chart-card">
+                            <h3>Top Specialties by Case Count</h3>
+                            <div class="chart-container tall">
+                                <canvas id="analysisSpecialtyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-article__commentary">
+                        <p>Internal Medicine and Family Medicine practitioners appear frequently, in part because they represent large portions of the physician workforce and handle diverse patient conditions. Surgical specialties also feature prominently due to the inherent procedural risks involved.</p>
+                    </div>
+
+                    <aside class="analysis-article__sources">
+                        <h4>Further Reading</h4>
+                        <ul>
+                            <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2628513/" target="_blank" rel="noopener">Medical Malpractice Claims by Specialty (NCBI)</a></li>
+                            <li><a href="https://www.ama-assn.org/practice-management/sustainability/medical-liability-claim-frequency-among-us-physicians" target="_blank" rel="noopener">AMA: Medical Liability Claim Frequency</a></li>
+                        </ul>
+                    </aside>
+                </div>
+            </article>
+
+            <!-- Placeholder for future analyses -->
+            <div class="analysis-placeholder">
+                <p>More analyses coming soon.</p>
+            </div>
+
+        </div>
+    </div>
+
     <!-- Debug View -->
     <div id="debug-view" class="view">
         <div class="content-wrapper">
@@ -317,6 +373,7 @@
         const pageSize = 20;
         let chartsLoaded = false;
         let debugLoaded = false;
+        let analysisLoaded = false;
         let charts = {};
 
         function switchView(view) {
@@ -327,6 +384,9 @@
 
             if (view === 'statistics' && !chartsLoaded) {
                 loadAnalytics();
+            }
+            if (view === 'analysis' && !analysisLoaded) {
+                loadAnalysisData();
             }
             if (view === 'debug' && !debugLoaded) {
                 loadDebugData();
@@ -1812,6 +1872,31 @@
             if (value === null || value === undefined) return 'null';
             const str = String(value);
             return str.length > maxLen ? str.substring(0, maxLen - 3) + '...' : str;
+        }
+
+        // Analysis tab - load specialty data and render charts
+        async function loadAnalysisData() {
+            analysisLoaded = true;
+
+            try {
+                const res = await fetch('/api/analytics');
+                const data = await res.json();
+
+                // Specialty breakdown (horizontal bar) - same format as Statistics
+                createChart('analysisSpecialtyChart', 'bar', {
+                    labels: data.specialties.map(d => d.specialty),
+                    datasets: [{
+                        label: 'Cases',
+                        data: data.specialties.map(d => d.count),
+                        backgroundColor: '#34312D',
+                        borderColor: '#14110F',
+                        borderWidth: 1
+                    }]
+                }, { indexAxis: 'y' });
+
+            } catch (e) {
+                console.error('Failed to load analysis data:', e);
+            }
         }
 
         // Initialize

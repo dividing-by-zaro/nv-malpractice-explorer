@@ -9,6 +9,7 @@ Nevada Medical Malpractice Explorer - Tools to scrape, process, and analyze publ
 ## Workflow Rules
 
 - **Never commit unless explicitly told** - Do not stage or commit changes automatically. Wait for explicit user instruction to commit.
+- **Always use TrackedDB for database updates** - Never use direct `db.collection.update_one()` calls. Use `TrackedDB` from `analysis/scripts/tracked_db.py` to ensure all changes are logged to the `change_log` collection. See `analysis/CLAUDE.md` for usage examples.
 
 ## Data Pipeline
 
@@ -199,6 +200,9 @@ app.py → Web UI at http://localhost:8000
   - Identified by `LICENSE-{number}` pattern (e.g., LICENSE-401)
   - Contains OCR text and metadata, no LLM processing
   - Fields: `license_number`, `type`, `year`, `date`, `respondent`, `pdf_url`, `text_content`
+- `change_log`: Audit trail of all database modifications (auto-populated by `TrackedDB`)
+  - Fields: `timestamp`, `collection`, `document_id`, `document_key`, `operation`, `script`, `reason`, `changes[]`, `user`
+  - Each change entry: `{field, old_value, new_value}`
 - `cases_summary`: Status tracking for each case (OCR status, extraction status)
 
 ### MongoDB Indexes
@@ -235,6 +239,10 @@ Run `uv run python scripts/utils/create_indexes.py` to create performance indexe
     - CME analysis: topic breakdown, hours by license action, by complaint category
     - Highlight cards for key metrics (total fines, highest year, alignment rates)
     - Statistical notes showing Kruskal-Wallis test results and effect sizes
+- **Analysis Tab**: In-depth explorations with commentary and external data sources
+  - Modular article-based layout for adding new analyses
+  - Charts use same format as Statistics tab
+  - Sources/further reading sections with external links
 - **Data Schema Tab**: Data schema explorer (like pandas `df.describe()`)
   - Shows all MongoDB collections (complaints, settlements, license_only_filings)
   - For each field: name, type, description, coverage bar (with color-coded null %), statistics
@@ -262,9 +270,18 @@ scripts/
     ├── build_cases_summary.py
     ├── create_indexes.py
     ├── migrate_settlements.py
-    ├── add_resolution_outcome.py  # Backfill resolution_outcome field
+    ├── normalize_specialties.py  # Normalize specialty names to NPDB standard
+    ├── add_resolution_outcome.py
     ├── validate_filings.py
     └── aggregate_cases.py
+
+analysis/                    # Analysis module (see analysis/CLAUDE.md)
+├── scripts/
+│   ├── load_data.py         # MongoDB → pandas DataFrames
+│   ├── tracked_db.py        # Tracked database updates (ALWAYS USE)
+│   └── change_logger.py     # Change log utilities
+├── datasets/                # External datasets for enrichment
+└── output/                  # Generated outputs (gitignored)
 ```
 
 ### Key Files
@@ -366,7 +383,7 @@ MONGODB_URI=mongodb://...
 - `amendment_summary`: LLM-generated one-sentence description of changes - only present if amended
 - `llm_extracted`: LLM-extracted fields:
   - `summary`: One-sentence description
-  - `specialty`: ABMS-recognized specialty (e.g., "Internal Medicine")
+  - `specialty`: NPDB-normalized specialty (24 categories: Neurosurgery, Orthopedics, Internal Medicine, etc.)
   - `num_complainants`: Number of patients
   - `complainants[]`: Array of {age, sex}
   - `procedure`: Medical procedure involved

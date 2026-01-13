@@ -1724,6 +1724,176 @@ button.secondary:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   ANALYSIS VIEW - Modular article-based layout
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#analysis-view .content-wrapper {
+  max-width: 900px;
+}
+
+.analysis-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.analysis-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.analysis-header h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--black);
+  margin: 0 0 8px 0;
+}
+
+.analysis-subtitle {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--gray);
+  margin: 0;
+}
+
+/* Analysis Intro - context-setting paragraph */
+.analysis-intro {
+  max-width: 72ch;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.analysis-intro p {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--charcoal);
+  margin: 0;
+}
+
+/* Analysis Article - modular container for each analysis */
+.analysis-article {
+  background: white;
+  border: var(--border-weight) solid rgba(52, 49, 45, 0.15);
+  box-shadow: var(--shadow-sm);
+}
+
+.analysis-article__header {
+  padding: 24px 28px 20px;
+  border-bottom: var(--border-weight) solid rgba(52, 49, 45, 0.1);
+  background: var(--off-white);
+}
+
+.analysis-article__title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--black);
+  margin: 0 0 8px 0;
+}
+
+.analysis-article__lead {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--gray);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.analysis-article__content {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Commentary sections */
+.analysis-article__commentary {
+  max-width: 72ch;
+}
+
+.analysis-article__commentary p {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--charcoal);
+  margin: 0;
+}
+
+.analysis-article__commentary p + p {
+  margin-top: 16px;
+}
+
+/* Chart container within analysis */
+.analysis-article__chart {
+  margin: 8px 0;
+}
+
+.analysis-article__chart .chart-card {
+  margin: 0;
+}
+
+/* Sources/further reading section */
+.analysis-article__sources {
+  background: rgba(217, 197, 178, 0.15);
+  border-left: 3px solid var(--tan);
+  padding: 16px 20px;
+  margin-top: 8px;
+}
+
+.analysis-article__sources h4 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 12px 0;
+}
+
+.analysis-article__sources ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.analysis-article__sources li {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.analysis-article__sources a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.analysis-article__sources a:hover {
+  color: var(--black);
+  text-decoration: underline;
+}
+
+/* Placeholder for upcoming analyses */
+.analysis-placeholder {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--gray);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 2px dashed rgba(52, 49, 45, 0.2);
+  background: rgba(243, 243, 244, 0.5);
+}
+
+.analysis-placeholder p {
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    DEBUG VIEW - Clean table layout
    ═══════════════════════════════════════════════════════════════════════════ */
 

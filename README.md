@@ -77,7 +77,11 @@ uv run uvicorn app:app --reload --port 8000
     - Fines analysis: by category, bracket distribution, yearly trends ($1.35M total)
     - CME analysis: topic breakdown (44% alignment rate), hours by severity
     - Data tables with full statistics (n, median, mean, range)
+- **Analysis Tab**: In-depth explorations with commentary, charts, and external data sources
+  - Modular article-based layout for adding new analyses
+  - Specialty analysis comparing Nevada cases to national NPDB data
 - **Data Schema Tab**: Data schema explorer showing MongoDB collections, field types, coverage stats, and top values (like pandas `df.describe()`). Collections load incrementally with spinners for faster perceived performance.
+- **Change Tracking**: All database modifications logged to `change_log` collection with field-level diffs
 - **API Documentation**: Interactive OpenAPI docs at `/docs` with typed response schemas
 - **Optimized API**: Targeted settlement lookups, batched prefix counting, indexed queries (~180ms response time)
 
@@ -207,8 +211,11 @@ scripts/
 ├── scraper.py                # Download filings from Nevada Board
 ├── prompts/                  # LLM prompts (complaint, settlement, amendment)
 ├── batch/                    # Batch processing (legacy)
-│   ├── ocr_pdfs.py, clean_text.py, process_complaints.py, etc.
-└── utils/                    # Utilities (build_cases_summary, create_indexes, etc.)
+└── utils/                    # Utilities (normalize_specialties, create_indexes, etc.)
+analysis/                     # Analysis module
+├── scripts/                  # Data loading, change tracking utilities
+├── datasets/                 # External datasets (NPDB claims data, etc.)
+└── output/                   # Generated outputs (gitignored)
 data/
 ├── filings.json              # Raw scraped metadata
 └── filings_normalized.json   # Cleaned metadata
@@ -229,7 +236,7 @@ text/{year}/                  # Extracted plain text
 
 ### Complaint Extraction (LLM)
 - `summary`: One-sentence description
-- `specialty`: ABMS-recognized specialty (Internal Medicine, Dermatology, etc.)
+- `specialty`: NPDB-normalized specialty (24 categories: Internal Medicine, Neurosurgery, etc.)
 - `num_complainants`: Number of patients involved
 - `complainants[]`: Array of {age, sex}
 - `procedure`: Medical procedure if applicable

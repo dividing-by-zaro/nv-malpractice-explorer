@@ -10,8 +10,10 @@ dependencies = [
     "httpx>=0.28.1",
     "lxml>=6.0.2",
     "openai>=2.14.0",
+    "pandas>=2.3.3",
     "pymongo>=4.15.5",
     "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
     "scipy>=1.16.3",
     "uvicorn>=0.40.0",
 ]
