@@ -235,11 +235,11 @@ Run `uv run python scripts/utils/create_indexes.py` to create performance indexe
     - CME analysis: topic breakdown, hours by license action, by complaint category
     - Highlight cards for key metrics (total fines, highest year, alignment rates)
     - Statistical notes showing Kruskal-Wallis test results and effect sizes
-- **Debug Tab**: Data schema explorer (like pandas `df.describe()`)
+- **Data Schema Tab**: Data schema explorer (like pandas `df.describe()`)
   - Shows all MongoDB collections (complaints, settlements, license_only_filings)
   - For each field: name, type, description, coverage bar (with color-coded null %), statistics
   - Numeric fields show min/max/mean/sum; categorical fields show unique count + top values
-  - `/api/debug` endpoint generates field statistics dynamically
+  - **Incremental loading**: Collections load in parallel via `/api/debug/{collection}` endpoint, each rendering as it completes with loading spinner
 
 ### Scripts Organization
 ```

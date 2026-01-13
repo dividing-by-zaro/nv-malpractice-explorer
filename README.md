@@ -77,7 +77,7 @@ uv run uvicorn app:app --reload --port 8000
     - Fines analysis: by category, bracket distribution, yearly trends ($1.35M total)
     - CME analysis: topic breakdown (44% alignment rate), hours by severity
     - Data tables with full statistics (n, median, mean, range)
-- **Debug Tab**: Data schema explorer showing MongoDB collections, field types, coverage stats, and top values (like pandas `df.describe()`)
+- **Data Schema Tab**: Data schema explorer showing MongoDB collections, field types, coverage stats, and top values (like pandas `df.describe()`). Collections load incrementally with spinners for faster perceived performance.
 - **API Documentation**: Interactive OpenAPI docs at `/docs` with typed response schemas
 - **Optimized API**: Targeted settlement lookups, batched prefix counting, indexed queries (~180ms response time)
 

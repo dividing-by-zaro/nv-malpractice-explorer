@@ -17,7 +17,7 @@
     <nav class="main-tabs">
         <button class="main-tab active" onclick="switchView('cases')">Cases</button>
         <button class="main-tab" onclick="switchView('statistics')">Statistics</button>
-        <button class="main-tab" onclick="switchView('debug')">Debug</button>
+        <button class="main-tab" onclick="switchView('debug')">Data Schema</button>
     </nav>
 
     <!-- Cases View -->
@@ -279,11 +279,11 @@
     <div id="debug-view" class="view">
         <div class="content-wrapper">
             <div class="debug-header">
-                <h2>Data Schema &amp; Field Statistics</h2>
+                <h2>Field Statistics</h2>
                 <p class="debug-subtitle">Like pandas <code>df.describe()</code> for each MongoDB collection</p>
             </div>
             <div id="debug-content" class="debug-content">
-                <div class="loading">Loading schema data...</div>
+                <!-- Collections load incrementally -->
             </div>
         </div>
     </div>
@@ -1660,47 +1660,65 @@
             }
         });
 
-        // Debug view
+        // Data Schema view - loads collections incrementally
+        const SCHEMA_COLLECTIONS = ['complaints', 'settlements', 'license_only_filings'];
+
         async function loadDebugData() {
-            try {
-                const res = await fetch('/api/debug');
-                const data = await res.json();
-                debugLoaded = true;
-                renderDebugData(data);
-            } catch (e) {
-                document.getElementById('debug-content').innerHTML = `<div class="error">Failed to load debug data: ${e.message}</div>`;
-            }
+            debugLoaded = true;
+            const container = document.getElementById('debug-content');
+
+            // Create placeholder divs for each collection with loading state
+            container.innerHTML = SCHEMA_COLLECTIONS.map(name => `
+                <div class="debug-collection" id="debug-${name}">
+                    <div class="debug-collection-header">
+                        <h3>${name}</h3>
+                        <span class="debug-doc-count loading-text">Loading...</span>
+                    </div>
+                    <div class="debug-loading"><div class="loading-spinner"></div></div>
+                </div>
+            `).join('');
+
+            // Load each collection incrementally (in parallel for speed, render as they complete)
+            SCHEMA_COLLECTIONS.forEach(async (collName) => {
+                try {
+                    const res = await fetch(`/api/debug/${collName}`);
+                    const collection = await res.json();
+                    renderCollectionData(collName, collection);
+                } catch (e) {
+                    document.getElementById(`debug-${collName}`).innerHTML = `
+                        <div class="debug-collection-header">
+                            <h3>${collName}</h3>
+                            <span class="debug-doc-count error-text">Failed to load</span>
+                        </div>
+                        <div class="error">Error: ${e.message}</div>
+                    `;
+                }
+            });
         }
 
-        function renderDebugData(data) {
-            const container = document.getElementById('debug-content');
-            let html = '';
+        function renderCollectionData(collName, collection) {
+            const el = document.getElementById(`debug-${collName}`);
+            if (!el) return;
 
-            for (const collection of data.collections) {
-                html += `
-                    <div class="debug-collection">
-                        <div class="debug-collection-header">
-                            <h3>${collection.name}</h3>
-                            <span class="debug-doc-count">${collection.total_documents.toLocaleString()} docs</span>
-                        </div>
-                        <table class="debug-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-field">Field</th>
-                                    <th class="col-type">Type</th>
-                                    <th class="col-coverage">Coverage</th>
-                                    <th class="col-stats">Statistics</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${collection.fields.map(f => renderFieldRow(f)).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-
-            container.innerHTML = html;
+            el.innerHTML = `
+                <div class="debug-collection-header">
+                    <h3>${collection.name}</h3>
+                    <span class="debug-doc-count">${collection.total_documents.toLocaleString()} docs</span>
+                </div>
+                <table class="debug-table">
+                    <thead>
+                        <tr>
+                            <th class="col-field">Field</th>
+                            <th class="col-type">Type</th>
+                            <th class="col-coverage">Coverage</th>
+                            <th class="col-stats">Statistics</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${collection.fields.map(f => renderFieldRow(f)).join('')}
+                    </tbody>
+                </table>
+            `;
         }
 
         function renderFieldRow(field) {
@@ -1724,6 +1742,24 @@
                         <div class="stat-row"><span class="stat-label">sum</span><span class="stat-value">${formatStatValue(stats.sum)}</span></div>
                     </div>
                 `;
+            } else if (stats.min_length !== undefined) {
+                // Array field with length stats and examples
+                const examples = (stats.examples || []).slice(0, 3);
+                statsHtml = `
+                    <div class="stats-array">
+                        <div class="stats-numeric">
+                            <div class="stat-row"><span class="stat-label">min len</span><span class="stat-value">${formatStatValue(stats.min_length)}</span></div>
+                            <div class="stat-row"><span class="stat-label">max len</span><span class="stat-value">${formatStatValue(stats.max_length)}</span></div>
+                            <div class="stat-row"><span class="stat-label">avg len</span><span class="stat-value">${formatStatValue(stats.avg_length)}</span></div>
+                            <div class="stat-row"><span class="stat-label">unique</span><span class="stat-value">${(stats.unique || 0).toLocaleString()}</span></div>
+                        </div>
+                        ${examples.length > 0 ? `
+                            <div class="top-values">
+                                ${examples.map(v => `<div class="top-val"><span class="val-text">${truncateValue(v.value, 60)}</span><span class="val-count">${v.count}</span></div>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
             } else if (stats.unique !== undefined) {
                 const topVals = (stats.top_values || []).slice(0, 3);
                 statsHtml = `
@@ -1731,7 +1767,7 @@
                         <div class="unique-count">${stats.unique.toLocaleString()} unique</div>
                         ${topVals.length > 0 ? `
                             <div class="top-values">
-                                ${topVals.map(v => `<div class="top-val"><span class="val-text">${truncateValue(v.value, 20)}</span><span class="val-count">${v.count}</span></div>`).join('')}
+                                ${topVals.map(v => `<div class="top-val"><span class="val-text">${truncateValue(v.value, 80)}</span><span class="val-count">${v.count}</span></div>`).join('')}
                             </div>
                         ` : ''}
                     </div>

@@ -915,8 +915,9 @@ def get_debug_data(db: DB):
         stats = {}
 
         # Count non-null values
+        is_array = field_path.endswith("[]")
         non_null_query = {field_path: {"$exists": True, "$ne": None}}
-        if field_path.endswith("[]"):
+        if is_array:
             # Array field - check for non-empty arrays
             base_field = field_path.rstrip("[]")
             non_null_query = {base_field: {"$exists": True, "$not": {"$size": 0}}}
@@ -930,6 +931,40 @@ def get_debug_data(db: DB):
 
         if non_null_count == 0:
             return stats
+
+        # For array fields, compute length statistics and unique values
+        if is_array:
+            length_pipeline = [
+                {"$match": {field_path: {"$exists": True, "$type": "array"}}},
+                {"$project": {"_len": {"$size": f"${field_path}"}}},
+                {"$group": {
+                    "_id": None,
+                    "min_len": {"$min": "$_len"},
+                    "max_len": {"$max": "$_len"},
+                    "avg_len": {"$avg": "$_len"},
+                }}
+            ]
+            len_result = list(collection.aggregate(length_pipeline))
+            if len_result:
+                stats["min_length"] = len_result[0].get("min_len")
+                stats["max_length"] = len_result[0].get("max_len")
+                stats["avg_length"] = round(len_result[0].get("avg_len", 0), 2)
+
+            # Get unique values and top examples for arrays
+            unique_pipeline = [
+                {"$match": {field_path: {"$exists": True, "$type": "array", "$ne": []}}},
+                {"$unwind": f"${field_path}"},
+                {"$group": {"_id": f"${field_path}", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}},
+                {"$limit": 100}  # Get top 100 for unique count
+            ]
+            unique_result = list(collection.aggregate(unique_pipeline))
+            stats["unique"] = len(unique_result)
+            # Top 3 examples by frequency
+            stats["examples"] = [
+                {"value": str(r["_id"]) if r["_id"] is not None else None, "count": r["count"]}
+                for r in unique_result[:3]
+            ]
 
         if is_numeric:
             # Get min, max, mean for numeric fields
@@ -1047,6 +1082,168 @@ def get_debug_data(db: DB):
         })
 
     return {"collections": collections_info}
+
+
+@app.get("/api/debug/{collection_name}")
+def get_debug_collection(collection_name: str, db: DB):
+    """Get schema and field statistics for a single collection."""
+    valid_collections = ["complaints", "settlements", "license_only_filings"]
+    if collection_name not in valid_collections:
+        return {"error": f"Invalid collection. Must be one of: {valid_collections}"}
+
+    # Field descriptions for documentation
+    field_descriptions = {
+        "complaints": {
+            "_id": "MongoDB document ID",
+            "case_number": "Unique case identifier (e.g., '19-28023-1')",
+            "respondent": "Name of the doctor/practitioner",
+            "date": "Date complaint was filed (M/D/YYYY)",
+            "year": "Year extracted from date",
+            "type": "Document type (e.g., 'Formal Complaint')",
+            "pdf_url": "URL to original PDF on Nevada Medical Board site",
+            "is_amended": "Whether this is an amended complaint",
+            "original_complaint": "Reference to original complaint if amended",
+            "amendment_summary": "LLM summary of changes from original",
+            "llm_extracted.summary": "One-sentence case summary",
+            "llm_extracted.specialty": "ABMS-recognized medical specialty",
+            "llm_extracted.category": "Case category (Treatment, Diagnosis, etc.)",
+            "llm_extracted.procedure": "Medical procedure involved",
+            "llm_extracted.num_complainants": "Number of patients",
+            "llm_extracted.complainants": "Array of {age, sex} for each patient",
+            "llm_extracted.drugs": "Medications mentioned in complaint",
+        },
+        "settlements": {
+            "_id": "MongoDB document ID",
+            "case_numbers": "Array of case numbers this resolution covers",
+            "complaint_ids": "Array of ObjectIds linking to complaints",
+            "respondent": "Name of the doctor/practitioner",
+            "date": "Date of resolution (M/D/YYYY)",
+            "year": "Year extracted from date",
+            "type": "Document type (e.g., 'Stipulation for Settlement')",
+            "resolution_outcome": "'Settlement' (negotiated) or 'Hearing' (contested)",
+            "pdf_url": "URL to original PDF",
+            "llm_extracted.license_action": "Action taken (revoked, suspended, probation, etc.)",
+            "llm_extracted.probation_months": "Duration of probation in months",
+            "llm_extracted.fine_amount": "Dollar amount of fine",
+            "llm_extracted.investigation_costs": "Costs recovered from respondent",
+            "llm_extracted.cme_hours": "Required continuing education hours",
+            "llm_extracted.cme_topic": "Topic area for CME",
+            "llm_extracted.public_reprimand": "Whether public reprimand was issued",
+            "llm_extracted.npdb_report": "Whether reported to NPDB",
+            "llm_extracted.violations_admitted": "Array of NRS violations admitted",
+        },
+        "license_only_filings": {
+            "_id": "MongoDB document ID",
+            "license_number": "License number (LICENSE-XXX format)",
+            "type": "Document type (e.g., 'Order of Summary Suspension')",
+            "year": "Year of filing",
+            "date": "Date of filing",
+            "respondent": "Name of the practitioner",
+            "pdf_url": "URL to original PDF",
+            "text_content": "OCR extracted text content",
+        },
+    }
+
+    def get_field_stats(collection, field_path, is_numeric=False):
+        """Get statistics for a field."""
+        stats = {}
+        is_array = field_path.endswith("[]")
+        non_null_query = {field_path: {"$exists": True, "$ne": None}}
+        if is_array:
+            base_field = field_path.rstrip("[]")
+            non_null_query = {base_field: {"$exists": True, "$not": {"$size": 0}}}
+            field_path = base_field
+
+        non_null_count = collection.count_documents(non_null_query)
+        total_count = collection.count_documents({})
+        stats["count"] = non_null_count
+        stats["null_count"] = total_count - non_null_count
+        stats["null_pct"] = round((total_count - non_null_count) / total_count * 100, 1) if total_count > 0 else 0
+
+        if non_null_count == 0:
+            return stats
+
+        if is_array:
+            length_pipeline = [
+                {"$match": {field_path: {"$exists": True, "$type": "array"}}},
+                {"$project": {"_len": {"$size": f"${field_path}"}}},
+                {"$group": {"_id": None, "min_len": {"$min": "$_len"}, "max_len": {"$max": "$_len"}, "avg_len": {"$avg": "$_len"}}}
+            ]
+            len_result = list(collection.aggregate(length_pipeline))
+            if len_result:
+                stats["min_length"] = len_result[0].get("min_len")
+                stats["max_length"] = len_result[0].get("max_len")
+                stats["avg_length"] = round(len_result[0].get("avg_len", 0), 2)
+
+            unique_pipeline = [
+                {"$match": {field_path: {"$exists": True, "$type": "array", "$ne": []}}},
+                {"$unwind": f"${field_path}"},
+                {"$group": {"_id": f"${field_path}", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}},
+                {"$limit": 100}
+            ]
+            unique_result = list(collection.aggregate(unique_pipeline))
+            stats["unique"] = len(unique_result)
+            stats["examples"] = [{"value": str(r["_id"]) if r["_id"] is not None else None, "count": r["count"]} for r in unique_result[:3]]
+
+        if is_numeric:
+            pipeline = [
+                {"$match": {field_path: {"$exists": True, "$ne": None, "$type": "number"}}},
+                {"$group": {"_id": None, "min": {"$min": f"${field_path}"}, "max": {"$max": f"${field_path}"}, "avg": {"$avg": f"${field_path}"}, "sum": {"$sum": f"${field_path}"}}}
+            ]
+            result = list(collection.aggregate(pipeline))
+            if result:
+                stats["min"] = result[0].get("min")
+                stats["max"] = result[0].get("max")
+                stats["mean"] = round(result[0].get("avg", 0), 2)
+                stats["sum"] = result[0].get("sum")
+        else:
+            unique_values = collection.distinct(field_path)
+            unique_values = [v for v in unique_values if v is not None and v != ""]
+            stats["unique"] = len(unique_values)
+            top_pipeline = [
+                {"$match": {field_path: {"$exists": True, "$ne": None, "$ne": ""}}},
+                {"$group": {"_id": f"${field_path}", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}},
+                {"$limit": 5}
+            ]
+            top_result = list(collection.aggregate(top_pipeline))
+            stats["top_values"] = [{"value": str(r["_id"]) if r["_id"] is not None else None, "count": r["count"]} for r in top_result]
+
+        return stats
+
+    coll = db[collection_name]
+    total = coll.count_documents({})
+
+    if total == 0:
+        return {"name": collection_name, "total_documents": 0, "fields": []}
+
+    sample = coll.find_one()
+    descriptions = field_descriptions.get(collection_name, {})
+    numeric_fields = {"year", "llm_extracted.fine_amount", "llm_extracted.investigation_costs", "llm_extracted.probation_months", "llm_extracted.cme_hours", "llm_extracted.num_complainants", "llm_extracted.charity_donation"}
+
+    def process_fields(doc, prefix=""):
+        results = []
+        for key, value in doc.items():
+            if key == "_id":
+                continue
+            field_path = f"{prefix}{key}" if prefix else key
+            if isinstance(value, dict) and key != "original_complaint":
+                results.extend(process_fields(value, f"{field_path}."))
+            elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+                results.append({"field": field_path, "type": "array<object>", "description": descriptions.get(field_path, ""), "stats": get_field_stats(coll, field_path + "[]")})
+            elif isinstance(value, list):
+                results.append({"field": field_path, "type": "array", "description": descriptions.get(field_path, ""), "stats": get_field_stats(coll, field_path + "[]")})
+            else:
+                field_type = type(value).__name__ if value is not None else "unknown"
+                is_numeric = field_path in numeric_fields or field_type in ("int", "float")
+                results.append({"field": field_path, "type": field_type, "description": descriptions.get(field_path, ""), "stats": get_field_stats(coll, field_path, is_numeric)})
+        return results
+
+    fields_data = process_fields(sample)
+    fields_data.sort(key=lambda x: x["field"])
+
+    return {"name": collection_name, "total_documents": total, "fields": fields_data}
 
 
 @app.get("/api/extended-analytics")

@@ -1798,6 +1798,42 @@ button.secondary:hover {
   border-radius: 3px;
 }
 
+.debug-doc-count.loading-text {
+  color: var(--gray);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.debug-doc-count.error-text {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.debug-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  background: var(--off-white);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(52, 49, 45, 0.15);
+  border-top-color: var(--charcoal);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* Debug Table */
 .debug-table {
   width: 100%;
@@ -1978,10 +2014,8 @@ button.secondary:hover {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--charcoal);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   flex: 1;
+  word-break: break-word;
 }
 
 .val-count {
@@ -1993,6 +2027,19 @@ button.secondary:hover {
   padding: 2px 6px;
   border-radius: 10px;
   flex-shrink: 0;
+}
+
+/* Stats - Array (combined length stats + examples) */
+.stats-array {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats-array .top-values {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 /* Error State */
