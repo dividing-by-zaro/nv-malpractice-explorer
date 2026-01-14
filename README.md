@@ -52,7 +52,7 @@ uv run uvicorn app:app --reload --port 8000
 ## Web App Features
 
 - **Cases Tab**: Browse complaints with custom multi-select filters
-  - Filters: Category, specialty, resolution status, license action (with Select All/Clear buttons)
+  - Filters: Category, specialty, resolution status, license action, amended status, has modification
   - "Missing" option in specialty filter to find cases without specialty data
   - Sort by: Date (Newest/Oldest), Respondent A-Z/Z-A
   - Auto-search on filter change, no manual submit needed
@@ -67,6 +67,8 @@ uv run uvicorn app:app --reload --port 8000
   - Timeline section shows complaint date, resolution date, and time to resolution
   - Amended complaints display both original and amended PDFs in separate tabs
   - LLM-generated summary explains what changed between versions
+  - Settlement modifications: View all resolution documents (original + amendments) with tabs for each
+  - Modification summaries explain what changed (fine reductions, probation changes, vacated terms)
   - Related links section for external sources (news articles, court opinions, press releases)
 - **Statistics Tab**: Aggregate analytics dashboard
   - Stats cards: Total complaints, processed count, resolutions, categories
@@ -265,6 +267,8 @@ text/{year}/                  # Extracted plain text
 - `cme_hours`, `cme_topic`: Continuing education requirements
 - `public_reprimand`, `npdb_report`: Boolean flags
 - `violations_admitted[]`: NRS codes and descriptions admitted
+- `is_modification`: Boolean (true for amendments/modifications to previous settlements)
+- `modification_summary`: LLM-generated description of what changed - if modification
 
 ## Environment Variables
 

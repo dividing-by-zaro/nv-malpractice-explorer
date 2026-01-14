@@ -232,6 +232,52 @@ def get_resolution_outcome(doc_type: str) -> str:
     return "Settlement"
 
 
+def is_settlement_modification(doc_type: str) -> bool:
+    """
+    Check if document type is a modification of a previous settlement.
+
+    Modification types include amendments, addendums, modifications, and vacating orders.
+    """
+    if not doc_type:
+        return False
+    lower_type = doc_type.lower()
+    modification_keywords = ["modifying", "amended", "amending", "addendum", "vacating"]
+    return any(keyword in lower_type for keyword in modification_keywords)
+
+
+def find_original_settlement(settlements_collection, case_numbers: list[str], current_pdf_url: str):
+    """
+    Find the original (non-modification) settlement for the same case number(s).
+
+    Returns the settlement with the earliest date that is not a modification
+    and is not the current document.
+    """
+    if not case_numbers:
+        return None
+
+    # Find non-modification settlements for the same case numbers
+    candidates = list(settlements_collection.find({
+        "case_numbers": {"$in": case_numbers},
+        "pdf_url": {"$ne": current_pdf_url},
+        "$or": [
+            {"is_modification": {"$exists": False}},
+            {"is_modification": False}
+        ]
+    }))
+
+    if not candidates:
+        return None
+
+    # Return the earliest settlement by date
+    def parse_date(s):
+        try:
+            return datetime.strptime(s.get("date", "1/1/1900"), "%m/%d/%Y")
+        except (ValueError, TypeError):
+            return datetime(1900, 1, 1)
+
+    return min(candidates, key=parse_date)
+
+
 # -----------------------------------------------------------------------------
 # OCR Processing
 # -----------------------------------------------------------------------------
@@ -861,6 +907,52 @@ def process_settlement(
         document["llm_model"] = model
         result["llm_extracted"] = llm_result
         print(f"  Extracted: {llm_result.get('license_action', 'Unknown')} - Fine: ${llm_result.get('fine_amount', 0) or 0:,.0f}")
+
+    # Check if this is a modification settlement
+    if is_settlement_modification(doc_type):
+        document["is_modification"] = True
+        print("  Detected as modification of previous settlement")
+
+        # Find the original settlement for the same case number(s)
+        original = find_original_settlement(settlements_collection, case_numbers, pdf_url)
+
+        if original:
+            # Store reference to original
+            document["original_settlement"] = {
+                "pdf_url": original.get("pdf_url"),
+                "type": original.get("type"),
+                "date": original.get("date"),
+            }
+            print(f"  Found original: {original.get('type')} ({original.get('date')})")
+
+            # Compare original and modification via LLM if both have text
+            original_text = original.get("text_content", "")
+            if original_text and not ocr_failed:
+                print("  Comparing with original settlement...")
+                comparison_prompt = load_prompt("settlement_modification_comparison")
+
+                # Truncate texts for comparison
+                max_chars = 6000
+                comparison_content = f"""## Original Settlement Text
+
+{original_text[:max_chars]}
+
+## Modification Order Text
+
+{text_content[:max_chars]}
+"""
+                try:
+                    comparison_result = call_openai(openai_client, comparison_prompt, comparison_content, model)
+                    modification_summary = comparison_result.get("modification_summary")
+                    if modification_summary:
+                        document["modification_summary"] = modification_summary
+                        document["modification_changes"] = comparison_result.get("changes", [])
+                        result["modification_summary"] = modification_summary
+                        print(f"  Modification summary: {modification_summary[:80]}...")
+                except Exception as e:
+                    print(f"  Warning: Modification comparison failed: {e}")
+        else:
+            print("  Warning: No original settlement found for this modification")
 
     # Upsert to MongoDB by pdf_url
     settlements_collection.update_one(

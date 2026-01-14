@@ -1648,9 +1648,247 @@ button.secondary:hover {
   font-size: 14px;
 }
 
+/* Settlement Modifications */
+.modifications-section {
+  margin-top: 16px;
+}
+
+.modifications-section h3 {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border-default);
+}
+
+.modifications-section h3 [data-lucide] {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+.modification-item {
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+[data-theme="dark"] .modification-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-left-color: var(--tan);
+}
+
+.modification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.modification-date {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.modification-type {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.modification-summary {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Dynamic settlement tabs */
+.settlement-doc-tab {
+  /* Inherits from .tab styles */
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    STATISTICS VIEW
    ═══════════════════════════════════════════════════════════════════════════ */
+
+#statistics-view .content-wrapper {
+  max-width: none;
+  padding: 40px 48px;
+}
+
+/* Stats Sections */
+.stats-section {
+  margin-bottom: 48px;
+}
+
+.stats-section__title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-primary);
+  margin: 0 0 24px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border-default);
+}
+
+[data-theme="dark"] .stats-section__title {
+  color: var(--tan);
+  border-bottom-color: var(--tan);
+}
+
+/* Key Metrics Grid */
+.key-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  position: relative;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+  border-radius: 16px;
+  padding: 24px 24px 24px 28px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+/* Left accent bar */
+.metric-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--metric-accent, var(--tan));
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+/* Subtle glow effect on hover */
+.metric-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    ellipse at top left,
+    var(--metric-glow, rgba(217, 197, 178, 0.15)) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 12px 28px rgba(0, 0, 0, 0.08);
+  border-color: var(--border-default);
+}
+
+.metric-card:hover::before {
+  top: 12px;
+  bottom: 12px;
+  width: 5px;
+}
+
+.metric-card:hover::after {
+  opacity: 1;
+}
+
+[data-theme="dark"] .metric-card {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .metric-card:hover {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.25),
+    0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.metric-card__value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.metric-card__label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.metric-card__sublabel {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.8;
+  letter-spacing: 0;
+}
+
+/* Accent color variants with custom properties */
+.metric-card--accent {
+  --metric-accent: var(--tan);
+  --metric-glow: rgba(217, 197, 178, 0.2);
+}
+
+.metric-card--green {
+  --metric-accent: #10b981;
+  --metric-glow: rgba(16, 185, 129, 0.12);
+}
+
+.metric-card--amber {
+  --metric-accent: #f59e0b;
+  --metric-glow: rgba(245, 158, 11, 0.12);
+}
+
+.metric-card--purple {
+  --metric-accent: #8b5cf6;
+  --metric-glow: rgba(139, 92, 246, 0.12);
+}
+
+.metric-card--blue {
+  --metric-accent: #3b82f6;
+  --metric-glow: rgba(59, 130, 246, 0.12);
+}
+
+.metric-card--teal {
+  --metric-accent: #14b8a6;
+  --metric-glow: rgba(20, 184, 166, 0.12);
+}
 
 .stats-grid {
   display: grid;
@@ -1674,10 +1912,10 @@ button.secondary:hover {
 
 .chart-card h3 {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--text-primary);
   background: var(--bg-secondary);
   margin: 0;
@@ -1821,8 +2059,8 @@ button.secondary:hover {
 }
 
 .histogram-info {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: 12px;
   color: var(--text-muted);
   padding: 12px 20px;
   display: flex;
@@ -1865,8 +2103,8 @@ button.secondary:hover {
 }
 
 .analysis-note {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: 12px;
   color: var(--text-muted);
   margin-bottom: 20px;
 }
@@ -1893,18 +2131,18 @@ button.secondary:hover {
 }
 
 .highlight-value {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 6px;
   color: var(--tan);
 }
 
 .highlight-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--text-muted);
   line-height: 1.4;
 }
@@ -1918,8 +2156,8 @@ button.secondary:hover {
 .data-table table {
   width: 100%;
   border-collapse: collapse;
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
   background: var(--bg-card);
 }
 
@@ -1929,9 +2167,9 @@ button.secondary:hover {
   padding: 12px 16px;
   text-align: left;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
   border-right: 1px solid var(--border-subtle);
 }
 
@@ -1989,6 +2227,10 @@ button.secondary:hover {
     grid-template-columns: 1fr;
   }
 
+  .key-metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .totals-grid {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
@@ -2042,6 +2284,39 @@ button.secondary:hover {
 
   .content-wrapper {
     padding: 20px;
+  }
+
+  #statistics-view .content-wrapper {
+    padding: 20px;
+  }
+
+  .key-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .metric-card {
+    padding: 20px 20px 20px 24px;
+    border-radius: 12px;
+  }
+
+  .metric-card::before {
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+  }
+
+  .metric-card__value {
+    font-size: 28px;
+  }
+
+  .metric-card__label {
+    font-size: 13px;
+  }
+
+  .stats-section__title {
+    font-size: 12px;
+    margin-bottom: 16px;
   }
 
   .stats {

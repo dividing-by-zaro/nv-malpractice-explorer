@@ -105,6 +105,30 @@
                             </div>
                         </div>
                     </div>
+                    <div class="filter-group">
+                        <label>Amended Complaint</label>
+                        <div class="custom-select custom-select--single" id="amended-select" data-multi="false" data-filter="is_amended">
+                            <div class="custom-select__trigger">
+                                <span class="custom-select__value">All</span>
+                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
+                            </div>
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__options"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Has Modification</label>
+                        <div class="custom-select custom-select--single" id="modification-select" data-multi="false" data-filter="has_modification">
+                            <div class="custom-select__trigger">
+                                <span class="custom-select__value">All</span>
+                                <i data-lucide="chevron-down" class="custom-select__arrow"></i>
+                            </div>
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__options"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="filter-spacer"></div>
                     <div class="filter-group">
                         <label>Sort By</label>
@@ -132,85 +156,94 @@
     <!-- Statistics View -->
     <div id="statistics-view" class="view">
         <div class="content-wrapper">
-            <div class="totals-section">
-                <div class="totals-grid" id="totals-grid"></div>
-            </div>
-            <div class="stats" id="stats"></div>
-            <div class="summary-grid" id="settlement-summary"></div>
+            <!-- Key Metrics Section -->
+            <section class="stats-section" style="margin-bottom: 32px;">
+                <div class="key-metrics-grid" id="key-metrics"></div>
+            </section>
 
-        <div class="stats-grid">
-            <div class="chart-card">
-                <h3>Cases by Year</h3>
-                <div class="chart-container">
-                    <canvas id="yearChart"></canvas>
+            <!-- Overview Charts -->
+            <section class="stats-section">
+                <h2 class="stats-section__title">Case Overview</h2>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h3>Cases by Year</h3>
+                        <div class="chart-container">
+                            <canvas id="yearChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Cases by Category</h3>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="chart-card">
-                <h3>Cases by Category</h3>
-                <div class="chart-container">
-                    <canvas id="categoryChart"></canvas>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h3>Top Specialties</h3>
+                        <div class="chart-container tall">
+                            <canvas id="specialtyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>License Actions</h3>
+                        <div class="chart-container tall">
+                            <canvas id="actionsChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="stats-grid">
-            <div class="chart-card">
-                <h3>Top Specialties</h3>
-                <div class="chart-container tall">
-                    <canvas id="specialtyChart"></canvas>
+            <!-- Financial Impact Section -->
+            <section class="stats-section">
+                <h2 class="stats-section__title">Financial Impact</h2>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h3>Fine Amounts Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="fineChart"></canvas>
+                        </div>
+                        <div class="histogram-info" id="fine-info"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Investigation Costs Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="costChart"></canvas>
+                        </div>
+                        <div class="histogram-info" id="cost-info"></div>
+                    </div>
                 </div>
-            </div>
-            <div class="chart-card">
-                <h3>License Actions</h3>
-                <div class="chart-container tall">
-                    <canvas id="actionsChart"></canvas>
-                </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="stats-grid">
-            <div class="chart-card">
-                <h3>Fine Amounts Distribution</h3>
-                <div class="chart-container">
-                    <canvas id="fineChart"></canvas>
+            <!-- Disciplinary Outcomes Section -->
+            <section class="stats-section">
+                <h2 class="stats-section__title">Disciplinary Outcomes</h2>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h3>CME Hours Required</h3>
+                        <div class="chart-container">
+                            <canvas id="cmeChart"></canvas>
+                        </div>
+                        <div class="histogram-info" id="cme-info"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Probation Duration (Months)</h3>
+                        <div class="chart-container">
+                            <canvas id="probationChart"></canvas>
+                        </div>
+                        <div class="histogram-info" id="probation-info"></div>
+                    </div>
                 </div>
-                <div class="histogram-info" id="fine-info"></div>
-            </div>
-            <div class="chart-card">
-                <h3>Investigation Costs Distribution</h3>
-                <div class="chart-container">
-                    <canvas id="costChart"></canvas>
+                <div class="stats-grid">
+                    <div class="chart-card full-width">
+                        <h3>Time to Resolution</h3>
+                        <div class="chart-container">
+                            <canvas id="resolutionTimeChart"></canvas>
+                        </div>
+                        <div class="histogram-info" id="resolution-time-info"></div>
+                    </div>
                 </div>
-                <div class="histogram-info" id="cost-info"></div>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="chart-card">
-                <h3>CME Hours Required</h3>
-                <div class="chart-container">
-                    <canvas id="cmeChart"></canvas>
-                </div>
-                <div class="histogram-info" id="cme-info"></div>
-            </div>
-            <div class="chart-card">
-                <h3>Probation Duration (Months)</h3>
-                <div class="chart-container">
-                    <canvas id="probationChart"></canvas>
-                </div>
-                <div class="histogram-info" id="probation-info"></div>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="chart-card full-width">
-                <h3>Time to Resolution (Days)</h3>
-                <div class="chart-container">
-                    <canvas id="resolutionTimeChart"></canvas>
-                </div>
-                <div class="histogram-info" id="resolution-time-info"></div>
-            </div>
-        </div>
+            </section>
 
         <!-- Extended Analysis Section -->
         <div class="analysis-section" id="extended-analysis">
@@ -475,7 +508,9 @@
                     'sex': 'Any',
                     'sort': 'Date (Newest)',
                     'has_settlement': 'All',
-                    'license_action': 'All Actions'
+                    'license_action': 'All Actions',
+                    'is_amended': 'All',
+                    'has_modification': 'All'
                 };
                 return labels[this.filterName] || 'Select...';
             }
@@ -681,36 +716,29 @@
             customSelects['license_action'] = new CustomSelect(document.getElementById('license-action-select'));
             customSelects['license_action'].setOptions(data.license_actions.map(a => ({ value: a, label: a })));
 
+            // Initialize Amended Complaint dropdown (single select)
+            customSelects['is_amended'] = new CustomSelect(document.getElementById('amended-select'));
+            customSelects['is_amended'].setOptions([
+                { value: '', label: 'All' },
+                { value: 'yes', label: 'Amended Only' },
+                { value: 'no', label: 'Original Only' }
+            ]);
+
+            // Initialize Has Modification dropdown (single select)
+            customSelects['has_modification'] = new CustomSelect(document.getElementById('modification-select'));
+            customSelects['has_modification'].setOptions([
+                { value: '', label: 'All' },
+                { value: 'yes', label: 'Has Modification' },
+                { value: 'no', label: 'No Modification' }
+            ]);
+
             // Re-render Lucide icons for dropdown arrows
             lucide.createIcons();
         }
 
         async function loadStats() {
-            const res = await fetch('/api/stats');
-            const data = await res.json();
-
-            document.getElementById('stats').innerHTML = `
-                <div class="stat">
-                    <div class="stat-value">${data.total}</div>
-                    <div class="stat-label">Total Complaints</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">${data.with_extraction}</div>
-                    <div class="stat-label">Processed</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">${data.resolutions}</div>
-                    <div class="stat-label">Resolutions</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">${data.categories}</div>
-                    <div class="stat-label">Categories</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">${data.drugs}</div>
-                    <div class="stat-label">Unique Drugs</div>
-                </div>
-            `;
+            // Stats are now integrated into the analytics key metrics
+            // This function is kept for backward compatibility but no longer populates a separate element
         }
 
         function getCategoryClass(category) {
@@ -731,6 +759,8 @@
         // Store complaints and settlements for modal access
         let complaintsCache = {};
         let currentSettlement = null;
+        let currentSettlements = [];  // All settlements for the current case
+        let settlementPdfPaths = {};  // Map of pdf_url -> local path
         let currentComplaint = null;
         let complaintPdfPath = null;
         let originalPdfPath = null;
@@ -963,23 +993,46 @@
                 `;
             }
 
-            // Fetch resolution data
+            // Fetch all resolutions (original + modifications)
             let resolutionDate = null;
+            currentSettlements = [];
+            settlementPdfPaths = {};
             try {
-                const res = await fetch(`/api/settlement/${caseNumber}`);
-                const settlement = await res.json();
-                if (settlement && settlement.case_number) {
-                    currentSettlement = settlement;
-                    resolutionDate = settlement.date;
-                    infoHtml += renderSettlementInfo(settlement);
-                    document.getElementById('settlement-tab').style.display = 'block';
-                    settlementPdfPath = buildSettlementPdfPath(settlement);
+                const res = await fetch(`/api/settlements/${caseNumber}`);
+                const data = await res.json();
+                if (data.settlements && data.settlements.length > 0) {
+                    currentSettlements = data.settlements;
+
+                    // Primary settlement is first non-modification, or first if all are modifications
+                    const primarySettlement = currentSettlements.find(s => !s.is_modification) || currentSettlements[0];
+                    currentSettlement = primarySettlement;
+                    resolutionDate = primarySettlement.date;
+
+                    // Render primary settlement info
+                    infoHtml += renderSettlementInfo(primarySettlement);
+
+                    // If there are modifications, add modification summaries section
+                    const modifications = currentSettlements.filter(s => s.is_modification);
+                    if (modifications.length > 0) {
+                        infoHtml += renderModificationSummaries(modifications);
+                    }
+
+                    // Build PDF paths for all settlements
+                    currentSettlements.forEach(s => {
+                        settlementPdfPaths[s.pdf_url] = buildSettlementPdfPath(s);
+                    });
+
+                    // Set up dynamic settlement tabs
+                    buildSettlementTabs(currentSettlements);
+
+                    // For backward compatibility
+                    settlementPdfPath = settlementPdfPaths[primarySettlement.pdf_url];
                 } else {
-                    document.getElementById('settlement-tab').style.display = 'none';
+                    hideSettlementTabs();
                     settlementPdfPath = null;
                 }
             } catch (e) {
-                document.getElementById('settlement-tab').style.display = 'none';
+                hideSettlementTabs();
                 settlementPdfPath = null;
             }
 
@@ -1069,6 +1122,110 @@
             return html;
         }
 
+        function renderModificationSummaries(modifications) {
+            let html = '<div class="info-section modifications-section"><h3><i data-lucide="history"></i> Settlement Modifications</h3>';
+
+            modifications.forEach(mod => {
+                const date = mod.date ? formatDate(mod.date) : 'Unknown date';
+                // Shorten type for display
+                let typeShort = mod.type;
+                if (typeShort.length > 50) {
+                    typeShort = typeShort.substring(0, 47) + '...';
+                }
+
+                html += `
+                    <div class="modification-item">
+                        <div class="modification-header">
+                            <span class="modification-date">${date}</span>
+                        </div>
+                        <div class="modification-type">${typeShort}</div>
+                        ${mod.modification_summary ?
+                            `<div class="modification-summary">${mod.modification_summary}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            return html;
+        }
+
+        function buildSettlementTabs(settlements) {
+            const tabsContainer = document.getElementById('pdf-tabs');
+
+            // Remove existing settlement tabs (keep complaint and original)
+            document.querySelectorAll('.settlement-doc-tab').forEach(tab => tab.remove());
+
+            // Hide the old single settlement tab
+            document.getElementById('settlement-tab').style.display = 'none';
+
+            // Add tabs for each settlement
+            settlements.forEach((s, index) => {
+                // Determine tab label
+                let label;
+                if (s.is_modification) {
+                    const year = s.date ? new Date(s.date).getFullYear() : '';
+                    // Determine type: Modified, Amended, Addendum, Vacated
+                    const lowerType = s.type.toLowerCase();
+                    let typeShort = 'Modified';
+                    if (lowerType.includes('addendum')) typeShort = 'Addendum';
+                    else if (lowerType.includes('vacating')) typeShort = 'Vacated';
+                    else if (lowerType.includes('amended') || lowerType.includes('amending')) typeShort = 'Amended';
+                    label = `${typeShort} (${year})`;
+                } else {
+                    // Non-modification: check if there are multiple originals or modifications
+                    const hasModifications = settlements.some(s => s.is_modification);
+                    const hasMultipleOriginals = settlements.filter(s => !s.is_modification).length > 1;
+
+                    if (hasModifications || hasMultipleOriginals) {
+                        // Show type for clarity: Settlement, Hearing, etc.
+                        const isHearing = s.type.toLowerCase().includes('findings of fact');
+                        label = isHearing ? 'Hearing' : 'Settlement';
+                        // Add year if multiple
+                        if (hasMultipleOriginals) {
+                            const year = s.date ? new Date(s.date).getFullYear() : '';
+                            label += ` (${year})`;
+                        }
+                    } else {
+                        label = 'Resolution';
+                    }
+                }
+
+                const tab = document.createElement('button');
+                tab.className = 'tab settlement-doc-tab';
+                tab.textContent = label;
+                tab.dataset.pdfUrl = s.pdf_url;
+                tab.onclick = () => switchSettlementTab(s.pdf_url);
+
+                tabsContainer.appendChild(tab);
+            });
+        }
+
+        function switchSettlementTab(pdfUrl) {
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+            // Activate the clicked settlement tab
+            const clickedTab = document.querySelector(`.settlement-doc-tab[data-pdf-url="${CSS.escape(pdfUrl)}"]`);
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
+
+            // Load PDF
+            const pdfPath = settlementPdfPaths[pdfUrl];
+            if (pdfPath) {
+                document.getElementById('modal-pdf').innerHTML = `<iframe src="${pdfPath}"></iframe>`;
+            } else {
+                document.getElementById('modal-pdf').innerHTML = `<div class="no-pdf">PDF not available</div>`;
+            }
+        }
+
+        function hideSettlementTabs() {
+            document.querySelectorAll('.settlement-doc-tab').forEach(tab => tab.remove());
+            document.getElementById('settlement-tab').style.display = 'none';
+            settlementPdfPaths = {};
+            currentSettlements = [];
+        }
+
         function buildSettlementPdfPath(s) {
             // Use text_file path if available (most reliable)
             if (s.text_file) {
@@ -1118,10 +1275,14 @@
             document.body.style.overflow = '';
             document.getElementById('modal-pdf').innerHTML = '';
             currentSettlement = null;
+            currentSettlements = [];
+            settlementPdfPaths = {};
             currentComplaint = null;
             complaintPdfPath = null;
             originalPdfPath = null;
             settlementPdfPath = null;
+            // Clean up dynamic settlement tabs
+            document.querySelectorAll('.settlement-doc-tab').forEach(tab => tab.remove());
         }
 
         // Close modal on escape key
@@ -1139,6 +1300,8 @@
             const sort = customSelects['sort']?.getValue() || 'date_desc';
             const hasSettlement = customSelects['has_settlement']?.getValue() || '';
             const licenseAction = customSelects['license_action']?.getValue();
+            const isAmended = customSelects['is_amended']?.getValue() || '';
+            const hasModification = customSelects['has_modification']?.getValue() || '';
 
             // If any multi-select filter has nothing selected (null), show no results
             if (category === null || specialty === null || licenseAction === null) {
@@ -1153,6 +1316,8 @@
             if (licenseAction && licenseAction.length > 0) params.set('license_action', licenseAction.join(','));
             if (sort) params.set('sort', sort);
             if (hasSettlement) params.set('has_settlement', hasSettlement);
+            if (isAmended) params.set('is_amended', isAmended);
+            if (hasModification) params.set('has_modification', hasModification);
             params.set('skip', page * pageSize);
             params.set('limit', pageSize);
 
@@ -1214,14 +1379,36 @@
                 customSelects['has_settlement'].updateOptionStyles();
                 customSelects['has_settlement'].updateDisplay();
             }
+            if (customSelects['is_amended']) {
+                customSelects['is_amended'].selected = new Set(['']);
+                customSelects['is_amended'].updateOptionStyles();
+                customSelects['is_amended'].updateDisplay();
+            }
+            if (customSelects['has_modification']) {
+                customSelects['has_modification'].selected = new Set(['']);
+                customSelects['has_modification'].updateOptionStyles();
+                customSelects['has_modification'].updateDisplay();
+            }
             search();
         }
 
-        // Chart colors - complementing the archival palette
+        // Chart colors - utility accent palette for categorical data
         const chartColors = [
-            '#34312D', '#7E7F83', '#D9C5B2', '#14110F', '#a89985',
-            '#5c5954', '#b5a99a', '#9a9590', '#c4b8a9', '#6b6560'
+            '#2563eb', // blue
+            '#059669', // green
+            '#d97706', // amber
+            '#dc2626', // red
+            '#7c3aed', // purple
+            '#db2777', // pink
+            '#0891b2', // teal
+            '#65a30d', // lime
+            '#ea580c', // orange
+            '#6366f1', // indigo
         ];
+
+        // Single color shades for sequential data
+        const blueShades = ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'];
+        const greenShades = ['#047857', '#059669', '#10b981', '#34d399', '#6ee7b7'];
 
         async function loadAnalytics() {
             const res = await fetch('/api/analytics');
@@ -1241,134 +1428,131 @@
             const meanResolution = resStats ? formatDaysToReadable(resStats.mean_days) : '—';
             const medianResolution = resStats ? formatDaysToReadable(resStats.median_days) : '—';
 
-            document.getElementById('totals-grid').innerHTML = `
-                <div class="total-card">
-                    <div class="value">$${totals.total_fines.toLocaleString()}</div>
-                    <div class="label">Total Fines Collected</div>
-                    <div class="sublabel">${totals.min_year}–${totals.max_year}</div>
-                </div>
-                <div class="total-card green">
-                    <div class="value">$${totals.avg_fine_per_year.toLocaleString()}</div>
-                    <div class="label">Avg Fines Per Year</div>
-                    <div class="sublabel">${totals.year_span} years of data</div>
-                </div>
-                <div class="total-card amber">
-                    <div class="value">$${totals.total_investigation_costs.toLocaleString()}</div>
-                    <div class="label">Investigation Costs</div>
-                    <div class="sublabel">Recovered from respondents</div>
-                </div>
-                <div class="total-card purple">
-                    <div class="value">${totals.total_cme_hours.toLocaleString()}</div>
-                    <div class="label">CME Hours Required</div>
-                    <div class="sublabel">Continuing education ordered</div>
-                </div>
-                <div class="total-card cyan">
-                    <div class="value">${probationStr}</div>
-                    <div class="label">Total Probation Time</div>
-                    <div class="sublabel">${totals.total_probation_months} months combined</div>
-                </div>
-                <div class="total-card blue">
-                    <div class="value">${medianResolution}</div>
-                    <div class="label">Median Resolution Time</div>
-                    <div class="sublabel">${resStats ? resStats.count.toLocaleString() + ' resolved cases' : 'No data'}</div>
-                </div>
-                <div class="total-card teal">
-                    <div class="value">${meanResolution}</div>
-                    <div class="label">Mean Resolution Time</div>
-                    <div class="sublabel">From complaint to resolution</div>
-                </div>
-            `;
+            // Helper to format large numbers compactly
+            const formatCompact = (num) => {
+                if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
+                if (num >= 1000) return `$${Math.round(num / 1000)}K`;
+                return `$${num.toLocaleString()}`;
+            };
 
-            // Render resolution summary
+            // Render key metrics - consolidated view
             const summary = data.settlement_summary;
-            document.getElementById('settlement-summary').innerHTML = `
-                <div class="summary-card">
-                    <div class="value">${summary.total}</div>
-                    <div class="label">Total Resolutions</div>
+            document.getElementById('key-metrics').innerHTML = `
+                <div class="metric-card metric-card--accent">
+                    <div class="metric-card__value">${data.total}</div>
+                    <div class="metric-card__label">Total Complaints</div>
+                    <div class="metric-card__sublabel">${totals.min_year}–${totals.max_year}</div>
                 </div>
-                <div class="summary-card">
-                    <div class="value">${summary.with_fine}</div>
-                    <div class="label">With Fines</div>
+                <div class="metric-card metric-card--blue">
+                    <div class="metric-card__value">${summary.total}</div>
+                    <div class="metric-card__label">Resolutions</div>
+                    <div class="metric-card__sublabel">${summary.with_fine} with fines</div>
                 </div>
-                <div class="summary-card">
-                    <div class="value">${summary.with_probation}</div>
-                    <div class="label">With Probation</div>
+                <div class="metric-card metric-card--green">
+                    <div class="metric-card__value">${formatCompact(totals.total_fines)}</div>
+                    <div class="metric-card__label">Total Fines</div>
+                    <div class="metric-card__sublabel">${formatCompact(totals.avg_fine_per_year)}/year avg</div>
                 </div>
-                <div class="summary-card">
-                    <div class="value">${summary.with_cme}</div>
-                    <div class="label">CME Required</div>
+                <div class="metric-card metric-card--amber">
+                    <div class="metric-card__value">${formatCompact(totals.total_investigation_costs)}</div>
+                    <div class="metric-card__label">Investigation Costs</div>
+                    <div class="metric-card__sublabel">Recovered from respondents</div>
                 </div>
-                <div class="summary-card">
-                    <div class="value">${summary.public_reprimand}</div>
-                    <div class="label">Public Reprimand</div>
+                <div class="metric-card metric-card--purple">
+                    <div class="metric-card__value">${totals.total_cme_hours.toLocaleString()}</div>
+                    <div class="metric-card__label">CME Hours</div>
+                    <div class="metric-card__sublabel">${summary.with_cme} cases required</div>
                 </div>
-                <div class="summary-card">
-                    <div class="value">${summary.npdb_report}</div>
-                    <div class="label">NPDB Report</div>
+                <div class="metric-card metric-card--teal">
+                    <div class="metric-card__value">${medianResolution}</div>
+                    <div class="metric-card__label">Median Resolution</div>
+                    <div class="metric-card__sublabel">${resStats ? resStats.count.toLocaleString() + ' resolved' : 'No data'}</div>
                 </div>
             `;
 
-            // Cases by Year (line chart)
+            // Cases by Year (line chart) - black theme
             createChart('yearChart', 'line', {
                 labels: data.by_year.map(d => d.year),
                 datasets: [{
                     label: 'Cases',
                     data: data.by_year.map(d => d.count),
-                    borderColor: '#34312D',
-                    backgroundColor: 'rgba(217, 197, 178, 0.3)',
+                    borderColor: '#18181b',
+                    backgroundColor: 'rgba(24, 24, 27, 0.05)',
                     fill: true,
                     tension: 0.3,
                     borderWidth: 2,
-                    pointBackgroundColor: '#34312D',
-                    pointBorderColor: '#34312D',
-                    pointRadius: 3
+                    pointBackgroundColor: '#18181b',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
                 }]
             });
 
-            // Category breakdown (doughnut)
+            // Category breakdown (doughnut) - utility colors
             createChart('categoryChart', 'doughnut', {
                 labels: data.categories.map(d => d.category),
                 datasets: [{
                     data: data.categories.map(d => d.count),
-                    backgroundColor: chartColors
+                    backgroundColor: chartColors,
+                    borderWidth: 1,
+                    borderColor: '#ffffff'
                 }]
             }, { plugins: { legend: { position: 'right' } } });
 
-            // Specialty breakdown (horizontal bar)
+            // Specialty breakdown (horizontal bar) - each bar different color
             createChart('specialtyChart', 'bar', {
                 labels: data.specialties.map(d => d.specialty),
                 datasets: [{
                     label: 'Cases',
                     data: data.specialties.map(d => d.count),
-                    backgroundColor: '#34312D',
-                    borderColor: '#14110F',
-                    borderWidth: 1
+                    backgroundColor: data.specialties.map((_, i) => chartColors[i % chartColors.length]),
+                    borderColor: data.specialties.map((_, i) => chartColors[i % chartColors.length]),
+                    borderWidth: 0,
+                    borderRadius: 4
                 }]
             }, { indexAxis: 'y' });
 
-            // License actions (horizontal bar)
+            // License actions (horizontal bar) - each action gets severity color
+            const actionColors = data.license_actions.map(d => getActionColor(d.action));
             createChart('actionsChart', 'bar', {
                 labels: data.license_actions.map(d => d.action),
                 datasets: [{
                     label: 'Resolutions',
                     data: data.license_actions.map(d => d.count),
-                    backgroundColor: '#D9C5B2',
-                    borderColor: '#34312D',
-                    borderWidth: 1
+                    backgroundColor: actionColors,
+                    borderColor: actionColors,
+                    borderWidth: 0,
+                    borderRadius: 4
                 }]
             }, { indexAxis: 'y' });
 
-            // Fine distribution (histogram) - capped at 90th percentile
-            createHistogram('fineChart', data.fine_values, 'Fines', '#34312D', 'fine-info', '$', '', 90);
+            // Fine distribution (histogram) - fixed buckets
+            createFixedBucketHistogram('fineChart', data.fine_values, 'Fines', '#059669', 'fine-info', [
+                { min: 0, max: 500, label: '$0–$500' },
+                { min: 501, max: 1000, label: '$501–$1K' },
+                { min: 1001, max: 2500, label: '$1K–$2.5K' },
+                { min: 2501, max: 5000, label: '$2.5K–$5K' },
+                { min: 5001, max: 10000, label: '$5K–$10K' },
+                { min: 10001, max: Infinity, label: '$10K+' }
+            ]);
 
-            // Cost distribution (histogram) - capped at 90th percentile
-            createHistogram('costChart', data.cost_values, 'Investigation Costs', '#7E7F83', 'cost-info', '$', '', 90);
+            // Cost distribution (histogram) - 8 equal-width bins of $2,500
+            createFixedBucketHistogram('costChart', data.cost_values, 'Investigation Costs', '#d97706', 'cost-info', [
+                { min: 0, max: 2500, label: '$0–$2.5K' },
+                { min: 2501, max: 5000, label: '$2.5K–$5K' },
+                { min: 5001, max: 7500, label: '$5K–$7.5K' },
+                { min: 7501, max: 10000, label: '$7.5K–$10K' },
+                { min: 10001, max: 12500, label: '$10K–$12.5K' },
+                { min: 12501, max: 15000, label: '$12.5K–$15K' },
+                { min: 15001, max: 17500, label: '$15K–$17.5K' },
+                { min: 17501, max: Infinity, label: '$17.5K+' }
+            ]);
 
-            // CME hours (histogram)
-            createHistogram('cmeChart', data.cme_values, 'CME Hours', '#D9C5B2', 'cme-info', '', ' hrs');
+            // CME hours (histogram) - purple
+            createHistogram('cmeChart', data.cme_values, 'CME Hours', '#7c3aed', 'cme-info', '', ' hrs');
 
-            // Probation duration (histogram)
-            createHistogram('probationChart', data.probation_values, 'Probation', '#14110F', 'probation-info', '', ' mo');
+            // Probation duration (histogram) - red
+            createHistogram('probationChart', data.probation_values, 'Probation', '#dc2626', 'probation-info', '', ' mo');
 
             // Resolution time (histogram) - show in days with readable labels
             createResolutionTimeHistogram('resolutionTimeChart', data.resolution_time_values, data.resolution_time_stats);
@@ -1383,15 +1567,16 @@
 
             // === RESOLUTION TIME CHARTS ===
 
-            // By Category (horizontal bar)
+            // By Category (horizontal bar) - blue
             createChart('resolutionByCategoryChart', 'bar', {
                 labels: data.resolution_time_by_category.map(d => d.category.replace('Malpractice - ', '')),
                 datasets: [{
                     label: 'Median Days',
                     data: data.resolution_time_by_category.map(d => d.median),
-                    backgroundColor: '#34312D',
-                    borderColor: '#14110F',
-                    borderWidth: 1
+                    backgroundColor: '#2563eb',
+                    borderColor: '#2563eb',
+                    borderWidth: 0,
+                    borderRadius: 4
                 }]
             }, { indexAxis: 'y' });
 
@@ -1460,39 +1645,44 @@
                 </div>
             `;
 
-            // Fines by Category
+            // Fines by Category - green
             createChart('finesByCategoryChart', 'bar', {
                 labels: data.fines_by_category.map(d => d.category.replace('Malpractice - ', '')),
                 datasets: [{
                     label: 'Median Fine',
                     data: data.fines_by_category.map(d => d.median),
-                    backgroundColor: '#D9C5B2',
-                    borderColor: '#34312D',
-                    borderWidth: 1
+                    backgroundColor: '#059669',
+                    borderColor: '#059669',
+                    borderWidth: 0,
+                    borderRadius: 4
                 }]
             }, { indexAxis: 'y' });
 
-            // Fine Brackets (pie chart)
+            // Fine Brackets (pie chart) - green shades
             createChart('fineBracketsChart', 'doughnut', {
                 labels: data.fine_brackets.map(d => d.label),
                 datasets: [{
                     data: data.fine_brackets.map(d => d.count),
-                    backgroundColor: ['#e5e5e5', '#D9C5B2', '#a89985', '#7E7F83', '#34312D']
+                    backgroundColor: ['#d1fae5', '#6ee7b7', '#34d399', '#10b981', '#047857'],
+                    borderWidth: 1,
+                    borderColor: '#ffffff'
                 }]
             }, { plugins: { legend: { position: 'right' } } });
 
-            // Fines by Year (line chart)
+            // Fines by Year (line chart) - green theme
             createChart('finesByYearChart', 'line', {
                 labels: data.fines_by_year.map(d => d.year),
                 datasets: [{
                     label: 'Total Fines',
                     data: data.fines_by_year.map(d => d.total),
-                    borderColor: '#34312D',
-                    backgroundColor: 'rgba(217, 197, 178, 0.3)',
+                    borderColor: '#059669',
+                    backgroundColor: 'rgba(5, 150, 105, 0.1)',
                     fill: true,
                     tension: 0.3,
                     borderWidth: 2,
-                    pointBackgroundColor: '#34312D',
+                    pointBackgroundColor: '#059669',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
                     pointRadius: 4
                 }]
             });
@@ -1549,12 +1739,14 @@
                 </div>
             `;
 
-            // CME Topics (doughnut)
+            // CME Topics (doughnut) - purple shades
             createChart('cmeTopicsChart', 'doughnut', {
                 labels: data.cme_topic_breakdown.map(d => d.topic),
                 datasets: [{
                     data: data.cme_topic_breakdown.map(d => d.count),
-                    backgroundColor: ['#34312D', '#7E7F83', '#D9C5B2', '#a89985', '#5c5954', '#c4b8a9']
+                    backgroundColor: ['#7c3aed', '#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'],
+                    borderWidth: 1,
+                    borderColor: '#ffffff'
                 }]
             }, { plugins: { legend: { position: 'right' } } });
 
@@ -1570,8 +1762,9 @@
                     label: 'Median Hours',
                     data: sortedCMEByAction.map(d => d.median),
                     backgroundColor: sortedCMEByAction.map(d => getActionColor(d.action)),
-                    borderColor: '#14110F',
-                    borderWidth: 1
+                    borderColor: sortedCMEByAction.map(d => getActionColor(d.action)),
+                    borderWidth: 0,
+                    borderRadius: 4
                 }]
             });
 
@@ -1601,15 +1794,60 @@
         }
 
         function getActionColor(action) {
-            const colors = {
-                'no action': '#e5e5e5',
-                'reprimand': '#eab308',
-                'probation': '#f59e0b',
-                'suspended': '#f97316',
-                'surrendered': '#ef4444',
-                'revoked': '#dc2626'
-            };
-            return colors[action] || '#7E7F83';
+            if (!action) return '#9ca3af';
+            const lowerAction = action.toLowerCase();
+            // Match by partial string for flexibility
+            if (lowerAction.includes('revoc') || lowerAction.includes('revok')) return '#dc2626'; // red
+            if (lowerAction.includes('surrender')) return '#ef4444'; // red-500
+            if (lowerAction.includes('suspen')) return '#f97316'; // orange
+            if (lowerAction.includes('probation')) return '#f59e0b'; // amber
+            if (lowerAction.includes('reprimand')) return '#eab308'; // yellow
+            if (lowerAction.includes('no action') || lowerAction === 'none') return '#d1d5db'; // gray-300
+            return '#9ca3af'; // gray-400 default
+        }
+
+        function createFixedBucketHistogram(canvasId, values, label, color, infoId, buckets) {
+            if (!values || values.length === 0) {
+                document.getElementById(infoId).innerHTML = '<span>No data available</span>';
+                return;
+            }
+
+            // Count values in each bucket
+            const counts = buckets.map(() => 0);
+            values.forEach(v => {
+                for (let i = 0; i < buckets.length; i++) {
+                    if (v >= buckets[i].min && v <= buckets[i].max) {
+                        counts[i]++;
+                        break;
+                    }
+                }
+            });
+
+            // Calculate stats
+            const sorted = [...values].sort((a, b) => a - b);
+            const min = sorted[0];
+            const max = sorted[sorted.length - 1];
+            const mean = values.reduce((a, b) => a + b, 0) / values.length;
+            const median = sorted[Math.floor(sorted.length / 2)];
+
+            createChart(canvasId, 'bar', {
+                labels: buckets.map(b => b.label),
+                datasets: [{
+                    label: label,
+                    data: counts,
+                    backgroundColor: color,
+                    borderColor: color,
+                    borderWidth: 0,
+                    borderRadius: 4
+                }]
+            });
+
+            document.getElementById(infoId).innerHTML = `
+                <span>n=${values.length}</span>
+                <span>Median: $${Math.round(median).toLocaleString()}</span>
+                <span>Mean: $${Math.round(mean).toLocaleString()}</span>
+                <span>Range: $${min.toLocaleString()}–$${max.toLocaleString()}</span>
+            `;
         }
 
         function createResolutionTimeHistogram(canvasId, values, stats) {
@@ -1658,9 +1896,10 @@
                 datasets: [{
                     label: 'Cases',
                     data: bins,
-                    backgroundColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? '#7E7F83' : '#34312D'),
-                    borderColor: '#14110F',
-                    borderWidth: 1
+                    backgroundColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? '#93c5fd' : '#2563eb'),
+                    borderColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? '#93c5fd' : '#2563eb'),
+                    borderWidth: 0,
+                    borderRadius: 4
                 }]
             });
 
@@ -1683,19 +1922,19 @@
                     legend: {
                         display: type === 'doughnut',
                         labels: {
-                            font: { family: "'IBM Plex Mono', monospace", size: 12 },
+                            font: { family: "'Inter', sans-serif", size: 12 },
                             color: '#34312D'
                         }
                     }
                 },
                 scales: type !== 'doughnut' ? {
                     x: {
-                        ticks: { font: { family: "'IBM Plex Mono', monospace", size: 11 }, color: '#7E7F83' },
-                        grid: { color: 'rgba(52, 49, 45, 0.1)' }
+                        ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#7E7F83' },
+                        grid: { color: 'rgba(52, 49, 45, 0.08)' }
                     },
                     y: {
-                        ticks: { font: { family: "'IBM Plex Mono', monospace", size: 11 }, color: '#7E7F83' },
-                        grid: { color: 'rgba(52, 49, 45, 0.1)' }
+                        ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#7E7F83' },
+                        grid: { color: 'rgba(52, 49, 45, 0.08)' }
                     }
                 } : undefined,
                 ...extraOptions
@@ -1751,14 +1990,17 @@
                 }
             });
 
+            // Generate lighter shade for overflow bin
+            const lighterColor = color + '80'; // Add transparency
             createChart(canvasId, 'bar', {
                 labels: binLabels,
                 datasets: [{
                     label: label,
                     data: bins,
-                    backgroundColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? '#7E7F83' : color),
-                    borderColor: '#14110F',
-                    borderWidth: 1
+                    backgroundColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? lighterColor : color),
+                    borderColor: bins.map((_, i) => i === bins.length - 1 && aboveCapCount > 0 ? lighterColor : color),
+                    borderWidth: 0,
+                    borderRadius: 4
                 }]
             });
 

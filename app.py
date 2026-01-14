@@ -12,7 +12,7 @@ import statistics
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Query
@@ -109,6 +109,21 @@ class Violation(BaseModel):
     description: Optional[str] = None
 
 
+class OriginalSettlementRef(BaseModel):
+    """Reference to the original settlement for modifications."""
+    pdf_url: str
+    type: str
+    date: str
+
+
+class ModificationChange(BaseModel):
+    """Individual change in a settlement modification."""
+    field: str
+    original: Optional[Any] = None
+    modified: Optional[Any] = None
+    change_type: str  # reduced, increased, removed, added, modified
+
+
 class LLMExtractedSettlement(BaseModel):
     """LLM-extracted settlement fields."""
     license_action: Optional[str] = None
@@ -136,9 +151,22 @@ class Settlement(BaseModel):
     resolution_outcome: Optional[str] = None  # "Settlement", "Hearing", or null
     pdf_url: Optional[str] = None
     llm_extracted: Optional[LLMExtractedSettlement] = None
+    # Modification fields
+    is_modification: bool = False
+    original_settlement: Optional[OriginalSettlementRef] = None
+    modification_summary: Optional[str] = None
+    modification_changes: list[ModificationChange] = []
+    text_file: Optional[str] = None
 
     class Config:
         extra = "allow"
+
+
+class SettlementsResponse(BaseModel):
+    """Response containing all settlements for a case."""
+    settlements: list[dict]  # Using dict for flexibility
+    count: int
+    has_modifications: bool
 
 
 class CountItem(BaseModel):
@@ -200,6 +228,7 @@ class ResolutionTimeStats(BaseModel):
 
 class AnalyticsResponse(BaseModel):
     """Aggregate analytics data."""
+    total: int  # Total complaints count
     fine_values: list[float]
     cost_values: list[float]
     cme_values: list[int]
@@ -375,6 +404,8 @@ def get_complaints(
     sex: Optional[str] = None,
     has_settlement: Optional[str] = None,
     license_action: Optional[str] = None,
+    is_amended: Optional[str] = None,
+    has_modification: Optional[str] = None,
     sort: str = "date_desc",
     skip: int = 0,
     limit: int = Query(default=20, le=100)
@@ -481,6 +512,52 @@ def get_complaints(
                 query["case_number"] = {"$in": [cn for cn in action_case_numbers if cn not in existing["$nin"]]}
         else:
             query["case_number"] = {"$in": action_case_numbers}
+
+    # Filter by amended status
+    if is_amended:
+        if is_amended == "yes":
+            query["is_amended"] = True
+        elif is_amended == "no":
+            query["$or"] = query.get("$or", []) or []
+            # is_amended is false or doesn't exist
+            query["$and"] = query.get("$and", [])
+            query["$and"].append({
+                "$or": [
+                    {"is_amended": {"$exists": False}},
+                    {"is_amended": False}
+                ]
+            })
+            if not query["$and"]:
+                del query["$and"]
+
+    # Filter by whether case has settlement modifications
+    if has_modification:
+        # Get case numbers that have modifications
+        mod_case_numbers_pipeline = [
+            {"$match": {"is_modification": True}},
+            {"$unwind": "$case_numbers"},
+            {"$group": {"_id": None, "case_nums": {"$addToSet": "$case_numbers"}}}
+        ]
+        result = list(settlements.aggregate(mod_case_numbers_pipeline))
+        mod_case_numbers = result[0]["case_nums"] if result else []
+
+        if has_modification == "yes":
+            # Combine with existing case_number filter if present
+            if "case_number" in query:
+                existing = query["case_number"]
+                if "$in" in existing:
+                    query["case_number"] = {"$in": list(set(existing["$in"]) & set(mod_case_numbers))}
+                elif "$nin" in existing:
+                    query["case_number"] = {"$in": [cn for cn in mod_case_numbers if cn not in existing["$nin"]]}
+            else:
+                query["case_number"] = {"$in": mod_case_numbers}
+        elif has_modification == "no":
+            if "case_number" in query:
+                existing = query["case_number"]
+                if "$in" in existing:
+                    query["case_number"] = {"$in": [cn for cn in existing["$in"] if cn not in mod_case_numbers]}
+            else:
+                query["case_number"] = {"$nin": mod_case_numbers}
 
     # Sorting - need aggregation pipeline for date sorting since dates are stored as M/D/YYYY strings
     total = complaints.count_documents(query)
@@ -661,10 +738,25 @@ def get_complaint(case_number: str, db: DB):
 
 @app.get("/api/settlement/{case_number}")
 def get_settlement(case_number: str, db: DB):
-    """Get a settlement by case number."""
+    """Get the primary (non-modification) settlement by case number.
+
+    DEPRECATED: Use /api/settlements/{case_number} for all settlements including modifications.
+    """
     settlements = db["settlements"]
 
-    doc = settlements.find_one({"case_numbers": case_number})
+    # Prefer non-modification settlement
+    doc = settlements.find_one({
+        "case_numbers": case_number,
+        "$or": [
+            {"is_modification": {"$exists": False}},
+            {"is_modification": False}
+        ]
+    })
+
+    # Fallback to any settlement if no non-modification found
+    if not doc:
+        doc = settlements.find_one({"case_numbers": case_number})
+
     if doc:
         doc["_id"] = str(doc["_id"])
         if doc.get("complaint_ids"):
@@ -675,11 +767,52 @@ def get_settlement(case_number: str, db: DB):
     return None
 
 
+@app.get("/api/settlements/{case_number}", response_model=SettlementsResponse)
+def get_settlements(case_number: str, db: DB):
+    """Get all settlements for a case number (original + modifications).
+
+    Returns settlements sorted with originals first, then by date.
+    """
+    settlements = db["settlements"]
+
+    # Find all settlements that include this case number
+    docs = list(settlements.find(
+        {"case_numbers": case_number},
+        {"text_content": 0}  # Exclude large text field
+    ).sort([
+        ("is_modification", 1),  # Originals first (False/null sorts before True)
+        ("date", 1)  # Then by date
+    ]))
+
+    if not docs:
+        return SettlementsResponse(settlements=[], count=0, has_modifications=False)
+
+    # Convert ObjectIds to strings
+    for doc in docs:
+        doc["_id"] = str(doc["_id"])
+        if doc.get("complaint_ids"):
+            doc["complaint_ids"] = [str(cid) for cid in doc["complaint_ids"]]
+        # Add case_number for convenience
+        if doc.get("case_numbers"):
+            doc["case_number"] = doc["case_numbers"][0]
+
+    has_modifications = any(doc.get("is_modification") for doc in docs)
+
+    return SettlementsResponse(
+        settlements=docs,
+        count=len(docs),
+        has_modifications=has_modifications
+    )
+
+
 @app.get("/api/analytics", response_model=AnalyticsResponse)
 def get_analytics(db: DB):
     """Get aggregate analytics data for charts."""
     complaints = db["complaints"]
     settlements = db["settlements"]
+
+    # Total complaints count
+    total_complaints = complaints.count_documents({})
 
     # Fine amounts distribution
     fines_pipeline = [
@@ -843,6 +976,7 @@ def get_analytics(db: DB):
     )
 
     return AnalyticsResponse(
+        total=total_complaints,
         fine_values=fine_values,
         cost_values=cost_values,
         cme_values=cme_values,

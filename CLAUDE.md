@@ -38,6 +38,10 @@ uv run python scripts/add_link.py 19-28023-1 --remove "https://..."          # R
 - `complaint_ids[]`: ObjectId references to complaints
 - `resolution_outcome`: "Settlement" or "Hearing"
 - `pdf_url`: Unique identifier
+- `is_modification`: Boolean (true if this modifies a previous settlement)
+- `original_settlement`: Reference to original (`pdf_url`, `type`, `date`) - if modification
+- `modification_summary`: LLM-generated description of changes - if modification
+- `modification_changes[]`: Array of `{field, original, modified, change_type}` - if modification
 - `llm_extracted`:
   - `license_action`: revoked, suspended, surrendered, probation, reprimand, none
   - `fine_amount`, `investigation_costs`, `probation_months`
@@ -65,7 +69,13 @@ scripts/
 ├── process_new_filings.py  # Cron job: scrape + process new filings
 ├── process_single_file.py  # Core pipeline: PDF → OCR → LLM → MongoDB
 ├── add_link.py             # CLI to add/remove related links on cases
+├── mark_modifications.py   # Mark settlement modifications in DB
+├── backfill_modification_comparisons.py  # Generate modification summaries
 ├── prompts/                # LLM extraction prompts
+│   ├── complaint_extraction.md
+│   ├── settlement_extraction.md
+│   ├── amendment_comparison.md
+│   └── settlement_modification_comparison.md  # Compare original vs modified settlement
 └── utils/                  # Migrations, indexes, normalization scripts
 
 analysis/                   # See analysis/CLAUDE.md
@@ -80,6 +90,7 @@ analysis/                   # See analysis/CLAUDE.md
 
 - **Case number format**: `YY-NNNNN-N` (e.g., "19-28023-1"). Suffix indicates case in series.
 - **Settlement linking**: Settlements reference complaints via `case_numbers[]` array and `complaint_ids[]` ObjectIds
+- **Settlement modifications**: Amendments/modifications link to originals via `original_settlement.pdf_url`
 - **Specialty normalization**: 24 NPDB-standard categories. Subspecialties map to parents (e.g., Nephrology → Internal Medicine)
 - **Date format**: M/D/YYYY strings in MongoDB, parsed with `$dateFromString` for sorting
 
