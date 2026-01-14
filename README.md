@@ -88,12 +88,14 @@ uv run uvicorn app:app --reload --port 8000
 
 ### Design System
 
-The frontend uses an "Archival Brutalism" aesthetic with sharp corners, border-based separation, and a utilitarian feel:
+The frontend uses a modern sleek aesthetic with dark/light theme support:
 
-- **Color Palette**: Near-black (#14110F), charcoal (#34312D), gray (#7E7F83), tan (#D9C5B2), off-white (#F3F3F4)
-- **Category Colors**: Blue/purple palette (treatment, diagnosis, medication, surgical, controlled substances, etc.)
-- **License Action Colors**: Gray for "no action", yellow→red severity gradient (reprimand, probation, suspended, surrendered, revoked)
-- **Typography**: Libre Baskerville (headers), IBM Plex Mono (data), Source Sans 3 (body)
+- **Theme Toggle**: Click the sun/moon icon in the header to switch themes
+- **Dark Mode**: Deep near-black backgrounds (#09090b), subtle glow effects on hover, floating cards with shadow-based borders
+- **Light Mode**: Clean off-white backgrounds with subtle shadows
+- **Typography**: Inter (headers/body), IBM Plex Mono (data)
+- **Category Colors**: Blue/purple palette with subtle backgrounds
+- **License Action Colors**: Yellow→red severity gradient (reprimand → revoked)
 - **Icons**: Lucide Icons library
 
 ## Data Pipeline

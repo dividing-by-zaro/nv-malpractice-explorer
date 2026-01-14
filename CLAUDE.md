@@ -55,7 +55,7 @@ Auto-populated by TrackedDB. Fields: `timestamp`, `collection`, `document_id`, `
 ```
 app.py                      # FastAPI app with Pydantic models
 static/index.html           # Frontend (vanilla JS, Chart.js)
-static/css/styles.css       # Archival Brutalism design system
+static/css/styles.css       # Modern sleek design (dark/light themes)
 
 lib/                        # Shared utilities
 ├── tracked_db.py           # ALWAYS use for DB updates
