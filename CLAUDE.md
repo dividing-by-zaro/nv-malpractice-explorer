@@ -83,6 +83,13 @@ analysis/                   # See analysis/CLAUDE.md
 - **Specialty normalization**: 24 NPDB-standard categories. Subspecialties map to parents (e.g., Nephrology → Internal Medicine)
 - **Date format**: M/D/YYYY strings in MongoDB, parsed with `$dateFromString` for sorting
 
+## Data Validation
+
+See `audit2.md` for the validation plan before public release:
+- Manual audit of 80 documents (gold standard sample)
+- Automated validation checks (format, range, consistency, inter-document)
+- Acceptance criteria: ≥95% accuracy on critical fields
+
 ## Environment
 
 ```

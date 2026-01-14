@@ -274,6 +274,10 @@ MONGODB_URI=mongodb://...   # MongoDB connection string
 
 ## Roadmap
 
+- [ ] Data validation before public release (see `audit2.md`)
+  - [ ] Manual audit of 80 documents (gold standard sample)
+  - [ ] Automated validation checks (format, range, consistency)
+  - [ ] Data Quality section in app UI
 - [ ] Add Cloudflare R2 storage for OCR'd PDFs (persistent storage, no egress fees)
 
 ## License
