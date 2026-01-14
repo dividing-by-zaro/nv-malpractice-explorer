@@ -720,8 +720,8 @@
             customSelects['is_amended'] = new CustomSelect(document.getElementById('amended-select'));
             customSelects['is_amended'].setOptions([
                 { value: '', label: 'All' },
-                { value: 'yes', label: 'Amended Only' },
-                { value: 'no', label: 'Original Only' }
+                { value: 'yes', label: 'Is Amended' },
+                { value: 'no', label: 'Not Amended' }
             ]);
 
             // Initialize Has Modification dropdown (single select)
@@ -885,27 +885,74 @@
             let infoHtml = '';
 
             // Timeline section - will be updated after fetching resolution
-            const timelineHtml = (resolutionDate) => `
-                <div class="info-section timeline-section">
-                    <h3>Timeline</h3>
-                    <div class="timeline">
+            const timelineHtml = (settlements) => {
+                // Find original (non-modification) settlement for resolution date
+                const originalSettlement = settlements.find(s => !s.is_modification);
+                const resolutionDate = originalSettlement?.date;
+
+                // Get modifications (sorted by date)
+                const modifications = settlements
+                    .filter(s => s.is_modification)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                // Determine first complaint date (original if amended, otherwise current)
+                const firstComplaintDate = c.is_amended && c.original_complaint?.date
+                    ? c.original_complaint.date
+                    : c.date;
+
+                let html = '<div class="info-section timeline-section"><h3>Timeline</h3><div class="timeline">';
+
+                // Original complaint (if amended)
+                if (c.is_amended && c.original_complaint?.date) {
+                    html += `
                         <div class="timeline-item">
-                            <span class="timeline-label">Complaint Filed</span>
-                            <span class="timeline-value">${formatDate(c.date)}</span>
-                        </div>
-                        <div class="timeline-item">
-                            <span class="timeline-label">Resolution</span>
-                            <span class="timeline-value">${resolutionDate ? formatDate(resolutionDate) : '—'}</span>
-                        </div>
-                        ${resolutionDate ? `
+                            <span class="timeline-label">Original Complaint</span>
+                            <span class="timeline-value">${formatDate(c.original_complaint.date)}</span>
+                        </div>`;
+                }
+
+                // Current complaint (labeled as Amended if applicable)
+                html += `
+                    <div class="timeline-item">
+                        <span class="timeline-label">${c.is_amended ? 'Amended Complaint' : 'Complaint Filed'}</span>
+                        <span class="timeline-value">${formatDate(c.date)}</span>
+                    </div>`;
+
+                // Resolution
+                html += `
+                    <div class="timeline-item">
+                        <span class="timeline-label">Resolution</span>
+                        <span class="timeline-value">${resolutionDate ? formatDate(resolutionDate) : '—'}</span>
+                    </div>`;
+
+                // Modifications
+                modifications.forEach(mod => {
+                    // Extract short type label (e.g., "Order Modifying..." -> "Resolution Modification")
+                    let typeLabel = 'Resolution Modification';
+                    const typeLower = (mod.type || '').toLowerCase();
+                    if (typeLower.includes('vacating')) typeLabel = 'Resolution Vacated';
+                    else if (typeLower.includes('addendum')) typeLabel = 'Resolution Addendum';
+                    else if (typeLower.includes('amended')) typeLabel = 'Amended Resolution';
+
+                    html += `
+                        <div class="timeline-item timeline-modification">
+                            <span class="timeline-label">${typeLabel}</span>
+                            <span class="timeline-value">${formatDate(mod.date)}</span>
+                        </div>`;
+                });
+
+                // Time to resolution (from first complaint to first resolution)
+                if (resolutionDate) {
+                    html += `
                         <div class="timeline-item timeline-elapsed">
                             <span class="timeline-label">Time to Resolution</span>
-                            <span class="timeline-value">${formatTimeElapsed(c.date, resolutionDate)}</span>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
+                            <span class="timeline-value">${formatTimeElapsed(firstComplaintDate, resolutionDate)}</span>
+                        </div>`;
+                }
+
+                html += '</div></div>';
+                return html;
+            };
 
             if (ext.category) {
                 infoHtml += `
@@ -1036,8 +1083,8 @@
                 settlementPdfPath = null;
             }
 
-            // Prepend timeline section with resolution date
-            document.getElementById('modal-info').innerHTML = timelineHtml(resolutionDate) + infoHtml;
+            // Prepend timeline section with full chronology
+            document.getElementById('modal-info').innerHTML = timelineHtml(currentSettlements) + infoHtml;
             lucide.createIcons();
 
             // Build PDF paths

@@ -23,7 +23,7 @@ uv run python scripts/add_link.py 19-28023-1 --remove "https://..."          # R
 ## MongoDB Collections
 
 ### complaints
-- `case_number`: Unique identifier (e.g., "19-28023-1")
+- `case_number`: Identifier (e.g., "19-28023-1") - NOT unique, can have multiple docs per case (original + amended)
 - `respondent`, `date`, `year`, `type`, `pdf_url`
 - `is_amended`, `original_complaint`, `amendment_summary` (for amended complaints)
 - `related_links[]`: Array of `{url, title}` for external links (news articles, etc.)
@@ -71,6 +71,7 @@ scripts/
 ├── add_link.py             # CLI to add/remove related links on cases
 ├── mark_modifications.py   # Mark settlement modifications in DB
 ├── backfill_modification_comparisons.py  # Generate modification summaries
+├── backfill_amended_complaints.py  # Backfill amended complaints with LLM extraction
 ├── prompts/                # LLM extraction prompts
 │   ├── complaint_extraction.md
 │   ├── settlement_extraction.md
@@ -89,6 +90,7 @@ analysis/                   # See analysis/CLAUDE.md
 ## Key Patterns
 
 - **Case number format**: `YY-NNNNN-N` (e.g., "19-28023-1"). Suffix indicates case in series.
+- **Multiple complaints per case**: Original and amended complaints stored as separate documents with same case_number. Amended complaints have `is_amended=True` and `original_complaint` reference.
 - **Settlement linking**: Settlements reference complaints via `case_numbers[]` array and `complaint_ids[]` ObjectIds
 - **Settlement modifications**: Amendments/modifications link to originals via `original_settlement.pdf_url`
 - **Specialty normalization**: 24 NPDB-standard categories. Subspecialties map to parents (e.g., Nephrology → Internal Medicine)

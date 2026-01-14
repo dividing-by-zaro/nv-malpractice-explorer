@@ -5,7 +5,7 @@ Tools to scrape, process, and analyze public medical malpractice filings from th
 ## Current Stats
 
 - **1,594 filings** scraped (2008-2025)
-- **679 complaints** in MongoDB (674 with LLM extraction)
+- **752 complaints** in MongoDB (74 amended + 678 original)
 - **663 resolutions** in MongoDB (all with LLM extraction)
   - 607 negotiated settlements, 56 contested hearings (Findings of Fact)
 - **615 cases** with both complaint and settlement linked
@@ -64,7 +64,7 @@ uv run uvicorn app:app --reload --port 8000
     - Summary text with comfortable reading width
     - Footer: Procedure, fine, investigative costs (with colored icons)
 - **Case Details**: Click any case to view extracted data + embedded PDF viewer (tabs for complaint/resolution)
-  - Timeline section shows complaint date, resolution date, and time to resolution
+  - Enhanced timeline shows full case chronology: original complaint → amended complaint → resolution → modifications
   - Amended complaints display both original and amended PDFs in separate tabs
   - LLM-generated summary explains what changed between versions
   - Settlement modifications: View all resolution documents (original + amendments) with tabs for each

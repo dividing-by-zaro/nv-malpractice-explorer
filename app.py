@@ -629,11 +629,16 @@ def get_complaints(
     case_numbers_in_results = [doc.get("case_number", "") for doc in results_list]
 
     # Fetch ONLY settlements for case numbers in current page (not all settlements)
+    # Exclude modifications - use original settlement data for cards
     settlement_lookup = {}
     if case_numbers_in_results:
         settlement_query = {
             "case_numbers": {"$in": case_numbers_in_results},
-            "llm_extracted": {"$exists": True}
+            "llm_extracted": {"$exists": True},
+            "$or": [
+                {"is_modification": {"$exists": False}},
+                {"is_modification": False}
+            ]
         }
         for doc in settlements.find(settlement_query):
             ext = doc.get("llm_extracted", {})
@@ -707,9 +712,16 @@ def get_random(db: DB):
     if result:
         doc = result[0]
         doc["_id"] = str(doc["_id"])
-        # Check for resolution
+        # Check for resolution (prefer original settlement, not modifications)
         case_num = doc.get("case_number")
-        settlement = settlements.find_one({"case_numbers": case_num, "llm_extracted": {"$exists": True}})
+        settlement = settlements.find_one({
+            "case_numbers": case_num,
+            "llm_extracted": {"$exists": True},
+            "$or": [
+                {"is_modification": {"$exists": False}},
+                {"is_modification": False}
+            ]
+        })
         if settlement:
             ext = settlement.get("llm_extracted", {})
             doc["settlement_summary"] = {
